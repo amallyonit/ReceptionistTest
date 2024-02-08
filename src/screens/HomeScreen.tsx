@@ -131,12 +131,12 @@ const HomeScreen = ({ navigation }: any) => {
             <View style={styles.boxRow}>
                 <Pressable style={styles.uploadBox}>
                     <Pressable style={styles.cusButton}>
-                        <Text style={styles.cusText}>Pre Approved<Icon name="check-circle-outline" size={20} color={Color.whiteRecColor}></Icon></Text>
+                        <Text style={styles.cusText}>Pre Approved<Icon name="check-circle-outline" size={Dimensions.get('window').fontScale * 16} color={Color.whiteRecColor}></Icon></Text>
                     </Pressable>
                 </Pressable>
                 <Pressable style={styles.uploadBox}>
                     <Pressable style={styles.cusButton}>
-                        <Text style={styles.cusText}>Check Out<Icon name="location-exit" size={20} color={Color.whiteRecColor}></Icon>
+                        <Text style={styles.cusText}>Check Out<Icon name="location-exit" size={Dimensions.get('window').fontScale * 16} color={Color.whiteRecColor}></Icon>
                         </Text>
                     </Pressable>
                 </Pressable>
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
         backgroundColor: Color.greenRecColor,
       },
       cusText: {
-        fontSize: 16,
+        fontSize: Dimensions.get('window').fontScale * 16,
         lineHeight: 21,
         fontWeight: 'bold',
         letterSpacing: 0.25,

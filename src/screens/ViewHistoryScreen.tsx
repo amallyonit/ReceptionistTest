@@ -1,5 +1,5 @@
 import React, { useState } from "react"
-import { Dimensions, FlatList, Image, StyleSheet, Text, TextInput, View } from "react-native"
+import { Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import Fonts from "../theme/Fonts"
@@ -21,8 +21,8 @@ const ViewHistoryScreen = ({ navigation }: any) => {
     return (
         <View>
             <View style={styles.container}>
-                <View style={{ width: '100%', backgroundColor: Color.greenRecColor, height: 60, alignItems: 'center', flexDirection: 'row' }}>
-                    <Text style={{ color: Color.whiteRecColor, fontSize: 16, flex: 1.6, marginLeft: 15 }}>
+                <View style={styles.navContainer}>
+                    <Text style={styles.navContText}>
                         <Icon onPress={() =>
                             navigation.navigate("Home")
                         } name="arrow-left" size={28} color={Color.whiteRecColor}></Icon>
@@ -33,8 +33,8 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                 <View style={styles.boxRow}>
                     <View style={styles.uploadBox}>
                         <View style={styles.inputView}>
-                            <TextInput value={phonenumber} onChange={(event)=>filterHistory(event)} style={styles.input} keyboardType="numeric" placeholder='Mobile No.' autoCapitalize='none' />
-                            <TextInput style={styles.input} keyboardType="default" placeholder='Name' autoCapitalize='none' />
+                            <TextInput value={phonenumber} placeholderTextColor={Color.blackRecColor} onChange={(event)=>filterHistory(event)} style={styles.input} keyboardType="numeric" placeholder='Mobile No.' autoCapitalize='none' />
+                            <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} keyboardType="default" placeholder='Name' autoCapitalize='none' />
                         </View>
                     </View>
                     <View style={styles.uploadBox1}>
@@ -42,6 +42,7 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                     </View>
                 </View>
                 <View style={{ width: '95%',marginLeft:10, paddingTop:Dimensions.get('window').height * 0.14}}>
+                <ScrollView style={{maxHeight:Dimensions.get('window').height * 0.76,width:'100%',overflow:'scroll'}}>
                     {
                         data.map((item, index) => (
                             <ListItem
@@ -56,6 +57,7 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                             </ListItem>
                         ))
                     }
+                </ScrollView>
                 </View>
             </View>
         </View>
@@ -65,7 +67,10 @@ const ViewHistoryScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
     container: {
         alignItems: "center",
-    },boxRow: {
+    },
+    navContainer:{ width: '100%', backgroundColor: Color.greenRecColor, height: 60, alignItems: 'center', flexDirection: 'row' },
+    navContText:{ color: Color.whiteRecColor, fontSize: 16, flex: 1.6, marginLeft: 15 },
+    boxRow: {
         flex: 1,
         flexDirection: 'row',
         flexWrap: 'wrap',
@@ -85,7 +90,7 @@ const styles = StyleSheet.create({
         width: '20%',
     },
     inputView: {
-        marginTop: 30,
+        marginTop: 10,
         gap: 3,
         width: "100%",
         paddingHorizontal: 10,
@@ -95,7 +100,7 @@ const styles = StyleSheet.create({
         height: 40,
         paddingHorizontal: 20,
         borderColor: Color.blackRecColor,
-        color: '#464646',
+        color: Color.blackRecColor,
         borderBottomWidth: 1,
         borderRadius: 50
     },

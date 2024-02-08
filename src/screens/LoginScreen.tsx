@@ -31,9 +31,9 @@ const LoginScreen = ({navigation}:any) =>{
         <Image source={receLogo} style={styles.image} />
         <Text style={styles.title}>Receptionist</Text>
         <View style={styles.inputView}>
-            <TextInput style={styles.input} placeholder='User ID' value={username} onChangeText={setUsername} autoCorrect={false}
+            <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='User ID' value={username} onChangeText={setUsername} autoCorrect={false}
         autoCapitalize='none' />
-            <TextInput style={styles.input} placeholder='Password' secureTextEntry value={password} onChangeText={setPassword} autoCorrect={false}
+            <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Password' secureTextEntry value={password} onChangeText={setPassword} autoCorrect={false}
         autoCapitalize='none'/>
               <Dropdown
         style={styles.dropdown}
@@ -42,6 +42,7 @@ const LoginScreen = ({navigation}:any) =>{
         inputSearchStyle={styles.inputSearchStyle}
         iconStyle={styles.iconStyle}
         data={data}
+        itemTextStyle={{color:Color.blackRecColor}}
         search
         maxHeight={300}
         labelField="label"
@@ -159,15 +160,18 @@ const styles = StyleSheet.create({
       borderBottomColor: Color.blackRecColor,
       borderBottomWidth: 1,
       marginHorizontal : 20,
+      color:Color.blackRecColor
     },
     icon: {
       marginRight: 5,
     },
     placeholderStyle: {
       fontSize: 16,
+      color:Color.blackRecColor
     },
     selectedTextStyle: {
       fontSize: 16,
+      color:Color.blackRecColor
     },
     iconStyle: {
       width: 20,
@@ -176,6 +180,7 @@ const styles = StyleSheet.create({
     inputSearchStyle: {
       height: 40,
       fontSize: 16,
+      color:Color.blackRecColor
     },
   })
 

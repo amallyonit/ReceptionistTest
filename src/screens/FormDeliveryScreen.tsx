@@ -1,22 +1,45 @@
-import React from "react"
-import { Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
+import React, { useState } from "react"
+import { Dimensions, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import Fonts from "../theme/Fonts"
-import CommonStrings from "../theme/CommonStrings"
-import { DelpickData, InfoFormProps, ViewHistoryList } from "../models/RecepModels"
+import { DelpickData, InfoFormProps } from "../models/RecepModels"
 import { ListItem } from "react-native-elements"
 import LinearGradient from "react-native-linear-gradient"
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
 const FormDeliveryScreen = ({route,navigation}:any) => {
     const data:InfoFormProps=route.params['propData']
     let dataList = DelpickData
+
+
+    const [date, setDate] = useState(new Date(1598051730000));
+
+    const onChange = (event:any, selectedDate:any) => {
+      const currentDate = selectedDate;
+      setDate(currentDate);
+    };
+  
+    const showMode = (currentMode:any) => {
+      DateTimePickerAndroid.open({
+        value: date,
+        onChange,
+        mode: currentMode,
+        is24Hour: true,
+      });
+    };
+    const showDatepicker = () => {
+        showMode('date');
+      };
+  
+
+
     return (
         <View>
         <View style={styles.container}>
         <View style={{width:'100%',backgroundColor:Color.greenRecColor,height:60,alignItems:'center',flexDirection:'row'}}>
-        <Text style={{color:Color.whiteRecColor,fontSize:16,flex:1.6,marginLeft:15}}>
+        <Text style={{color:Color.whiteRecColor,fontSize:16,flex:1.4,marginLeft:15}}>
             <Icon onPress={() =>
                navigation.navigate("Home")
                } name="arrow-left" size={28} color={Color.whiteRecColor}></Icon>
@@ -42,17 +65,18 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
                 </Pressable>
             </View>
             <View style={styles.inputView}>
-                <TextInput style={styles.input} placeholder='Vehicle No.' autoCapitalize='none' />
-                <TextInput style={styles.input} placeholder='Driver Mobile No.S' autoCapitalize='none' />
-                <TextInput style={styles.input} placeholder='Driver Name' autoCapitalize='none' />
-                <TextInput style={styles.input} placeholder='Transporter Name' autoCapitalize='none' />
+                <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Vehicle No.' autoCapitalize='none' />
+                <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Driver Mobile No.S' autoCapitalize='none' />
+                <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Driver Name' autoCapitalize='none' />
+                <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Transporter Name' autoCapitalize='none' />
             </View>
             <View style={styles.boxRow1}>
                 <View style={{backgroundColor:Color.lightGreyRecColor,flex:1,marginHorizontal:22,flexDirection:"row",flexWrap:"wrap"}}>
-                <TextInput style={[styles.input,{width:'70%'}]} placeholder='Bill Number' autoCapitalize='none' />
-                <TextInput style={[styles.input,{width:'30%'}]} placeholder='Date' autoCapitalize='none' />
-                <TextInput style={[styles.input,{width:'100%'}]} placeholder='Party Name' autoCapitalize='none' />
+                <TextInput placeholderTextColor={Color.blackRecColor} style={[styles.input,{width:'70%'}]} placeholder='Bill Number' autoCapitalize='none' />
+                <TextInput placeholderTextColor={Color.blackRecColor} value={date.toLocaleString()} onPressIn={showDatepicker} style={[styles.input,{width:'30%'}]} placeholder='Date' autoCapitalize='none' />
+                <TextInput placeholderTextColor={Color.blackRecColor} style={[styles.input,{width:'100%'}]} placeholder='Party Name' autoCapitalize='none' />
                 <Pressable style={[styles.uploadBox2,{marginLeft:'auto',marginTop:10,marginRight:12}]}>
+                    
                     <Pressable style={styles.cusButton1}>
                         <Text style={{color:Color.whiteRecColor,padding:10,textAlign:'center',fontSize:18}}>
                             Add <Icon name="plus-circle-outline" size={20}></Icon>
@@ -77,19 +101,20 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
                 </View>
                 </View>
             </View>
-            {/* <View style={styles.boxRow}>
-                <View style={styles.uploadBo}>
-                    <Image source={camLogo} style={styles.imageSize}></Image>
-                </View>
-                <View style={styles.uploadBox}>
-                    <View style={styles.outlineButton}>
-                        <Text style={styles.buttonText}>Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
+            <View style={styles.boxRow2}>
+            <View style={styles.uploadBox}>
+                        <Image source={camLogo} style={styles.imageSize}></Image>
                     </View>
-                    <View style={styles.statusView}>
-                        <Text style={styles.statusText}>Status <Icon name="check-circle" size={15} color={Color.blackRecColor}></Icon></Text>
+                    <View style={styles.uploadBox}></View>
+                    <View style={styles.uploadBox}>
+                        <View style={styles.outlineButton}>
+                            <Text style={styles.buttonText}>Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
+                        </View>
+                        <View style={styles.statusView}>
+                            <Text style={styles.statusText}>Status <Icon name="check-circle" size={18} color={Color.blackRecColor}></Icon></Text>
+                        </View>
                     </View>
-                </View>
-            </View> */}
+            </View>
         </View>
         </View>
     )
@@ -129,22 +154,29 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         flexWrap: 'wrap',
         width: "100%",
-        paddingHorizontal:30
+        paddingHorizontal:20
     },
-    outlineButton:{
-        marginLeft:'auto',
-        marginTop:10,
-        height:35,
-        width:130,
-        borderWidth:1,
-        borderColor:Color.greenRecColor,
-        textAlign:'center'
+    boxRow2: {
+        marginTop:Dimensions.get('window').height * 0.1,
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        width: "100%",
+        paddingHorizontal:20
     },
     boxRow1: {
         marginTop:50,
         flexDirection: 'row',
         flexWrap: 'wrap',
         width: "100%",
+    },
+    outlineButton:{
+        marginLeft:Dimensions.get('window').width * 0.14,
+        marginTop:10,
+        height:35,
+        width:130,
+        borderWidth:1,
+        borderColor:Color.greenRecColor,
+        textAlign:'center'
     },
     uploadBox: {
         width: '33.3%',

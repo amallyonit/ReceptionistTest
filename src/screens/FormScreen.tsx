@@ -4,7 +4,7 @@ import Color from "../theme/Color"
 import Fonts from "../theme/Fonts"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import { InfoFormProps } from "../models/RecepModels";
-import { Dropdown } from "react-native-element-dropdown"
+import { Dropdown } from "react-native-element-dropdown";
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
@@ -33,12 +33,11 @@ const FormScreen = ({ route, navigation }: any) => {
                     <Text style={{ marginLeft: 10, color: Color.whiteRecColor, fontSize: 18, fontFamily: Fonts.recFontFamily.titleRecFont, flex: 2 }}>{data.appBarTitle}</Text>
                 </View>
                 <View style={styles.inputView}>
-                    <TextInput style={styles.input} placeholder='Mobile No of Vistor' autoCapitalize='none' />
-                    <TextInput style={styles.input} placeholder='Name of Vistor' autoCapitalize='none' />
-                    <TextInput style={styles.input} placeholder='From' autoCapitalize='none' />
-                    <TextInput style={styles.input} placeholder='Purpose of Vistor' autoCapitalize='none' />
-                    <TextInput style={styles.input} placeholder="Company name" autoCapitalize='none'></TextInput>
-                    <TextInput style={styles.input} placeholder='Meeting with' autoCapitalize='none' />
+                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Mobile No of Vistor' autoCapitalize='none' />
+                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Name of Vistor' autoCapitalize='none' />
+                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='From' autoCapitalize='none' />
+                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Purpose of Vistor' autoCapitalize='none' />
+                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder="Company name" autoCapitalize='none'></TextInput>
                     <Dropdown
                         style={styles.dropdown}
                         placeholderStyle={styles.placeholderStyle}
@@ -46,6 +45,7 @@ const FormScreen = ({ route, navigation }: any) => {
                         inputSearchStyle={styles.inputSearchStyle}
                         iconStyle={styles.iconStyle}
                         data={userData}
+                        itemTextStyle={{color:Color.blackRecColor}}
                         search
                         maxHeight={300}
                         labelField="label"
@@ -57,7 +57,7 @@ const FormScreen = ({ route, navigation }: any) => {
                             setValue(item.value);
                         }}
                     />
-                    <TextInput keyboardType="numeric" style={styles.input} placeholder='No of Visitors' autoCapitalize='none' />
+                    <TextInput keyboardType="numeric" placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='No of Visitors' autoCapitalize='none' />
                 </View>
                 <View style={styles.boxRow}>
                     <View style={styles.uploadBox}>
@@ -68,7 +68,7 @@ const FormScreen = ({ route, navigation }: any) => {
                             <Text style={styles.buttonText}>Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
                         </View>
                         <View style={styles.statusView}>
-                            <Text style={styles.statusText}>Status <Icon name="check-circle" size={15} color={Color.blackRecColor}></Icon></Text>
+                            <Text style={styles.statusText}>Status <Icon name="check-circle" size={18} color={Color.blackRecColor}></Icon></Text>
                         </View>
                     </View>
                 </View>
@@ -76,7 +76,7 @@ const FormScreen = ({ route, navigation }: any) => {
                     <View>
                         <Text style={{ marginLeft: 20, textAlign: 'center', color: 'blue', width: 100, borderBottomWidth: 1, borderBottomColor: 'blue', marginBottom: 10 }} onPress={() => Linking.openURL('https://google.com')}>Take Photo</Text>
                     </View>
-                    <TextInput placeholder="Remarks" style={styles.remarkInput}></TextInput>
+                    <TextInput placeholderTextColor={Color.blackRecColor} placeholder="Remarks" style={styles.remarkInput}></TextInput>
                 </View>
             </View>
         </View>
@@ -96,6 +96,7 @@ const styles = StyleSheet.create({
     },
     statusText: {
         color: Color.blackRecColor,
+        fontSize:18,
     },
     imageSize: {
         marginTop: 10,
@@ -133,15 +134,15 @@ const styles = StyleSheet.create({
         gap: 3,
         width: "100%",
         paddingHorizontal: 10,
-        marginBottom: 5
+        marginBottom: 5,
     },
     input: {
         height: 40,
         paddingHorizontal: 20,
         borderColor: Color.blackRecColor,
-        color: '#464646',
+        color: Color.blackRecColor,
         borderBottomWidth: 1,
-        borderRadius: 50
+        borderRadius: 50,
     },
     remarkInputView: {
         marginTop: 160,
@@ -165,6 +166,7 @@ const styles = StyleSheet.create({
     },
     placeholderStyle: {
         fontSize: 16,
+        color:Color.blackRecColor
     },
     selectedTextStyle: {
         fontSize: 16,
