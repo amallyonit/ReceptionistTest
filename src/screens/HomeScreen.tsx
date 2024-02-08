@@ -13,6 +13,7 @@ const receServeLog = require('../../assets/recscreen/SERVICE.png')
 const receContrLog = require('../../assets/recscreen/CONTRACTOR.png')
 const receInterLog = require('../../assets/recscreen/INTERVIEW.png')
 const receDelLog = require('../../assets/recscreen/DELIVERY.png')
+const receBottomLogo = require('../../assets/recimages/Group.png') 
 
 const HomeScreen = ({ navigation }: any) => {
     let propData:InfoFormProps
@@ -145,6 +146,7 @@ const HomeScreen = ({ navigation }: any) => {
                 <Text onPress={()=>{checkHistoryScreen()}} style={styles.ViewText}>View History <Icon name="history" size={28} color={Color.blueRecColor}></Icon></Text>
                 </Pressable>
             </View>
+            <Image source={receBottomLogo} style={styles.bottomLogo} />
         </View>
     )
 }
@@ -154,8 +156,8 @@ const cardWidth = (Dimensions.get('window').width - cardGap * 3) / 3;
 
 const styles = StyleSheet.create({
     container: {
+        paddingTop:Dimensions.get('window').height * 0.06,
         alignItems: "center",
-        paddingTop: 80,
         paddingHorizontal: 28
     },
     image: {
@@ -164,14 +166,22 @@ const styles = StyleSheet.create({
         resizeMode: 'contain'
     },
     imageSet: {
-        width: 140,
-        height: 120
+        width: Dimensions.get('window').width * 0.2,
+        height: (Dimensions.get('window').height * 1) / 10,
+        resizeMode:'contain'
     },
     viewSec:{
-        flex:1,flexDirection:'row',justifyContent:'flex-end'
+        flex:1,
+        flexDirection:'row',
+        justifyContent:'flex-end'
     },
     ViewText:{
-        textAlign:'right',marginRight:5,borderBottomWidth:1,width:120,color:Color.blueRecColor,borderBottomColor:Color.blueRecColor,
+        textAlign:'right',
+        marginRight:5,
+        borderBottomWidth:1,
+        width:120,
+        color:Color.blueRecColor,
+        borderBottomColor:Color.blueRecColor,
     },
     cusButton: {
         alignItems: 'center',
@@ -190,7 +200,7 @@ const styles = StyleSheet.create({
         color: Color.whiteRecColor,
       },
     bottomLogo: {
-        marginTop: 100,
+        marginTop:Dimensions.get('window').height * 0.02,
         height: 60,
         width: 60,
         resizeMode: 'contain'
@@ -212,7 +222,7 @@ const styles = StyleSheet.create({
         gap: 5
     },
     boxRow:{
-        marginTop:40,
+        marginTop:Dimensions.get('window').height * 0.02,
         flexDirection:'row',
         width : "100%",
         gap:10
@@ -233,7 +243,7 @@ const styles = StyleSheet.create({
         marginTop: cardGap,
         marginLeft: 6,
         width: cardWidth,
-        height: 200,
+        height: Dimensions.get('window').height * 0.2,
         backgroundColor: Color.whiteRecColor,
         borderRadius: 10,
         justifyContent: 'center',
