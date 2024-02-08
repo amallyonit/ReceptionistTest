@@ -39,7 +39,7 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
         <View>
         <View style={styles.container}>
         <View style={{width:'100%',backgroundColor:Color.greenRecColor,height:60,alignItems:'center',flexDirection:'row'}}>
-        <Text style={{color:Color.whiteRecColor,fontSize:16,flex:1.4,marginLeft:15}}>
+        <Text style={{color:Color.whiteRecColor,fontSize:16,flex:1,marginLeft:15}}>
             <Icon onPress={() =>
                navigation.navigate("Home")
                } name="arrow-left" size={28} color={Color.whiteRecColor}></Icon>
@@ -157,20 +157,20 @@ const styles = StyleSheet.create({
         paddingHorizontal:20
     },
     boxRow2: {
-        marginTop:Dimensions.get('window').height * 0.1,
+        marginTop:Dimensions.get('window').height * 0.06,
         flexDirection: 'row',
         flexWrap: 'wrap',
         width: "100%",
         paddingHorizontal:20
     },
     boxRow1: {
-        marginTop:50,
+        marginTop:30,
         flexDirection: 'row',
         flexWrap: 'wrap',
         width: "100%",
     },
     outlineButton:{
-        marginLeft:Dimensions.get('window').width * 0.14,
+        marginLeft:'auto',
         marginTop:10,
         height:35,
         width:130,
