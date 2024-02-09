@@ -68,8 +68,17 @@ const styles = StyleSheet.create({
     container: {
         alignItems: "center",
     },
-    navContainer:{ width: '100%', backgroundColor: Color.greenRecColor, height: 60, alignItems: 'center', flexDirection: 'row' },
-    navContText:{ color: Color.whiteRecColor, fontSize: 16, flex: 1.6, marginLeft: 15 },
+    navContainer:{ 
+        width: '100%',
+        backgroundColor: Color.greenRecColor, 
+        height: 60, alignItems: 'center', flexDirection: 'row'
+    },
+    navContText:{ 
+        color: Color.whiteRecColor, 
+        fontSize: 16, 
+        flex: 1.6, 
+        marginLeft: 15 
+    },
     boxRow: {
         flex: 1,
         flexDirection: 'row',
