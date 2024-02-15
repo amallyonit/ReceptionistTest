@@ -1,3 +1,3 @@
 export const ServerConfig = {
-    urlString:'http://10.0.2.2:3000'
+    urlString:'http://192.168.2.140:3004/'
 }

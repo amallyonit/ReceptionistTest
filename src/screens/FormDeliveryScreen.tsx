@@ -1,3 +1,4 @@
+"use strict"
 import React, { useState } from "react"
 import { Dimensions, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
@@ -12,10 +13,7 @@ const camLogo = require("../../assets/recscreen/CAMERA.png")
 const FormDeliveryScreen = ({route,navigation}:any) => {
     const data:InfoFormProps=route.params['propData']
     let dataList = DelpickData
-
-
     const [date, setDate] = useState(new Date(1598051730000));
-
     const onChange = (event:any, selectedDate:any) => {
       const currentDate = selectedDate;
       setDate(currentDate);
@@ -78,7 +76,7 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
                 <Pressable style={[styles.uploadBox2,{marginLeft:'auto',marginTop:10,marginRight:12}]}>
                     
                     <Pressable style={styles.cusButton1}>
-                        <Text style={{color:Color.whiteRecColor,padding:10,textAlign:'center',fontSize:18}}>
+                        <Text style={{color:Color.whiteRecColor,padding:8,textAlign:'center',fontSize:18}}>
                             Add <Icon name="plus-circle-outline" size={20}></Icon>
                         </Text>
                     </Pressable>

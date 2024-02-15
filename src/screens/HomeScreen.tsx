@@ -1,11 +1,11 @@
-import React, { useEffect } from "react"
+"use strict"
+import React from "react"
 import { Dimensions, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Fonts from "../theme/Fonts"
 import Color from "../theme/Color"
 import LinearGradient from "react-native-linear-gradient"
 import { InfoFormProps, RecpImgArray } from "../models/RecepModels"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
-import { GetUsers } from "../wrapper/dashboard.wrapper"
 
 const receLogo = require('../../assets/recimages/Frame.png')
 const receMeetLog = require('../../assets/recscreen/MEETING.png')
@@ -17,17 +17,6 @@ const receDelLog = require('../../assets/recscreen/DELIVERY.png')
 const receBottomLogo = require('../../assets/recimages/Group.png') 
 
 const HomeScreen = ({ navigation }: any) => {
-    useEffect(()=>{
-        let payload = {id:1,name:'Amal'}
-        let data = GetUsers(payload)
-        data.then((response:any)=>{
-            console.log("response ",response)
-        }).catch((error)=>{
-            console.log("error ",error)
-        }).finally(()=>{
-            console.log("api call success")
-        })
-    })
     let propData:InfoFormProps
     const checkFormScreen=(type:any)=>{
         switch (type) {
@@ -82,10 +71,8 @@ const HomeScreen = ({ navigation }: any) => {
     }
     return (
         <View style={styles.container}>
-
             <Image source={receLogo} style={styles.image} />
             <Text style={styles.title}>Receptionist</Text>
-
             <View style={styles.cardGroupContainer}>
                 <LinearGradient colors={[Color.whiteRecColor, Color.greenRecColor, Color.greenRecColor]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('MEETING')} style={{ alignItems: 'center' }}>
@@ -112,7 +99,6 @@ const HomeScreen = ({ navigation }: any) => {
                     </TouchableOpacity>
                 </LinearGradient>
             </View>
-
             <View style={styles.cardGroupContainer}>
                 <LinearGradient colors={[Color.whiteRecColor, Color.greenRecColor, Color.greenRecColor]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('CONTRACTOR')} style={{ alignItems: 'center' }}>
@@ -139,7 +125,6 @@ const HomeScreen = ({ navigation }: any) => {
                     </TouchableOpacity>
                 </LinearGradient>
             </View>
-
             <View style={styles.boxRow}>
                 <Pressable style={styles.uploadBox}>
                     <Pressable style={styles.cusButton}>

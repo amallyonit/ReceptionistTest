@@ -1,3 +1,3 @@
 export const ServerEndpoints = {
-    POST_USERS:'api/v1/getRecUserList'
+    POST_USER_LOGIN:'api/v1/recAuth/generateLogin'
 }

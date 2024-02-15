@@ -1,5 +1,6 @@
-import React, { useState } from "react"
-import { Dimensions, FlatList, Image, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
+"use strict"
+import React from "react"
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import Fonts from "../theme/Fonts"

@@ -1,63 +1,46 @@
-import { SafeAreaView, Image, Text, View, TextInput, Pressable, Alert, StyleSheet, Button, Dimensions } from "react-native"
+"use strict"
+import { Image, Text, View, TextInput, StyleSheet, Button, Dimensions } from "react-native"
 import Color from "../theme/Color"
 import Fonts from "../theme/Fonts"
 import { useState } from "react";
 import React from "react";
-import { Dropdown } from "react-native-element-dropdown";
+import { PostUserLogin } from "../requests/recLooginRequest";
+import axios from "axios";
+import { ApiConfig } from "../constants/RecConfig";
+import { ServerConfig } from "../constants/RecServerconf";
+import { ServerEndpoints } from "../constants/RecEndpoints";
+import { StoreValue } from "../wrapper/storedata.wrapper";
 const receLogo =  require('../../assets/recimages/Frame.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
 
 const LoginScreen = ({navigation}:any) =>{
-    const [click,setClick] = useState(false);
-    const [username,setUsername]=  useState("");
+    const [userId,setUserId]=  useState("");
     const [password,setPassword]=  useState("");
-    const [location,setLocation]= useState("")
-    const [value, setValue] = useState("");
-    const data = [
-      { label: 'Item 1', value: '1' },
-      { label: 'Item 2', value: '2' },
-      { label: 'Item 3', value: '3' },
-      { label: 'Item 4', value: '4' },
-      { label: 'Item 5', value: '5' },
-      { label: 'Item 6', value: '6' },
-      { label: 'Item 7', value: '7' },
-      { label: 'Item 8', value: '8' },
-    ];
-  
-
+    const fetchLogin =async ()=>{
+      let payload = {
+        UserID:userId,
+        Password:password
+      }
+      let result = await PostUserLogin(payload)
+      if(result?.data.Status){
+        StoreValue("EZ_LOGIN_DET",result.data.Data[0])
+        let userLocations = result.data.Data[1]
+        navigation.navigate('Location',{userLocations})
+      }else{
+      }
+    }
     return(
         <View style={styles.container}>
-      
         <Image source={receLogo} style={styles.image} />
-        <Text style={styles.title}>Receptionist</Text>
+        <Text style={styles.title}>EzEntry</Text>
         <View style={styles.inputView}>
-            <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='User ID' value={username} onChangeText={setUsername} autoCorrect={false}
-        autoCapitalize='none' />
+            <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='User ID' value={userId} onChangeText={setUserId} autoCorrect={false} autoCapitalize='none' />
             <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Password' secureTextEntry value={password} onChangeText={setPassword} autoCorrect={false}
         autoCapitalize='none'/>
-              <Dropdown
-        style={styles.dropdown}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
-        data={data}
-        itemTextStyle={{color:Color.blackRecColor}}
-        search
-        maxHeight={300}
-        labelField="label"
-        valueField="value"
-        placeholder="Location"
-        searchPlaceholder="Search..."
-        value={value}
-        onChange={item => {
-          setValue(item.value);
-        }}
-      />
         </View>
 
         <View style={styles.buttonView}>
-            <Button title="Login" color={Color.greenRecColor}  onPress={() => navigation.navigate("Home")}>
+            <Button title="Login" color={Color.greenRecColor}  onPress={fetchLogin}>
             </Button>
         </View>
         

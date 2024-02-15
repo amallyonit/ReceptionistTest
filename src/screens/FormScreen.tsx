@@ -1,15 +1,21 @@
-import React, { useState } from "react"
-import { Image, Linking, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
+"use strict"
+import React, { useCallback, useMemo, useRef, useState } from "react"
+import { Button, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import Color from "../theme/Color"
 import Fonts from "../theme/Fonts"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import { InfoFormProps } from "../models/RecepModels";
 import { Dropdown } from "react-native-element-dropdown";
+import { launchCamera, CameraOptions } from 'react-native-image-picker';
+
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
+
 const FormScreen = ({ route, navigation }: any) => {
     const data: InfoFormProps = route.params["propData"]
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [botNotShow, setBotShow] = useState(false)
     const [value, setValue] = useState("");
     const userData = [
         { label: 'Amal', value: '1' },
@@ -21,6 +27,29 @@ const FormScreen = ({ route, navigation }: any) => {
         { label: 'Dileep', value: '7' },
         { label: 'Prabakar', value: '8' },
     ];
+
+    const handleCameraLaunch = () => {
+        const option:CameraOptions = {
+            mediaType: 'photo',
+            includeBase64: false,
+            maxHeight: 2000,
+            maxWidth: 2000,
+        }
+
+        launchCamera(option, (response: any) => {
+            if (response.didCancel) {
+                console.log('User cancelled camera');
+            } else if (response.error) {
+                console.log('Camera Error: ', response.error);
+            } else {
+                let imageUri = response.uri || response.assets?.[0]?.uri;
+                setSelectedImage(imageUri);
+                console.log(imageUri);
+            }
+        });
+    }
+
+
     return (
         <View>
             <View style={styles.container}>
@@ -33,9 +62,9 @@ const FormScreen = ({ route, navigation }: any) => {
                     <Text style={{ marginLeft: 10, color: Color.whiteRecColor, fontSize: 18, fontFamily: Fonts.recFontFamily.titleRecFont, flex: 2 }}>{data.appBarTitle}</Text>
                 </View>
                 <View style={styles.inputView}>
-                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Mobile No of Vistor' autoCapitalize='none' />
+                    <TextInput style={styles.input} keyboardType="numeric" maxLength={10} placeholderTextColor={Color.blackRecColor} placeholder='Mobile No of Vistor' autoCapitalize='none' />
                     <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Name of Vistor' autoCapitalize='none' />
-                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='From' autoCapitalize='none' />
+                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='From / Company name / place' autoCapitalize='none' />
                     <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Purpose of Vistor' autoCapitalize='none' />
                     <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder="Company name" autoCapitalize='none'></TextInput>
                     <Dropdown
@@ -45,7 +74,7 @@ const FormScreen = ({ route, navigation }: any) => {
                         inputSearchStyle={styles.inputSearchStyle}
                         iconStyle={styles.iconStyle}
                         data={userData}
-                        itemTextStyle={{color:Color.blackRecColor}}
+                        itemTextStyle={{ color: Color.blackRecColor }}
                         search
                         maxHeight={300}
                         labelField="label"
@@ -61,7 +90,11 @@ const FormScreen = ({ route, navigation }: any) => {
                 </View>
                 <View style={styles.boxRow}>
                     <View style={styles.uploadBox}>
-                        <Image source={camLogo} style={styles.imageSize}></Image>
+                        {selectedImage!=null?<Image
+                         source={{ uri: selectedImage }}
+                         style={styles.imageSize}></Image>:<Image
+                         source={camLogo}
+                         style={styles.imageSize}></Image>}
                     </View>
                     <View style={styles.uploadBox}>
                         <View style={styles.outlineButton}>
@@ -73,9 +106,11 @@ const FormScreen = ({ route, navigation }: any) => {
                     </View>
                 </View>
                 <View style={styles.remarkInputView}>
-                    <View>
-                        <Text style={{ marginLeft: 20, textAlign: 'center', color: 'blue', width: 100, borderBottomWidth: 1, borderBottomColor: 'blue', marginBottom: 10 }} onPress={() => Linking.openURL('https://google.com')}>Take Photo</Text>
-                    </View>
+                <Text
+                    onPress={handleCameraLaunch}
+                    style={{marginRight:'auto',marginLeft:10,textAlign: 'center', color: 'blue', borderBottomWidth: 1, borderBottomColor: 'blue'}}>Take Photo</Text>
+                </View>
+                <View style={styles.remarkInputView1}>
                     <TextInput placeholderTextColor={Color.blackRecColor} placeholder="Remarks" style={styles.remarkInput}></TextInput>
                 </View>
             </View>
@@ -89,14 +124,14 @@ const styles = StyleSheet.create({
     },
     statusView: {
         marginLeft: 'auto',
-        marginRight: 40,
+        marginRight: 28,
         marginTop: 40,
         height: 35,
         textAlign: 'center'
     },
     statusText: {
         color: Color.blackRecColor,
-        fontSize:18,
+        fontSize: 25,
     },
     imageSize: {
         marginTop: 10,
@@ -149,6 +184,10 @@ const styles = StyleSheet.create({
         width: '100%',
         padding: 20,
     },
+    remarkInputView1: {
+        width: '100%',
+        padding: 20,
+    },
     remarkInput: {
         textAlign: 'justify',
         height: 137,
@@ -166,10 +205,11 @@ const styles = StyleSheet.create({
     },
     placeholderStyle: {
         fontSize: 16,
-        color:Color.blackRecColor
+        color: Color.blackRecColor
     },
     selectedTextStyle: {
         fontSize: 16,
+        color: Color.blackRecColor
     },
     iconStyle: {
         width: 20,
