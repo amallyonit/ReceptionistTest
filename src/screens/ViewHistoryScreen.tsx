@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
     },
     navContainer:{ 
         width: '100%',
-        backgroundColor: Color.greenRecColor, 
+        backgroundColor: Color.blueRecColor, 
         height: 60, alignItems: 'center', flexDirection: 'row'
     },
     navContText:{ 

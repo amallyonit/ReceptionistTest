@@ -1,33 +1,28 @@
 "use strict"
-import React, { useCallback, useMemo, useRef, useState } from "react"
-import { Button, Image, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import React, { useEffect, useState } from "react"
+import { Image, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Fonts from "../theme/Fonts"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
-import { InfoFormProps } from "../models/RecepModels";
+import { InfoFormProps, UserLoginLocation } from "../models/RecepModels";
 import { Dropdown } from "react-native-element-dropdown";
 import { launchCamera, CameraOptions } from 'react-native-image-picker';
+import { RetrieveValue } from "../wrapper/storedata.wrapper"
+import { MiscStoreKeys } from "../constants/RecStorageKeys"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
 
 const FormScreen = ({ route, navigation }: any) => {
-    const data: InfoFormProps = route.params["propData"]
+    const data:InfoFormProps = route.params["propData"]
+    console.log(data)
+    const [value,setValue] = useState(data.locations[0].LocationName)
     const [selectedImage, setSelectedImage] = useState(null);
-    const [botNotShow, setBotShow] = useState(false)
-    const [value, setValue] = useState("");
-    const userData = [
-        { label: 'Amal', value: '1' },
-        { label: 'Ajith', value: '2' },
-        { label: 'Manoj', value: '3' },
-        { label: 'Sivadarsh', value: '4' },
-        { label: 'Shyamily', value: '5' },
-        { label: 'Jayachandran', value: '6' },
-        { label: 'Dileep', value: '7' },
-        { label: 'Prabakar', value: '8' },
-    ];
+    const getUsersByLocationName = () =>{
 
+    }
     const handleCameraLaunch = () => {
         const option:CameraOptions = {
             mediaType: 'photo',
@@ -53,10 +48,10 @@ const FormScreen = ({ route, navigation }: any) => {
     return (
         <View>
             <View style={styles.container}>
-                <View style={{ width: '100%', backgroundColor: Color.greenRecColor, height: 60, alignItems: 'center', flexDirection: 'row' }}>
+                <View style={{ width: '100%', backgroundColor: Color.blueRecColor, height: 60, alignItems: 'center', flexDirection: 'row' }}>
                     <Text style={{ color: Color.whiteRecColor, fontSize: 16, flex: 1.6, marginLeft: 15 }}>
                         <Icon onPress={() =>
-                            navigation.navigate("Home")
+                            navigation.navigate("Home",{data})
                         } name="arrow-left" size={28} color={Color.whiteRecColor}></Icon>
                     </Text>
                     <Text style={{ marginLeft: 10, color: Color.whiteRecColor, fontSize: 18, fontFamily: Fonts.recFontFamily.titleRecFont, flex: 2 }}>{data.appBarTitle}</Text>
@@ -66,24 +61,24 @@ const FormScreen = ({ route, navigation }: any) => {
                     <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Name of Vistor' autoCapitalize='none' />
                     <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='From / Company name / place' autoCapitalize='none' />
                     <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Purpose of Vistor' autoCapitalize='none' />
-                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder="Company name" autoCapitalize='none'></TextInput>
                     <Dropdown
                         style={styles.dropdown}
                         placeholderStyle={styles.placeholderStyle}
                         selectedTextStyle={styles.selectedTextStyle}
                         inputSearchStyle={styles.inputSearchStyle}
                         iconStyle={styles.iconStyle}
-                        data={userData}
+                        data={data.locations}
                         itemTextStyle={{ color: Color.blackRecColor }}
                         search
                         maxHeight={300}
-                        labelField="label"
-                        valueField="value"
-                        placeholder="Meeting with"
-                        searchPlaceholder="Search..."
+                        labelField="LocationName"
+                        valueField="LocationName"
+                        placeholder="Company name"
+                        searchPlaceholder="Search...locations"
                         value={value}
-                        onChange={item => {
-                            setValue(item.value);
+                        onChange={(item) => {
+                            setValue(item.LocationName)
+                            console.log("value ",value)
                         }}
                     />
                     <TextInput keyboardType="numeric" placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='No of Visitors' autoCapitalize='none' />

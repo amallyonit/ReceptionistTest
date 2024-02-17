@@ -36,7 +36,7 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
     return (
         <View>
         <View style={styles.container}>
-        <View style={{width:'100%',backgroundColor:Color.greenRecColor,height:60,alignItems:'center',flexDirection:'row'}}>
+        <View style={{width:'100%',backgroundColor:Color.blueRecColor,height:60,alignItems:'center',flexDirection:'row'}}>
         <Text style={{color:Color.whiteRecColor,fontSize:16,flex:1,marginLeft:15}}>
             <Icon onPress={() =>
                navigation.navigate("Home")
@@ -48,7 +48,7 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
         <View style={styles.boxRow}>
                 <Pressable style={styles.uploadBox}>
                     <Pressable style={styles.cusButton}>
-                        <Text style={{color:Color.greenRecColor,padding:10,textAlign:'center',fontSize:18}}>
+                        <Text style={{color:Color.blackRecColor,padding:10,textAlign:'center',fontSize:18}}>
                             Delivery
                         </Text>
                     </Pressable>
@@ -58,7 +58,7 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
                 </Pressable>
                 <Pressable style={styles.uploadBox}>
                     <Pressable style={styles.cusButton}>
-                        <Text style={{color:Color.greenRecColor,padding:10,textAlign:'center',fontSize:18}}>Pickup</Text>
+                        <Text style={{color:Color.blackRecColor,padding:10,textAlign:'center',fontSize:18}}>Pickup</Text>
                     </Pressable>
                 </Pressable>
             </View>
@@ -76,7 +76,7 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
                 <Pressable style={[styles.uploadBox2,{marginLeft:'auto',marginTop:10,marginRight:12}]}>
                     
                     <Pressable style={styles.cusButton1}>
-                        <Text style={{color:Color.whiteRecColor,padding:8,textAlign:'center',fontSize:18}}>
+                        <Text style={{color:Color.blackRecColor,padding:8,textAlign:'center',fontSize:18}}>
                             Add <Icon name="plus-circle-outline" size={20}></Icon>
                         </Text>
                     </Pressable>
@@ -171,9 +171,17 @@ const styles = StyleSheet.create({
         marginLeft:'auto',
         marginTop:10,
         height:35,
-        width:130,
-        borderWidth:1,
-        borderColor:Color.greenRecColor,
+        width:125,
+        borderRadius:4,
+        backgroundColor: Color.blueRecColor,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.32,
+        shadowRadius: 5.46,
+        elevation: 9,
         textAlign:'center'
     },
     uploadBox: {
@@ -183,14 +191,29 @@ const styles = StyleSheet.create({
         width:'20%'
     },
     cusButton: {
-        borderRadius: 1,
-        borderColor: Color.greenRecColor,
-        borderWidth:1,
+        borderRadius:4,
+        backgroundColor: Color.blueRecColor,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.32,
+        shadowRadius: 5.46,
+        elevation: 9,
         height:45,
       },
       cusButton1: {
-        borderRadius: 1,
-        backgroundColor: Color.greenRecColor,
+        borderRadius:4,
+        backgroundColor: Color.blueRecColor,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.32,
+        shadowRadius: 5.46,
+        elevation: 9,
         height:45,
       },
       delButton:{

@@ -1,15 +1,13 @@
 "use strict"
-import { Image, Text, View, TextInput, StyleSheet, Button, Dimensions } from "react-native"
+import { Image, Text, View, TextInput, StyleSheet, Dimensions, Pressable } from "react-native"
 import Color from "../theme/Color"
 import Fonts from "../theme/Fonts"
 import { useState } from "react";
 import React from "react";
 import { PostUserLogin } from "../requests/recLooginRequest";
-import axios from "axios";
-import { ApiConfig } from "../constants/RecConfig";
-import { ServerConfig } from "../constants/RecServerconf";
-import { ServerEndpoints } from "../constants/RecEndpoints";
 import { StoreValue } from "../wrapper/storedata.wrapper";
+import { MiscStoreKeys } from "../constants/RecStorageKeys";
+import { Button, Icon } from "react-native-elements";
 const receLogo =  require('../../assets/recimages/Frame.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
 
@@ -21,12 +19,21 @@ const LoginScreen = ({navigation}:any) =>{
         UserID:userId,
         Password:password
       }
-      let result = await PostUserLogin(payload)
-      if(result?.data.Status){
-        StoreValue("EZ_LOGIN_DET",result.data.Data[0])
-        let userLocations = result.data.Data[1]
-        navigation.navigate('Location',{userLocations})
-      }else{
+      try {
+        PostUserLogin(payload)?.then((response:any)=>{
+          console.log("resposne ",response)
+          if(response?.data.Status){
+            StoreValue(MiscStoreKeys.EZ_LOGIN,response.data.Data[0][0])
+            let userLocations = response.data.Data[1]
+              navigation.navigate('Home',{userLocations})
+              StoreValue(MiscStoreKeys.EZ_LOCATION,JSON.stringify(userLocations))
+          }else{
+          }
+        }).catch((error)=>{
+          console.log("error ",error)
+        }) 
+      } catch (error) {
+        
       }
     }
     return(
@@ -40,8 +47,9 @@ const LoginScreen = ({navigation}:any) =>{
         </View>
 
         <View style={styles.buttonView}>
-            <Button title="Login" color={Color.greenRecColor}  onPress={fetchLogin}>
-            </Button>
+         <Pressable style={styles.cusButton} onPress={fetchLogin}>
+              <Text style={styles.cusText}>Login</Text>
+          </Pressable>
         </View>
         
         <Image source={receBottomLogo} style={styles.bottomLogo} />
@@ -59,6 +67,21 @@ const styles = StyleSheet.create({
       width : 300,
       resizeMode:'contain'
     },
+    cusButton: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingVertical: 10,
+      paddingHorizontal: 30,
+      borderRadius: 4,
+      elevation: 3,
+      backgroundColor: "#99c2ff",
+    },
+    cusText: {
+      fontSize: Dimensions.get('window').fontScale * 17,
+      fontWeight: 'bold',
+      letterSpacing: 0.25,
+      color: Color.blackRecColor,
+    },
     bottomLogo : {
       marginTop:100,
       height : 60,
@@ -69,7 +92,7 @@ const styles = StyleSheet.create({
       fontSize : 32,
       fontFamily:Fonts.recFontFamily.titleRecFont,
       textAlign: "center",
-      color : Color.violetRecColor
+      color : '#99c2ff'
     },
     inputView : {
       gap : 5,

@@ -35,7 +35,8 @@ export interface PathStore {
 
 export interface InfoFormProps {
     appBarTitle: any,
-    type: any
+    type: any,
+    locations:UserLoginLocation[]
 }
 
 export interface ViewHistory {

@@ -16,49 +16,60 @@ const receInterLog = require('../../assets/recscreen/INTERVIEW.png')
 const receDelLog = require('../../assets/recscreen/DELIVERY.png')
 const receBottomLogo = require('../../assets/recimages/Group.png') 
 
-const HomeScreen = ({ navigation }: any) => {
-    let propData:InfoFormProps
+const HomeScreen = ({ route,navigation }: any) => {
+    let propData:InfoFormProps = {
+        type:'',
+        locations:[],
+        appBarTitle:''
+    }
     const checkFormScreen=(type:any)=>{
+        
         switch (type) {
             case 'MEETING':
                 propData = {
                     appBarTitle:'Meeting',
-                    type:type
+                    type:type,
+                    locations:route.params['userLocations']
                 }
                 navigation.navigate('Form',{propData})
                 break;
             case 'VISIT':
                 propData = {
                     appBarTitle:'Visit',
-                    type:type
+                    type:type,
+                    locations:route.params['userLocations']
                 }
                 navigation.navigate('Form',{propData})
                 break;
             case 'SERVICE':
                 propData = {
                     appBarTitle:'Service',
-                    type:type
+                    type:type,
+                    locations:route.params['userLocations']
                 }
                 navigation.navigate('Form',{propData})
                 break;
             case 'CONTRACTOR':
                 propData = {
                     appBarTitle:'Contractor',
-                    type:type
+                    type:type,
+                    locations:route.params['userLocations']
                 }
                 navigation.navigate('Form',{propData})
                 break;
             case 'INTERVIEW':
                 propData = {
                     appBarTitle:'Interview',
-                    type:type
+                    type:type,
+                    locations:route.params['userLocations']
                 }
                 navigation.navigate('Form',{propData})
                 break;
             case 'DELIVERYPICK':
                     propData = {
                         appBarTitle:'Delivery / Pickup',
-                        type:type
+                        type:type,
+                        locations:route.params['userLocations']
                     }
                     navigation.navigate('PickDel',{propData})
                     break;
@@ -72,9 +83,9 @@ const HomeScreen = ({ navigation }: any) => {
     return (
         <View style={styles.container}>
             <Image source={receLogo} style={styles.image} />
-            <Text style={styles.title}>Receptionist</Text>
+            <Text style={styles.title}>EzEntry</Text>
             <View style={styles.cardGroupContainer}>
-                <LinearGradient colors={[Color.whiteRecColor, Color.greenRecColor, Color.greenRecColor]} style={styles.cardGroup}>
+                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor,Color.lightRecBlue]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('MEETING')} style={{ alignItems: 'center' }}>
                         <Image source={receMeetLog} style={styles.imageSet} />
                         <Text style={styles.buttonText}>
@@ -82,7 +93,7 @@ const HomeScreen = ({ navigation }: any) => {
                         </Text>
                     </TouchableOpacity>
                 </LinearGradient>
-                <LinearGradient colors={[Color.whiteRecColor, Color.greenRecColor, Color.greenRecColor]} style={styles.cardGroup}>
+                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('VISIT')} style={{ alignItems: 'center' }}>
                         <Image source={receVisitLog} style={styles.imageSet} />
                         <Text style={styles.buttonText}>
@@ -90,7 +101,7 @@ const HomeScreen = ({ navigation }: any) => {
                         </Text>
                     </TouchableOpacity>
                 </LinearGradient>
-                <LinearGradient colors={[Color.whiteRecColor, Color.greenRecColor, Color.greenRecColor]} style={styles.cardGroup}>
+                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('SERVICE')} style={{ alignItems: 'center' }}>
                         <Image source={receServeLog} style={styles.imageSet} />
                         <Text style={styles.buttonText}>
@@ -100,7 +111,7 @@ const HomeScreen = ({ navigation }: any) => {
                 </LinearGradient>
             </View>
             <View style={styles.cardGroupContainer}>
-                <LinearGradient colors={[Color.whiteRecColor, Color.greenRecColor, Color.greenRecColor]} style={styles.cardGroup}>
+                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('CONTRACTOR')} style={{ alignItems: 'center' }}>
                         <Image source={receContrLog} style={styles.imageSet} />
                         <Text style={styles.buttonText}>
@@ -108,7 +119,7 @@ const HomeScreen = ({ navigation }: any) => {
                         </Text>
                     </TouchableOpacity>
                 </LinearGradient>
-                <LinearGradient colors={[Color.whiteRecColor, Color.greenRecColor, Color.greenRecColor]} style={styles.cardGroup}>
+                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('INTERVIEW')} style={{ alignItems: 'center' }}>
                         <Image source={receInterLog} style={styles.imageSet} />
                         <Text style={styles.buttonText}>
@@ -116,7 +127,7 @@ const HomeScreen = ({ navigation }: any) => {
                         </Text>
                     </TouchableOpacity>
                 </LinearGradient>
-                <LinearGradient colors={[Color.whiteRecColor, Color.greenRecColor, Color.greenRecColor]} style={styles.cardGroup}>
+                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('DELIVERYPICK')} style={{ alignItems: 'center' }}>
                         <Image source={receDelLog} style={styles.imageSet} />
                         <Text style={styles.buttonText}>
@@ -128,12 +139,12 @@ const HomeScreen = ({ navigation }: any) => {
             <View style={styles.boxRow}>
                 <Pressable style={styles.uploadBox}>
                     <Pressable style={styles.cusButton}>
-                        <Text style={styles.cusText}>Pre Approved<Icon name="check-circle-outline" size={Dimensions.get('window').fontScale * 16} color={Color.whiteRecColor}></Icon></Text>
+                        <Text style={styles.cusText}>Pre Approved <Icon name="check-circle-outline" size={Dimensions.get('window').fontScale * 16}></Icon></Text>
                     </Pressable>
                 </Pressable>
                 <Pressable style={styles.uploadBox}>
                     <Pressable style={styles.cusButton}>
-                        <Text style={styles.cusText}>Check Out<Icon name="location-exit" size={Dimensions.get('window').fontScale * 16} color={Color.whiteRecColor}></Icon>
+                        <Text style={styles.cusText}>Check Out <Icon name="location-exit" size={Dimensions.get('window').fontScale * 16}></Icon>
                         </Text>
                     </Pressable>
                 </Pressable>
@@ -183,18 +194,24 @@ const styles = StyleSheet.create({
     cusButton: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 12,
-        paddingHorizontal: 30,
-        borderRadius: 4,
-        elevation: 3,
-        backgroundColor: Color.greenRecColor,
+        paddingVertical: 10,
+        borderRadius: 10,
+        backgroundColor: Color.blueRecColor,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.32,
+        shadowRadius: 5.46,
+        elevation: 9,
       },
       cusText: {
-        fontSize: Dimensions.get('window').fontScale * 16,
+        fontSize: Dimensions.get('window').fontScale * 15,
         lineHeight: 21,
-        fontWeight: 'bold',
-        letterSpacing: 0.25,
-        color: Color.whiteRecColor,
+        fontWeight: '600',
+        letterSpacing: 0.20,
+        color: Color.blackRecColor,
       },
     bottomLogo: {
         marginTop:Dimensions.get('window').height * 0.02,
@@ -206,7 +223,8 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontFamily: Fonts.recFontFamily.titleRecFont,
         textAlign: "center",
-        color: Color.violetRecColor
+        fontWeight:'normal',
+        color: Color.blueRecColor
     },
     button: {
         backgroundColor: 'green',
@@ -219,7 +237,7 @@ const styles = StyleSheet.create({
         gap: 5
     },
     boxRow:{
-        marginTop:Dimensions.get('window').height * 0.02,
+        marginTop:Dimensions.get('window').height * 0.024,
         flexDirection:'row',
         width : "100%",
         gap:10
@@ -231,7 +249,7 @@ const styles = StyleSheet.create({
         justifyContent:'center'
     },
     buttonText: {
-        color: Color.whiteRecColor,
+        color: Color.blackRecColor,
         fontSize: 14,
         fontWeight: "bold",
         textAlign:'center',

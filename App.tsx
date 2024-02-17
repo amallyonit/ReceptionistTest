@@ -7,7 +7,6 @@ import HomeScreen from './src/screens/HomeScreen';
 import FormScreen from './src/screens/FormScreen';
 import FormDeliveryScreen from './src/screens/FormDeliveryScreen';
 import ViewHistoryScreen from './src/screens/ViewHistoryScreen';
-import LocationScreen from './src/screens/LocationScreen';
 
 const Stack =  createNativeStackNavigator()
 
@@ -16,7 +15,6 @@ function App() {
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerShown:false}} initialRouteName='Login'>
         <Stack.Screen  name='Login' component={LoginScreen}></Stack.Screen>
-        <Stack.Screen  name='Location' component={LocationScreen}></Stack.Screen>
         <Stack.Screen name='Home' component={HomeScreen}></Stack.Screen>
         <Stack.Screen name='Form' component={FormScreen}></Stack.Screen>
         <Stack.Screen name='PickDel' component={FormDeliveryScreen}></Stack.Screen>

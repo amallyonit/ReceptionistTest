@@ -4,5 +4,6 @@ export default {
     whiteRecColor:'#ffffff',
     lightGreyRecColor:'#EBE9E9',
     blackRecColor:'#464646',
-    blueRecColor:'#5362EF'
+    blueRecColor:'#99c2ff',
+    lightRecBlue:'#e6f0ff'
 }
