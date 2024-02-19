@@ -1,15 +1,14 @@
 "use strict"
-import React, { useEffect, useState } from "react"
-import { Image, StyleSheet, Text, TextInput, View } from "react-native"
+import React, { useState } from "react"
+import { Alert, Dimensions, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Fonts from "../theme/Fonts"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
-import { InfoFormProps, UserLoginLocation } from "../models/RecepModels";
+import { InfoFormProps, UserLoginData } from "../models/RecepModels";
 import { Dropdown } from "react-native-element-dropdown";
 import { launchCamera, CameraOptions } from 'react-native-image-picker';
-import { RetrieveValue } from "../wrapper/storedata.wrapper"
-import { MiscStoreKeys } from "../constants/RecStorageKeys"
-import AsyncStorage from "@react-native-async-storage/async-storage"
+import { GetUsersByLocation, PostVisitorData } from "../requests/recHomeRequest"
+import RNModal from "react-native-modal";
 
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
@@ -17,33 +16,96 @@ const camLogo = require("../../assets/recscreen/CAMERA.png")
 
 const FormScreen = ({ route, navigation }: any) => {
     const data:InfoFormProps = route.params["propData"]
-    console.log(data)
-    const [value,setValue] = useState(data.locations[0].LocationName)
+    const [userslst,setUserlist] = useState([])
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    let userLocation:UserLoginData[]=[]
     const [selectedImage, setSelectedImage] = useState(null);
-    const getUsersByLocationName = () =>{
+    const [imageBase,setBase64] = useState("")
+    const [mobile,setMobile]=useState("")
+    const [visiorname,setVisitorname] = useState("")
+    const [place,setPlace] = useState("")
+    const [purpose,SetPurpose] = useState("")
+    const [visitors,setVisitors]=useState("")
+    const [remarks,setRemarks] = useState("")
+    const [meet,setMeetWith] = useState("")
 
+    let typeFormData = {
+        locationCode:data.locations[0].LocationName,
+        imageDatas:''
     }
+    const getUsersByLocationName = (code:any) =>{
+        let payload = {
+            UserLocationCode:code
+        }
+        try {
+            console.log("payload ",payload)
+            GetUsersByLocation(JSON.stringify(payload))?.then((response)=>{
+                console.log("response ",response.data)
+                userLocation = response.data.Data
+                console.log("users ",userLocation)
+                setUserlist(response.data.Data)
+            }).catch((error:any)=>{
+                console.log("error ",error)
+            })
+        } catch (error) {
+            console.log("error ",error)
+        }
+    }
+
+  
     const handleCameraLaunch = () => {
         const option:CameraOptions = {
             mediaType: 'photo',
-            includeBase64: false,
+            includeBase64: true,
             maxHeight: 2000,
             maxWidth: 2000,
         }
 
         launchCamera(option, (response: any) => {
             if (response.didCancel) {
-                console.log('User cancelled camera');
+                console.log('User cancelled camera',response);
             } else if (response.error) {
                 console.log('Camera Error: ', response.error);
             } else {
                 let imageUri = response.uri || response.assets?.[0]?.uri;
+                typeFormData.imageDatas =response.assets?.[0]?.base64
                 setSelectedImage(imageUri);
-                console.log(imageUri);
+                setBase64(typeFormData.imageDatas)
+                console.log("form base",typeFormData.imageDatas);
             }
         });
     }
 
+
+    const onSendRequest = ()=>{
+        console.log("image data ",typeFormData.imageDatas)
+        let payload = {
+            VisitorName:visiorname,
+            VisitorMobileNo:mobile,
+            VisitorImage:imageBase,
+            VisitorCode:'',
+            VisitTranMasterCode:'',
+            VisitTranCategory:data.category,
+            VisitTranVisitorFrom:place,
+            VisitTranPurpose:purpose,
+            VisitTranMeetingWith:meet,
+            VisitTranCheckinTime:'',
+            VisitTranCheckoutTime:'',
+            VisitTranVisitType:'',
+            VisitTranVisitStatus:'',
+            VisitTranRemarks:remarks
+        }
+        PostVisitorData(payload)?.then((response:any)=>{
+            console.log("response ",response)
+            if(response.data.Status){
+                setIsModalVisible(true)
+            }else{
+                setIsModalVisible(false)
+            }
+        }).catch((error)=>{
+            console.log("error ",error)
+        })
+    }
 
     return (
         <View>
@@ -57,10 +119,27 @@ const FormScreen = ({ route, navigation }: any) => {
                     <Text style={{ marginLeft: 10, color: Color.whiteRecColor, fontSize: 18, fontFamily: Fonts.recFontFamily.titleRecFont, flex: 2 }}>{data.appBarTitle}</Text>
                 </View>
                 <View style={styles.inputView}>
-                    <TextInput style={styles.input} keyboardType="numeric" maxLength={10} placeholderTextColor={Color.blackRecColor} placeholder='Mobile No of Vistor' autoCapitalize='none' />
-                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Name of Vistor' autoCapitalize='none' />
-                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='From / Company name / place' autoCapitalize='none' />
-                    <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Purpose of Vistor' autoCapitalize='none' />
+                    <TextInput
+                    value={mobile}
+                     onChangeText={number =>setMobile(number)}
+                     style={styles.input} keyboardType="numeric" maxLength={10} 
+                     placeholderTextColor={Color.blackRecColor} placeholder='Mobile No of Vistor'
+                      autoCapitalize='none' />
+                    <TextInput
+                    value={visiorname}
+                    onChangeText={name=>setVisitorname(name)}
+                     style={styles.input} placeholderTextColor={Color.blackRecColor} 
+                     placeholder='Name of Vistor' autoCapitalize='none' />
+                    <TextInput 
+                    value={place}
+                    onChangeText={plcs =>setPlace(plcs)}
+                    style={styles.input} placeholderTextColor={Color.blackRecColor} 
+                    placeholder='From / Company name / place' autoCapitalize='none' />
+                    <TextInput 
+                    value={purpose}
+                    onChangeText={purp =>SetPurpose(purp)}
+                    style={styles.input} placeholderTextColor={Color.blackRecColor} 
+                    placeholder='Purpose of Vistor' autoCapitalize='none' />
                     <Dropdown
                         style={styles.dropdown}
                         placeholderStyle={styles.placeholderStyle}
@@ -72,16 +151,41 @@ const FormScreen = ({ route, navigation }: any) => {
                         search
                         maxHeight={300}
                         labelField="LocationName"
-                        valueField="LocationName"
+                        valueField="LocationCode"
                         placeholder="Company name"
                         searchPlaceholder="Search...locations"
-                        value={value}
+                        value={typeFormData.locationCode}
                         onChange={(item) => {
-                            setValue(item.LocationName)
-                            console.log("value ",value)
+                            typeFormData.locationCode = item.LocationCode
+                            getUsersByLocationName(typeFormData.locationCode)
+                            console.log("value ",typeFormData.locationCode)
                         }}
                     />
-                    <TextInput keyboardType="numeric" placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='No of Visitors' autoCapitalize='none' />
+                    <Dropdown
+                        style={styles.dropdown}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={userslst}
+                        itemTextStyle={{ color: Color.blackRecColor }}
+                        search
+                        maxHeight={300}
+                        labelField="UserName"
+                        valueField="UserCode"
+                        placeholder="Meeting with"
+                        searchPlaceholder="Search...locations"
+                        value={meet}
+                        onChange={(item:any) => {
+                            setMeetWith(item.UserCode)
+                            console.log("item ",item,meet)
+                        }}
+                    />
+                    <TextInput
+                    value={visitors}
+                    onChangeText={vistno=>setVisitors(vistno)}
+                     keyboardType="numeric" placeholderTextColor={Color.blackRecColor}
+                      style={styles.input} placeholder='No of Visitors' autoCapitalize='none' />
                 </View>
                 <View style={styles.boxRow}>
                     <View style={styles.uploadBox}>
@@ -93,7 +197,7 @@ const FormScreen = ({ route, navigation }: any) => {
                     </View>
                     <View style={styles.uploadBox}>
                         <View style={styles.outlineButton}>
-                            <Text style={styles.buttonText}>Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
+                            <Text style={styles.buttonText} onPress={onSendRequest}>Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
                         </View>
                         <View style={styles.statusView}>
                             <Text style={styles.statusText}>Status <Icon name="check-circle" size={18} color={Color.blackRecColor}></Icon></Text>
@@ -106,9 +210,32 @@ const FormScreen = ({ route, navigation }: any) => {
                     style={{marginRight:'auto',marginLeft:10,textAlign: 'center', color: 'blue', borderBottomWidth: 1, borderBottomColor: 'blue'}}>Take Photo</Text>
                 </View>
                 <View style={styles.remarkInputView1}>
-                    <TextInput placeholderTextColor={Color.blackRecColor} placeholder="Remarks" style={styles.remarkInput}></TextInput>
+                    <TextInput 
+                    value={remarks}
+                    onChangeText={rems=>setRemarks(rems)}
+                    placeholderTextColor={Color.blackRecColor} placeholder="Remarks"
+                     style={styles.remarkInput}></TextInput>
                 </View>
             </View>
+            <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => {
+          Alert.alert('Modal has been closed.');
+          setIsModalVisible(!isModalVisible);
+        }}>
+        <View style={styles.centeredView}>
+          <View style={styles.modalView}>
+            <Text style={styles.modalText}>Successful Added</Text>
+            <Pressable
+              style={[styles.button, styles.buttonClose]}
+              onPress={() => setIsModalVisible(!isModalVisible)}>
+              <Text style={styles.textStyle}>Hide Modal</Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>        
         </View>
     )
 }
@@ -144,9 +271,17 @@ const styles = StyleSheet.create({
         marginTop: 10,
         height: 35,
         width: 130,
-        borderWidth: 1,
-        borderColor: Color.greenRecColor,
-        textAlign: 'center'
+        textAlign: 'center',
+        borderRadius: 10,
+        backgroundColor: Color.blueRecColor,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+        shadowOpacity: 0.32,
+        shadowRadius: 5.46,
+        elevation: 9,
     },
     boxRow: {
         flex: 1,
@@ -214,6 +349,44 @@ const styles = StyleSheet.create({
         height: 40,
         fontSize: 16,
     },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
+      },
+      modalView: {
+        margin: 20,
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 35,
+        alignItems: 'center',
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 2,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 4,
+        elevation: 5,
+      },
+      button: {
+        borderRadius: 15,
+        padding: 10,
+        elevation: 2,
+      },
+      buttonClose: {
+        backgroundColor: Color.blueRecColor,
+      },
+      textStyle: {
+        color: Color.whiteRecColor,
+        fontWeight: 'bold',
+        textAlign: 'center',
+      },
+      modalText: {
+        marginBottom: 15,
+        textAlign: 'center',
+      },
 })
 
 export default FormScreen

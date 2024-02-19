@@ -8,6 +8,7 @@ import { PostUserLogin } from "../requests/recLooginRequest";
 import { StoreValue } from "../wrapper/storedata.wrapper";
 import { MiscStoreKeys } from "../constants/RecStorageKeys";
 import { Button, Icon } from "react-native-elements";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 const receLogo =  require('../../assets/recimages/Frame.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
 
@@ -20,13 +21,14 @@ const LoginScreen = ({navigation}:any) =>{
         Password:password
       }
       try {
-        PostUserLogin(payload)?.then((response:any)=>{
+        PostUserLogin(payload)?.then(async (response:any)=>{
           console.log("resposne ",response)
           if(response?.data.Status){
             StoreValue(MiscStoreKeys.EZ_LOGIN,response.data.Data[0][0])
             let userLocations = response.data.Data[1]
               navigation.navigate('Home',{userLocations})
               StoreValue(MiscStoreKeys.EZ_LOCATION,JSON.stringify(userLocations))
+              StoreValue(MiscStoreKeys.EZ_TOKEN,JSON.stringify(response.data.Token))
           }else{
           }
         }).catch((error)=>{
