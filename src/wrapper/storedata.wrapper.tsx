@@ -14,12 +14,8 @@ export const StoreValue = (key:string,value:any)=>{
  * @param key session store key
  * @returns get all the values as per the key
  */
-export const RetrieveValue = (key:any[]) =>{
-   AsyncStorage.multiGet(key).then((response:any)=>{
-    return response
-   }).catch((error)=>{
-    return error
-   })
+export const RetrieveValue = (key:any) =>{
+   return AsyncStorage.getItem(key)
 }
 
 /**

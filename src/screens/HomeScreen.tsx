@@ -84,9 +84,7 @@ const HomeScreen = ({ route,navigation }: any) => {
                 break;
         }
     }
-    const checkHistoryScreen = ()=>{
-        navigation.navigate('History')
-    }
+
     return (
         <View style={styles.container}>
             <Image source={receLogo} style={styles.image} />
@@ -158,7 +156,7 @@ const HomeScreen = ({ route,navigation }: any) => {
             </View>
             <View style={styles.boxRow}>
                 <Pressable style={styles.viewSec}>
-                <Text onPress={()=>{checkHistoryScreen()}} style={styles.ViewText}>View History <Icon name="history" size={28} color={Color.blueRecColor}></Icon></Text>
+                <Text onPress={()=>{navigation.navigate('History')}} style={styles.ViewText}>View History <Icon name="history" size={28} color={Color.blueRecColor}></Icon></Text>
                 </Pressable>
             </View>
             <Image source={receBottomLogo} style={styles.bottomLogo} />

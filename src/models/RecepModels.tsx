@@ -31,6 +31,11 @@ export const DelpickData: DeliveryData[] = [
 export interface PathStore {
     name: any
     path: any
+} 
+
+export interface UserPayload{
+    userid:any
+    token:any
 }
 
 export interface InfoFormProps {

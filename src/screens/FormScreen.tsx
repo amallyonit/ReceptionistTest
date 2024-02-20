@@ -1,13 +1,17 @@
 "use strict"
-import React, { useState } from "react"
-import { ActivityIndicator, Alert, Dimensions, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
+import React, { useEffect, useState } from "react"
+import { ActivityIndicator, Alert, Button, Dimensions, Image, Modal, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Fonts from "../theme/Fonts"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
-import { InfoFormProps, UserLoginData } from "../models/RecepModels";
+import { InfoFormProps, UserLoginData, UserLoginLocation, UserPayload } from "../models/RecepModels";
 import { Dropdown } from "react-native-element-dropdown";
 import { launchCamera, CameraOptions } from 'react-native-image-picker';
 import { GetUsersByLocation, PostVisitorData } from "../requests/recHomeRequest"
+import { RetrieveValue } from "../wrapper/storedata.wrapper"
+import { MiscStoreKeys } from "../constants/RecStorageKeys"
+import NotificationPlayGround from "../wrapper/notification-wrap/notification.wrapper"
+import onDisplayNotification from "../wrapper/notification-wrap/notification.wrapper"
 
 
 
@@ -17,22 +21,45 @@ const camLogo = require("../../assets/recscreen/CAMERA.png")
 const FormScreen = ({ route, navigation }: any) => {
     const data: InfoFormProps = route.params["propData"]
     const [userslst, setUserlist] = useState([])
+    const [location,setLocations] = useState<UserLoginLocation[]>([])
+    const [usertoken,setUserToken] = useState<UserPayload>({token:'',userid:''})
     const [isModalVisible, setIsModalVisible] = useState(false);
-    let userLocation: UserLoginData[] = []
+    const [isLoaderTrue,setIsLoaderTrue] = useState(false)
     const [selectedImage, setSelectedImage] = useState(null);
     const [imageBase, setBase64] = useState("")
     const [mobile, setMobile] = useState("")
     const [visiorname, setVisitorname] = useState("")
     const [place, setPlace] = useState("")
-    const [purpose, SetPurpose] = useState("")
+    const [purpose, setPurpose] = useState("")
     const [visitors, setVisitors] = useState("")
     const [remarks, setRemarks] = useState("")
     const [meet, setMeetWith] = useState("")
-
+    console.log("data location ",data.locations)
     let typeFormData = {
-        locationCode: data.locations[0].LocationName,
+        locationCode: '',
         imageDatas: ''
     }
+
+    useEffect(()=>{
+        RetrieveValue(MiscStoreKeys.EZ_LOGIN).then((res:any)=>{
+            let responseData = JSON.parse(res)
+            console.log("res data ",responseData.Data)
+            if(responseData.Status){
+                console.log("response ",responseData.data)
+                let sessionToken:UserPayload={
+                    userid:responseData.Data[0][0].UserCode,
+                    token:responseData.Token
+                }
+                let locsByUser:UserLoginLocation[] = responseData.Data[1][1]
+                setLocations(locsByUser)
+                setUserToken(sessionToken)
+            }
+            console.log("locations  ",location)
+        }).catch((error:any)=>{
+            console.log("error session values ",error)
+        }) 
+    },location)
+    
     const getUsersByLocationName = (code: any) => {
         let payload = {
             UserLocationCode: code
@@ -41,8 +68,6 @@ const FormScreen = ({ route, navigation }: any) => {
             console.log("payload ", payload)
             GetUsersByLocation(JSON.stringify(payload))?.then((response) => {
                 console.log("response ", response.data)
-                userLocation = response.data.Data
-                console.log("users ", userLocation)
                 setUserlist(response.data.Data)
             }).catch((error: any) => {
                 console.log("error ", error)
@@ -76,8 +101,22 @@ const FormScreen = ({ route, navigation }: any) => {
         });
     }
 
+    const resetVisitForm = ()=>{
+        setUserlist([])
+        setIsLoaderTrue(false)
+        setSelectedImage(null)
+        setBase64("")
+        setMobile("")
+        setVisitorname("")
+        setPlace("")
+        setPurpose("")
+        setVisitors("")
+        setRemarks("")
+        setMeetWith("")
+    }
 
     const onSendRequest = () => {
+        setIsLoaderTrue(true)
         console.log("image data ", typeFormData.imageDatas)
         let payload = {
             VisitorName: visiorname,
@@ -99,8 +138,13 @@ const FormScreen = ({ route, navigation }: any) => {
             console.log("response ", response)
             if (response.data.Status) {
                 setIsModalVisible(true)
+                setIsLoaderTrue(false)
+                resetVisitForm()
+                onDisplayNotification()
             } else {
                 setIsModalVisible(false)
+                setIsLoaderTrue(false)
+                resetVisitForm()
             }
         }).catch((error) => {
             console.log("error ", error)
@@ -137,7 +181,7 @@ const FormScreen = ({ route, navigation }: any) => {
                         placeholder='From / Company name / place' autoCapitalize='none' />
                     <TextInput
                         value={purpose}
-                        onChangeText={purp => SetPurpose(purp)}
+                        onChangeText={purp => setPurpose(purp)}
                         style={styles.input} placeholderTextColor={Color.blackRecColor}
                         placeholder='Purpose of Vistor' autoCapitalize='none' />
                     <Dropdown
@@ -146,7 +190,7 @@ const FormScreen = ({ route, navigation }: any) => {
                         selectedTextStyle={styles.selectedTextStyle}
                         inputSearchStyle={styles.inputSearchStyle}
                         iconStyle={styles.iconStyle}
-                        data={data.locations}
+                        data={location}
                         itemTextStyle={{ color: Color.blackRecColor }}
                         search
                         maxHeight={300}
@@ -178,7 +222,6 @@ const FormScreen = ({ route, navigation }: any) => {
                         value={meet}
                         onChange={(item: any) => {
                             setMeetWith(item.UserCode)
-                            console.log("item ", item, meet)
                         }}
                     />
                     <TextInput
@@ -237,7 +280,19 @@ const FormScreen = ({ route, navigation }: any) => {
                     </View>
                 </View>
             </Modal>
-            <ActivityIndicator style={{backfaceVisibility:'hidden'}} size={"large"} color={Color.blueRecColor}></ActivityIndicator>
+             <Modal
+                animationType="fade"
+                transparent={false}
+                statusBarTranslucent={true}
+                visible={isLoaderTrue}
+                onRequestClose={() => {
+                    Alert.alert('Modal has been closed.');
+                    setIsModalVisible(!isModalVisible);
+                }}>
+                <View style={styles.centeredView}>
+                    <ActivityIndicator style={{backfaceVisibility:'hidden'}} size={60} color={Color.blueRecColor}></ActivityIndicator> 
+                </View>
+            </Modal>
         </View>
     )
 }
@@ -324,7 +379,8 @@ const styles = StyleSheet.create({
         textAlign: 'justify',
         height: 137,
         justifyContent: 'flex-start',
-        backgroundColor: Color.lightGreyRecColor
+        backgroundColor: Color.lightGreyRecColor,
+        color:Color.blackRecColor
     },
     dropdown: {
         height: 50,
