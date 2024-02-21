@@ -14,9 +14,11 @@ export const StoreValue = (key:string,value:any)=>{
  * @param key session store key
  * @returns get all the values as per the key
  */
-export const RetrieveValue = (key:any) =>{
+export async function RetrieveValue(key:any){
    return AsyncStorage.getItem(key)
 }
+
+
 
 /**
  * 

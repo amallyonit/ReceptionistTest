@@ -19,7 +19,6 @@ const receBottomLogo = require('../../assets/recimages/Group.png')
 const HomeScreen = ({ route,navigation }: any) => {
     let propData:InfoFormProps = {
         type:'',
-        locations:[],
         appBarTitle:'',
         category:0
     }
@@ -30,7 +29,6 @@ const HomeScreen = ({ route,navigation }: any) => {
                 propData = {
                     appBarTitle:'Meeting',
                     type:type,
-                    locations:route.params['userLocations'],
                     category:1
                 }
                 navigation.navigate('Form',{propData})
@@ -39,7 +37,6 @@ const HomeScreen = ({ route,navigation }: any) => {
                 propData = {
                     appBarTitle:'Visit',
                     type:type,
-                    locations:route.params['userLocations'],
                     category:2
                 }
                 navigation.navigate('Form',{propData})
@@ -48,7 +45,6 @@ const HomeScreen = ({ route,navigation }: any) => {
                 propData = {
                     appBarTitle:'Service',
                     type:type,
-                    locations:route.params['userLocations'],
                     category:3
                 }
                 navigation.navigate('Form',{propData})
@@ -57,7 +53,6 @@ const HomeScreen = ({ route,navigation }: any) => {
                 propData = {
                     appBarTitle:'Contractor',
                     type:type,
-                    locations:route.params['userLocations'],
                     category:4
                 }
                 navigation.navigate('Form',{propData})
@@ -66,7 +61,6 @@ const HomeScreen = ({ route,navigation }: any) => {
                 propData = {
                     appBarTitle:'Interview',
                     type:type,
-                    locations:route.params['userLocations'],
                     category:5
                 }
                 navigation.navigate('Form',{propData})
@@ -75,7 +69,6 @@ const HomeScreen = ({ route,navigation }: any) => {
                     propData = {
                         appBarTitle:'Delivery / Pickup',
                         type:type,
-                        locations:route.params['userLocations'],
                         category:6
                     }
                     navigation.navigate('PickDel',{propData})

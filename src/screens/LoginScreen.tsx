@@ -7,13 +7,19 @@ import React from "react";
 import { PostUserLogin } from "../requests/recLooginRequest";
 import { StoreValue } from "../wrapper/storedata.wrapper";
 import { MiscStoreKeys } from "../constants/RecStorageKeys";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Snackbar from 'react-native-snackbar';
+import { CommonModal } from "../components/RecCommonModal";
+
 const receLogo =  require('../../assets/recimages/Frame.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
 
 const LoginScreen = ({navigation}:any) =>{
     const [userId,setUserId]=  useState("");
     const [password,setPassword]=  useState("");
+    const [isLoader,setIsLoader] =useState(false)
     const fetchLogin =async ()=>{
+      setIsLoader(true)
       let payload = {
         UserID:userId,
         Password:password
@@ -22,13 +28,28 @@ const LoginScreen = ({navigation}:any) =>{
         PostUserLogin(payload)?.then(async (response:any)=>{
           console.log("resposne ",response)
           if(response?.data.Status){
-            StoreValue(MiscStoreKeys.EZ_LOGIN,JSON.stringify(response.data))
+            setIsLoader(false)
+            AsyncStorage.removeItem('LOCATION')
+            AsyncStorage.removeItem('LOGIN')
+            AsyncStorage.removeItem('TOKEN')
+            StoreValue(MiscStoreKeys.EZ_LOGIN,response.data)
             let userLocations = response.data.Data[1]
-            navigation.navigate('Home',{userLocations})
+            if(response.data.Data[0][0].UserType=='U'){
+              navigation.navigate('Activity')
+            }else{
+              navigation.navigate('Home',{userLocations})
+            }
           }else{
           }
         }).catch((error)=>{
           console.log("error ",error)
+          Snackbar.show({
+            text:'Invalid Credentials !',
+            duration:Snackbar.LENGTH_SHORT,
+            backgroundColor:Color.blueRecColor,
+            textColor:Color.blackRecColor,
+          })
+          setIsLoader(false)
         }) 
       } catch (error) {
         
@@ -45,12 +66,13 @@ const LoginScreen = ({navigation}:any) =>{
         </View>
 
         <View style={styles.buttonView}>
-         <Pressable style={styles.cusButton} onPress={fetchLogin}>
+         <Pressable android_ripple={{color:Color.lightRecBlue}} style={styles.cusButton} onPress={fetchLogin}>
               <Text style={styles.cusText}>Login</Text>
           </Pressable>
         </View>
         
         <Image source={receBottomLogo} style={styles.bottomLogo} />
+        <CommonModal confirm={isLoader}></CommonModal>
         </View>
     )
 }
@@ -71,7 +93,7 @@ const styles = StyleSheet.create({
       paddingVertical: 10,
       paddingHorizontal: 30,
       borderRadius: 4,
-      elevation: 3,
+      elevation: 5,
       backgroundColor: "#99c2ff",
     },
     cusText: {

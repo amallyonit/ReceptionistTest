@@ -28,3 +28,17 @@ export function PostVisitorData(data:any){
         console.log("error ",error)
     }
 }
+
+
+export function GeViewHistoryData(data:any){
+    try {
+        return axios({
+            method:'post',
+            headers:ApiConfig,
+            url:ServerConfig.urlString+ServerEndpoints.GET_VISITOR_HISTORY,
+            data:data
+        })
+    } catch (error) {
+        console.log("error ",error)
+    }
+}

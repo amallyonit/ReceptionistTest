@@ -8,9 +8,8 @@ import { InfoFormProps, UserLoginData, UserLoginLocation, UserPayload } from "..
 import { Dropdown } from "react-native-element-dropdown";
 import { launchCamera, CameraOptions } from 'react-native-image-picker';
 import { GetUsersByLocation, PostVisitorData } from "../requests/recHomeRequest"
-import { RetrieveValue } from "../wrapper/storedata.wrapper"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
-import NotificationPlayGround from "../wrapper/notification-wrap/notification.wrapper"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 import onDisplayNotification from "../wrapper/notification-wrap/notification.wrapper"
 
 
@@ -34,32 +33,33 @@ const FormScreen = ({ route, navigation }: any) => {
     const [visitors, setVisitors] = useState("")
     const [remarks, setRemarks] = useState("")
     const [meet, setMeetWith] = useState("")
-    console.log("data location ",data.locations)
     let typeFormData = {
         locationCode: '',
         imageDatas: ''
     }
-
+  
     useEffect(()=>{
-        RetrieveValue(MiscStoreKeys.EZ_LOGIN).then((res:any)=>{
-            let responseData = JSON.parse(res)
-            console.log("res data ",responseData.Data)
-            if(responseData.Status){
-                console.log("response ",responseData.data)
-                let sessionToken:UserPayload={
-                    userid:responseData.Data[0][0].UserCode,
-                    token:responseData.Token
+        console.log("how many times")
+        try {
+            AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN).then((response:any)=>{
+               let items = JSON.parse(response)
+               if(items.Status){
+                setLocations(items.Data[1])
+                let tokenPay:UserPayload={
+                    userid:items.Data[0][0].UserCode,
+                    token:items.Token
                 }
-                let locsByUser:UserLoginLocation[] = responseData.Data[1][1]
-                setLocations(locsByUser)
-                setUserToken(sessionToken)
-            }
-            console.log("locations  ",location)
-        }).catch((error:any)=>{
-            console.log("error session values ",error)
-        }) 
-    },location)
-    
+                setUserToken(tokenPay)
+               }else{
+                   setLocations([])
+               }
+             }).catch((error:any)=>{
+               console.log("error response ",error)
+             })
+           } catch (error) {
+               console.log("error ",error)
+           }
+    },[])
     const getUsersByLocationName = (code: any) => {
         let payload = {
             UserLocationCode: code
@@ -84,6 +84,7 @@ const FormScreen = ({ route, navigation }: any) => {
             includeBase64: true,
             maxHeight: 2000,
             maxWidth: 2000,
+            quality:0.1
         }
 
         launchCamera(option, (response: any) => {
@@ -150,7 +151,6 @@ const FormScreen = ({ route, navigation }: any) => {
             console.log("error ", error)
         })
     }
-
     return (
         <View>
             <View style={styles.container}>
@@ -239,9 +239,9 @@ const FormScreen = ({ route, navigation }: any) => {
                                 style={styles.imageSize}></Image>}
                     </View>
                     <View style={styles.uploadBox}>
-                        <View style={styles.outlineButton}>
-                            <Text style={styles.buttonText} onPress={onSendRequest}>Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
-                        </View>
+                        <Pressable android_ripple={{color:Color.lightRecBlue}} style={styles.outlineButton}>
+                            <Text  style={styles.buttonText} onPress={onSendRequest}>Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
+                        </Pressable>
                         <View style={styles.statusView}>
                             <Text style={styles.statusText}>Status <Icon name="check-circle" size={18} color={Color.blackRecColor}></Icon></Text>
                         </View>
@@ -262,7 +262,7 @@ const FormScreen = ({ route, navigation }: any) => {
             </View>
             <Modal
                 animationType="fade"
-                transparent={true}
+                transparent={false}
                 statusBarTranslucent={true}
                 visible={isModalVisible}
                 onRequestClose={() => {
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     button: {
-        borderRadius: 10,
+        borderRadius: 5,
         paddingHorizontal:20,
         paddingVertical:5,
         elevation: 2,

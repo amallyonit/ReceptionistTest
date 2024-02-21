@@ -1,24 +1,64 @@
 "use strict"
-import React from "react"
+import React, { useEffect, useState } from "react"
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import Fonts from "../theme/Fonts"
-import { ViewHistoryList } from "../models/RecepModels"
 import { ListItem } from "react-native-elements"
 import LinearGradient from 'react-native-linear-gradient';
+import { UserPayload, ViewHistory } from "../models/RecepModels"
+import { GeViewHistoryData } from "../requests/recHomeRequest"
+import { MiscStoreKeys } from "../constants/RecStorageKeys"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { CommonModal } from "../components/RecCommonModal"
+
 const camLogo = require("../../assets/recscreen/CAMERA.png")
-const minHe = Dimensions.get('window')
+
 
 const ViewHistoryScreen = ({ navigation }: any) => {
-    let phonenumber:any
-    let data = ViewHistoryList
-    const filterHistory = (event:any)=>{
-        console.log("value",event.nativeEvent.text)
-            data = ViewHistoryList.filter((item)=>item.phonenumber==event.nativeEvent.text)
-            console.log("list ",data)
+    const [phone,setPhone]= useState("")
+    const [name,setName] = useState("")
+    const [viewList,setViewList] = useState<ViewHistory[]>([])
+    const [isLoader,setIsLoader] = useState(false)
+    const [userToken,setUserToken] = useState<UserPayload>({userid:'',token:''})
+    useEffect(()=>{
+        console.log("user history ",)
+        try {
+            AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN).then((response:any)=>{
+               let items = JSON.parse(response)
+               if(items.Status){
+                let tokenPay:UserPayload={
+                    userid:items.Data[0][0].UserCode,
+                    token:items.Token
+                }
+                setUserToken(tokenPay)
+                getViewHistoryByUser(tokenPay)
+                console.log("token ",tokenPay,userToken)
+               }
+             }).catch((error:any)=>{
+               console.log("error response ",error)
+             })
+           } catch (error) {
+               console.log("error ",error)
+           }
+    },[])
+
+    const getViewHistoryByUser = (userpayld:UserPayload)=>{
+        setIsLoader(true)
+        try {
+            GeViewHistoryData(userpayld)?.then((response)=>{
+                console.log("response ",response.data.Status)
+                if(response.data.Status){
+                    setViewList(response.data.Data)
+                    setIsLoader(false)
+                }
+            }).catch((error:any)=>{
+                console.log("error ",error)
+            })
+        } catch (error) {
+            
+        }
     }
-    console.log("type ", minHe.height)
     return (
         <View>
             <View style={styles.container}>
@@ -34,8 +74,8 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                 <View style={styles.boxRow}>
                     <View style={styles.uploadBox}>
                         <View style={styles.inputView}>
-                            <TextInput value={phonenumber} placeholderTextColor={Color.blackRecColor} onChange={(event)=>filterHistory(event)} style={styles.input} keyboardType="numeric" placeholder='Mobile No.' autoCapitalize='none' />
-                            <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} keyboardType="default" placeholder='Name' autoCapitalize='none' />
+                            <TextInput value={phone} placeholderTextColor={Color.blackRecColor} onChangeText={(phone)=>setPhone(phone)} style={styles.input} keyboardType="numeric" placeholder='Mobile No.' autoCapitalize='none' />
+                            <TextInput value={name} onChangeText={(name)=>setName(name)} style={styles.input} placeholderTextColor={Color.blackRecColor} keyboardType="default" placeholder='Name' autoCapitalize='none' />
                         </View>
                     </View>
                     <View style={styles.uploadBox1}>
@@ -43,22 +83,22 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                     </View>
                 </View>
                 <View style={{ width: '95%',marginLeft:10, paddingTop:Dimensions.get('window').height * 0.14}}>
-                <ScrollView style={{maxHeight:Dimensions.get('window').height * 0.76,width:'100%',overflow:'scroll'}}>
+                {isLoader?<CommonModal confirm={isLoader}></CommonModal>:<ScrollView style={{maxHeight:Dimensions.get('window').height * 0.76,width:'100%',overflow:'scroll'}}>
                     {
-                        data.map((item, index) => (
+                        viewList.map((item, index) => (
                             <ListItem
                                 linearGradientProps={{
                                     colors: [Color.lightGreyRecColor, Color.lightGreyRecColor],
                                 }}
                                 ViewComponent={LinearGradient} key={index} bottomDivider>
                                 <ListItem.Content>
-                                    <ListItem.Title>{item.description}</ListItem.Title>
-                                    <ListItem.Subtitle>{item.purpose}</ListItem.Subtitle>
+                                    <ListItem.Title>{item.VisitorName}</ListItem.Title>
+                                    <ListItem.Subtitle>{item.VisitTranVisitorFrom}</ListItem.Subtitle>
                                 </ListItem.Content>
                             </ListItem>
                         ))
                     }
-                </ScrollView>
+                </ScrollView>}
                 </View>
             </View>
         </View>

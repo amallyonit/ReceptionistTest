@@ -7,24 +7,6 @@ export const RecpImgArray: PathStore[] = [
     { name: 'Delivery / Pickup', path: '../../assets/recscreen/DELIVERY.png' }
 ]
 
-export const ViewHistoryList: ViewHistory[] = [
-    { id: 1, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1 },
-    { id: 2, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 12 },
-    { id: 3, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 123 },
-    { id: 4, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 5, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 6, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 7, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 8, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 9, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 10, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 11, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 12, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 13, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 14, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-    { id: 15, description: 'Meeting with sivadarsh', purpose: 'product service', date: new Date(), phonenumber: 1234 },
-]
-
 export const DelpickData: DeliveryData[] = [
     { billnumber: 5566, date: new Date(), partyname: 'LyonIT' }
 ]
@@ -41,16 +23,15 @@ export interface UserPayload{
 export interface InfoFormProps {
     appBarTitle: any,
     type: any,
-    locations:UserLoginLocation[],
     category:number
 }
 
 export interface ViewHistory {
-    id: any
-    description: any,
-    purpose: any,
-    date: any
-    phonenumber: any
+    VisitorName: any 
+    VisitorMobileNo: any
+    VisitorImage: any
+    VisitTranVisitorFrom: any
+
 }
 
 export interface DeliveryData {
@@ -67,6 +48,7 @@ export interface UserLoginData {
     UserMobileNo: any
     UserName: any
     UserPassword: any
+    UserType: any
 }
 
 export interface UserLoginLocation {

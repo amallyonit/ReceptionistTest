@@ -1,6 +1,6 @@
 import React, { ReactElement, useEffect } from "react";
 import { useState } from "react";
-import { Alert, Dimensions, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Alert, Dimensions, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import Color from "../theme/Color";
 
 export const CommonModal = ({confirm}:{confirm:boolean}):ReactElement =>{
@@ -15,22 +15,16 @@ export const CommonModal = ({confirm}:{confirm:boolean}):ReactElement =>{
     return(
         <Modal
         animationType="fade"
-        transparent={true}
+        transparent={false}
         statusBarTranslucent={true}
         visible={isModalVisible}
         onRequestClose={() => {
-            Alert.alert('Modal has been closed.');
+            Alert.alert('Network Error !');
             setIsModalVisible(!isModalVisible);
         }}>
         <View style={styles.centeredView}>
-            <View style={styles.modalView}>
-                <Text style={styles.modalText}>Successfully Added</Text>
-                <Pressable
-                    style={[styles.button, styles.buttonClose]}
-                    onPress={() => setIsModalVisible(!isModalVisible)}>
-                    <Text style={styles.textStyle}>Ok</Text>
-                </Pressable>
-            </View>
+                <ActivityIndicator size={'large'} color={Color.blueRecColor}></ActivityIndicator>
+                <Text>Loading...</Text>
         </View>
     </Modal>
     )

@@ -2,15 +2,13 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import notifee, { AndroidImportance, AndroidStyle } from "@notifee/react-native";
 import Color from "../../theme/Color";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import LoginScreen from "../../screens/LoginScreen";
 
-const Stack = createNativeStackNavigator()
   async function onDisplayNotification() {
     const channelId = await notifee.createChannel({
       id: "default",
       name: "Default Channel",
     });
+
     // Required for iOS
     // See https://notifee.app/react-native/docs/ios/permissions
     await notifee.requestPermission();
