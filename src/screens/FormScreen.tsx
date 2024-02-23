@@ -10,8 +10,7 @@ import { launchCamera, CameraOptions } from 'react-native-image-picker';
 import { GetUsersByLocation, PostVisitorData } from "../requests/recHomeRequest"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import onDisplayNotification from "../wrapper/notification-wrap/notification.wrapper"
-
+import NotificationPop from "../components/RecNotification"
 
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
@@ -20,6 +19,7 @@ const camLogo = require("../../assets/recscreen/CAMERA.png")
 const FormScreen = ({ route, navigation }: any) => {
     const data: InfoFormProps = route.params["propData"]
     const [userslst, setUserlist] = useState([])
+    const [phonenos,setPhonenos]  = useState([])
     const [location,setLocations] = useState<UserLoginLocation[]>([])
     const [usertoken,setUserToken] = useState<UserPayload>({token:'',userid:''})
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -141,7 +141,6 @@ const FormScreen = ({ route, navigation }: any) => {
                 setIsModalVisible(true)
                 setIsLoaderTrue(false)
                 resetVisitForm()
-                onDisplayNotification()
             } else {
                 setIsModalVisible(false)
                 setIsLoaderTrue(false)
@@ -163,6 +162,25 @@ const FormScreen = ({ route, navigation }: any) => {
                     <Text style={{ marginLeft: 10, color: Color.whiteRecColor, fontSize: 18, fontFamily: Fonts.recFontFamily.titleRecFont, flex: 2 }}>{data.appBarTitle}</Text>
                 </View>
                 <View style={styles.inputView}>
+                <Dropdown
+                        style={styles.dropdown}
+                        placeholderStyle={styles.placeholderStyle}
+                        selectedTextStyle={styles.selectedTextStyle}
+                        inputSearchStyle={styles.inputSearchStyle}
+                        iconStyle={styles.iconStyle}
+                        data={userslst}
+                        itemTextStyle={{ color: Color.blackRecColor }}
+                        search
+                        maxHeight={300}
+                        labelField="UserName"
+                        valueField="UserCode"
+                        placeholder="Phone Numbers"
+                        searchPlaceholder="Search... Phone numbers"
+                        value={meet}
+                        onChange={(item: any) => {
+                            setMeetWith(item.UserCode)
+                        }}
+                    />
                     <TextInput
                         value={mobile}
                         onChangeText={number => setMobile(number)}
@@ -293,6 +311,9 @@ const FormScreen = ({ route, navigation }: any) => {
                     <ActivityIndicator style={{backfaceVisibility:'hidden'}} size={60} color={Color.blueRecColor}></ActivityIndicator> 
                 </View>
             </Modal>
+            <View>
+                <NotificationPop confirm={true}></NotificationPop>
+            </View>
         </View>
     )
 }

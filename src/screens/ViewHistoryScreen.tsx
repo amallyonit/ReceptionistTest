@@ -11,6 +11,7 @@ import { GeViewHistoryData } from "../requests/recHomeRequest"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { CommonModal } from "../components/RecCommonModal"
+import { color } from "react-native-elements/dist/helpers"
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
@@ -18,11 +19,15 @@ const camLogo = require("../../assets/recscreen/CAMERA.png")
 const ViewHistoryScreen = ({ navigation }: any) => {
     const [phone,setPhone]= useState("")
     const [name,setName] = useState("")
+    const [viewLog,setViewLog] = useState<ViewHistory>({VisitorImage:'',VisitorMobileNo:'',VisitorName:'',VisitTranVisitorFrom:''})
     const [viewList,setViewList] = useState<ViewHistory[]>([])
     const [isLoader,setIsLoader] = useState(false)
     const [userToken,setUserToken] = useState<UserPayload>({userid:'',token:''})
     useEffect(()=>{
-        console.log("user history ",)
+        genrateViews(true)
+    },[])
+
+    const genrateViews = (loaderTrue?:boolean)=>{
         try {
             AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN).then((response:any)=>{
                let items = JSON.parse(response)
@@ -32,7 +37,7 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                     token:items.Token
                 }
                 setUserToken(tokenPay)
-                getViewHistoryByUser(tokenPay)
+                getViewHistoryByUser(tokenPay,loaderTrue)
                 console.log("token ",tokenPay,userToken)
                }
              }).catch((error:any)=>{
@@ -41,10 +46,10 @@ const ViewHistoryScreen = ({ navigation }: any) => {
            } catch (error) {
                console.log("error ",error)
            }
-    },[])
-
-    const getViewHistoryByUser = (userpayld:UserPayload)=>{
-        setIsLoader(true)
+    }
+    const getViewHistoryByUser = (userpayld:UserPayload,loader?:boolean)=>{
+        if(loader){
+            setIsLoader(true)}else{setIsLoader(false)}
         try {
             GeViewHistoryData(userpayld)?.then((response)=>{
                 console.log("response ",response.data.Status)
@@ -57,6 +62,18 @@ const ViewHistoryScreen = ({ navigation }: any) => {
             })
         } catch (error) {
             
+        }
+    }
+
+    const filterUserHistory = ()=>{
+        let findLog = viewList.find((item)=>item.VisitorMobileNo==phone || item.VisitorName==name)
+        console.log("finlog ",findLog)
+        if(findLog!=undefined){
+            setViewLog(findLog)
+            setViewList(viewList.filter((item)=>item==findLog))
+        }else{
+            genrateViews(false)
+            setViewLog({VisitorImage:'',VisitorMobileNo:'',VisitorName:'',VisitTranVisitorFrom:''})
         }
     }
     return (
@@ -74,19 +91,26 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                 <View style={styles.boxRow}>
                     <View style={styles.uploadBox}>
                         <View style={styles.inputView}>
-                            <TextInput value={phone} placeholderTextColor={Color.blackRecColor} onChangeText={(phone)=>setPhone(phone)} style={styles.input} keyboardType="numeric" placeholder='Mobile No.' autoCapitalize='none' />
-                            <TextInput value={name} onChangeText={(name)=>setName(name)} style={styles.input} placeholderTextColor={Color.blackRecColor} keyboardType="default" placeholder='Name' autoCapitalize='none' />
+                            <TextInput value={phone} placeholderTextColor={Color.blackRecColor} onKeyPress={filterUserHistory} onChangeText={setPhone} style={styles.input} keyboardType="numeric" 
+                                maxLength={10}
+                                placeholder='Mobile No.' autoCapitalize='none' />
+                            <TextInput value={name} onKeyPress={filterUserHistory} onChangeText={setName} style={styles.input} placeholderTextColor={Color.blackRecColor} keyboardType="default" placeholder='Name' autoCapitalize='none' />
                         </View>
                     </View>
                     <View style={styles.uploadBox1}>
-                        <Image source={camLogo} style={styles.imageSize}></Image>
+                        <Image source={viewLog.VisitorImage!=""? {uri: `data:image/png;base64,${viewLog.VisitorImage}`}: camLogo} style={styles.imageSize}></Image>
                     </View>
                 </View>
                 <View style={{ width: '95%',marginLeft:10, paddingTop:Dimensions.get('window').height * 0.14}}>
                 {isLoader?<CommonModal confirm={isLoader}></CommonModal>:<ScrollView style={{maxHeight:Dimensions.get('window').height * 0.76,width:'100%',overflow:'scroll'}}>
                     {
                         viewList.map((item, index) => (
-                            <ListItem
+                            <ListItem onPress={()=>{
+                                setViewLog(item)
+                                setPhone(item.VisitorMobileNo)
+                                setName(item.VisitorName)
+                            }}
+                            containerStyle={{borderBottomColor:Color.lightRecBlue,borderBottomWidth:2}}
                                 linearGradientProps={{
                                     colors: [Color.lightGreyRecColor, Color.lightGreyRecColor],
                                 }}

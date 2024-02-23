@@ -24,7 +24,6 @@ export const CommonModal = ({confirm}:{confirm:boolean}):ReactElement =>{
         }}>
         <View style={styles.centeredView}>
                 <ActivityIndicator size={'large'} color={Color.blueRecColor}></ActivityIndicator>
-                <Text>Loading...</Text>
         </View>
     </Modal>
     )

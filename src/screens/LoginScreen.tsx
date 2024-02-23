@@ -10,6 +10,7 @@ import { MiscStoreKeys } from "../constants/RecStorageKeys";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Snackbar from 'react-native-snackbar';
 import { CommonModal } from "../components/RecCommonModal";
+import notifee, { AndroidNotificationSettings, EventType, Notification } from '@notifee/react-native';
 
 const receLogo =  require('../../assets/recimages/Frame.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
@@ -29,12 +30,31 @@ const LoginScreen = ({navigation}:any) =>{
           console.log("resposne ",response)
           if(response?.data.Status){
             setIsLoader(false)
-            AsyncStorage.removeItem('LOCATION')
             AsyncStorage.removeItem('LOGIN')
-            AsyncStorage.removeItem('TOKEN')
             StoreValue(MiscStoreKeys.EZ_LOGIN,response.data)
             let userLocations = response.data.Data[1]
             if(response.data.Data[0][0].UserType=='U'){
+              const channelId = await notifee.createChannel({
+                id: 'default',
+                name: 'Default Channel',
+              });
+              // Display a notification
+              await notifee.displayNotification({
+                title: 'Notification Title',
+                body: 'Main body content of the notification',
+                android: {
+                  channelId,
+                  pressAction: {
+                    id: 'default',
+                  },
+                },
+              });
+              notifee.onForegroundEvent((event) => {
+                if (event.type === EventType.ACTION_PRESS) {
+                  // Open the specific app screen.
+                  navigation.navigate('Activity');
+                }
+              });
               navigation.navigate('Activity')
             }else{
               navigation.navigate('Home',{userLocations})
