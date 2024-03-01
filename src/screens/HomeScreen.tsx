@@ -1,11 +1,13 @@
 "use strict"
 import React from "react"
-import { Dimensions, Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Dimensions, Image, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Fonts from "../theme/Fonts"
 import Color from "../theme/Color"
 import LinearGradient from "react-native-linear-gradient"
 import { InfoFormProps, RecpImgArray } from "../models/RecepModels"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { MiscStoreKeys } from "../constants/RecStorageKeys"
 
 const receLogo = require('../../assets/recimages/Frame.png')
 const receMeetLog = require('../../assets/recscreen/MEETING.png')
@@ -32,6 +34,7 @@ const HomeScreen = ({ route,navigation }: any) => {
                     category:1
                 }
                 navigation.navigate('Form',{propData})
+                navigation.setOptions({ headerTitle: propData.appBarTitle})
                 break;
             case 'VISIT':
                 propData = {
@@ -40,6 +43,7 @@ const HomeScreen = ({ route,navigation }: any) => {
                     category:2
                 }
                 navigation.navigate('Form',{propData})
+                navigation.setOptions({ headerTitle: propData.appBarTitle})
                 break;
             case 'SERVICE':
                 propData = {
@@ -48,6 +52,7 @@ const HomeScreen = ({ route,navigation }: any) => {
                     category:3
                 }
                 navigation.navigate('Form',{propData})
+                navigation.setOptions({ headerTitle: propData.appBarTitle})
                 break;
             case 'CONTRACTOR':
                 propData = {
@@ -56,6 +61,7 @@ const HomeScreen = ({ route,navigation }: any) => {
                     category:4
                 }
                 navigation.navigate('Form',{propData})
+                navigation.setOptions({ headerTitle: propData.appBarTitle})
                 break;
             case 'INTERVIEW':
                 propData = {
@@ -64,6 +70,7 @@ const HomeScreen = ({ route,navigation }: any) => {
                     category:5
                 }
                 navigation.navigate('Form',{propData})
+                navigation.setOptions({ headerTitle: propData.appBarTitle})
                 break;
             case 'DELIVERYPICK':
                     propData = {
@@ -72,14 +79,21 @@ const HomeScreen = ({ route,navigation }: any) => {
                         category:6
                     }
                     navigation.navigate('PickDel',{propData})
+                    navigation.setOptions({ headerTitle: propData.appBarTitle})
                     break;
             default:
                 break;
         }
     }
 
+    const logoutApp = ()=>{
+        navigation.navigate('Login')
+        AsyncStorage.removeItem(MiscStoreKeys.EZ_LOGIN)
+    }
+
     return (
-        <View style={styles.container}>
+        <SafeAreaView>
+                    <View style={styles.container}>
             <Image source={receLogo} style={styles.image} />
             <Text style={styles.title}>EzEntry</Text>
             <View style={styles.cardGroupContainer}>
@@ -149,11 +163,13 @@ const HomeScreen = ({ route,navigation }: any) => {
             </View>
             <View style={styles.boxRow}>
                 <Pressable style={styles.viewSec}>
-                <Text onPress={()=>{navigation.navigate('History')}} style={styles.ViewText}>View History <Icon name="history" size={28} color={Color.blueRecColor}></Icon></Text>
+                <Icon style={{marginRight:'auto',fontSize:16,borderBottomWidth:1,borderBottomColor:Color.blueRecColor}} name="logout" onPress={logoutApp} color={Color.blueRecColor}>Logout</Icon>
+                <Icon onPress={()=>{navigation.navigate('History')}} style={{marginLeft:'auto',fontSize:16,borderBottomWidth:1,borderBottomColor:Color.blueRecColor}} name="history" color={Color.blueRecColor}>View History</Icon>
                 </Pressable>
             </View>
             <Image source={receBottomLogo} style={styles.bottomLogo} />
         </View>
+        </SafeAreaView>
     )
 }
 

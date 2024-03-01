@@ -1,8 +1,8 @@
 import React, { ReactElement, useEffect } from "react";
 import { useState } from "react";
-import { Alert, Dimensions, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, AppRegistry, Dimensions, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import Color from "../theme/Color";
-import { Icon, Image } from "react-native-elements";
+import { Divider, Icon, Image } from "react-native-elements";
 import Fonts from "../theme/Fonts";
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
@@ -23,32 +23,53 @@ export const NotificationPop = ({confirm}:{confirm:boolean}):ReactElement =>{
         statusBarTranslucent={true}
         visible={isModalVisible}
         onRequestClose={() => {
-            Alert.alert('Network Error !');
+            Alert.alert('User Cancelled !');
             setIsModalVisible(!isModalVisible);
         }}>
         <View style={styles.centeredView}>
             <View style={styles.modalView}>
-            <Icon style={{borderWidth:2,borderRadius:100,borderColor:Color.blueRecColor,backgroundColor:Color.blueRecColor,position:'relative',marginTop:10,zIndex:2}} color={Color.whiteRecColor} size={40} name="notifications-none"></Icon>
-                <Text style={{fontFamily:Fonts.recFontFamily.titleRecFont,fontSize:Dimensions.get('window').fontScale * 16,margin:10}}>You've got a Delivery at the main gate</Text>
-                <View style={{flexDirection:'row',flexWrap:'wrap',justifyContent:'flex-start',marginTop:5}}>
+            <Icon style={styles.iconStyle} color={Color.whiteRecColor} size={40} name="notifications-none"></Icon>
+                <Text style={styles.modalTitleStyle}>You've got a Delivery at the main gate</Text>
+                <View style={styles.hairline}></View>
+                <View style={styles.modalContentStyle}>
                     <View style={{width:'30%'}}>
                     <Image source={camLogo} style={{height:70,width:70,borderRadius:100}} />
                     </View>
                     <View style={{width:'70%',flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
-                        <Text style={{fontSize:18}}>Sivadarsh s</Text>
-                        {/* <Icon style={{marginLeft:'auto'}} name="phone" color={Color.blueRecColor}></Icon> */}
+                        <Text style={{fontSize:18,color:Color.blackRecColor}}>Sivadarsh s</Text>
                     </View>
                 </View>
-                <View style={{flexDirection:'row',paddingHorizontal:10,marginTop:10}}>
-                    <View style={{width:'30%'}}>
+                <View style={styles.hairline}></View>
+                <View style={{flexDirection:'row',
+                paddingHorizontal:10,marginTop:10,
+                borderRadius:10,backgroundColor:Color.whiteRecColor}}>
+                    <View style={{width:Dimensions.get('window').width > 1024? '23%':'23%'}}>
                         <Pressable android_ripple={{color:Color.redRecColor,borderless:true}}>
-                        <Icon style={{borderRadius:100,borderColor:Color.redRecColor}} color={Color.redRecColor} size={60} name="cancel"></Icon>
+                        <Icon style={{borderRadius:100,borderColor:Color.redRecColor,
+                        shadowColor: Color.redRecColor,
+                        shadowOffset: {
+                            width: 0,
+                            height: 12,
+                        },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 50,
+                        elevation: 0.1                        
+                        }} color={Color.redRecColor} size={60} name="cancel"></Icon>
                         </Pressable>  
                     </View>
-                    <View style={{width:'40%'}}></View>
-                    <View style={{width:'30%'}}>
-                    <Pressable android_ripple={{color:Color.greenRecColor,borderless:true}}>
-                    <Icon style={{borderRadius:100,borderColor:Color.greenRecColor}} color={Color.greenRecColor} size={60} name="check-circle"></Icon>
+                    <View style={{width:'54%'}}></View>
+                    <View style={{width:Dimensions.get('window').width > 1024? '23%':'23%'}}>
+                    <Pressable android_ripple={{color:Color.greenRecColor,borderless:true}} onPress={(item)=>{setIsModalVisible(false)}}>
+                    <Icon style={{borderRadius:100,borderColor:Color.greenRecColor,
+                    shadowColor: Color.greenRecColor,
+                    shadowOffset: {
+                        width: 0,
+                        height: 12,
+                    },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 20,
+                    elevation: 0.1
+                    }} color={Color.greenRecColor} size={60} name="check-circle"></Icon>
                     </Pressable>
                     </View>
                 </View>
@@ -66,11 +87,30 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginTop: 22,
     },
+    iconStyle:{
+        borderWidth:2,
+        borderRadius:100,
+        borderColor:Color.blueRecColor,
+        backgroundColor:Color.blueRecColor,
+        position:'relative',
+        marginTop:5
+    },
+    modalTitleStyle:{
+        color:Color.blackRecColor,
+        fontFamily:Fonts.recFontFamily.titleRecFont,
+        fontSize:Dimensions.get('window').fontScale * 21,
+        textAlign:'center',
+        margin:10
+    },
+    modalContentStyle:{
+        flexDirection:'row',flexWrap:'wrap',
+        borderRadius:10,padding:10,
+        justifyContent:'flex-start',marginTop:5,
+        backgroundColor:Color.whiteRecColor
+    },
     modalView: {
         margin: 10,
-        // borderTopColor:Color.blueRecColor,
-        // borderTopWidth:10,
-        width:'45%',
+        width:'90%',
         backgroundColor: Color.whiteRecColor,
         borderRadius: 15,
         padding: 35,
@@ -106,8 +146,9 @@ const styles = StyleSheet.create({
         fontSize:Dimensions.get('window').fontScale * 20
     },
     hairline: {
-        margin:10,
-        backgroundColor: Color.lightRecBlue,
+        marginTop:5,
+        marginBottom:5,
+        backgroundColor: Color.lightGreyRecColor,
         height: 2,
         width: '100%'
       },

@@ -29,13 +29,38 @@ export function PostVisitorData(data:any){
     }
 }
 
-
 export function GeViewHistoryData(data:any){
     try {
         return axios({
             method:'post',
             headers:ApiConfig,
             url:ServerConfig.urlString+ServerEndpoints.GET_VISITOR_HISTORY,
+            data:data
+        })
+    } catch (error) {
+        console.log("error ",error)
+    }
+}
+
+export function GetAllRevisitorsData(data:any){
+    try {
+        return axios({
+            method:'post',
+            headers:ApiConfig,
+            url:ServerConfig.urlString+ServerEndpoints.GET_ALL_REVISITORS_DATA,
+            data:data
+        })
+    } catch (error) {
+        console.log("error ",error)
+    }
+}
+
+export function GetPhoneNumberDetails(data:any){
+    try {
+        return axios({
+            method:'post',
+            headers:ApiConfig,
+            url:ServerConfig.urlString+ServerEndpoints.GET_DETAILS_BY_PHONENUMBER,
             data:data
         })
     } catch (error) {

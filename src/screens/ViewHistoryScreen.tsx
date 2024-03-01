@@ -1,6 +1,6 @@
 "use strict"
 import React, { useEffect, useState } from "react"
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
+import { Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import Fonts from "../theme/Fonts"
@@ -77,8 +77,8 @@ const ViewHistoryScreen = ({ navigation }: any) => {
         }
     }
     return (
-        <View>
-            <View style={styles.container}>
+            <SafeAreaView>
+                            <View style={styles.container}>
                 <View style={styles.navContainer}>
                     <Text style={styles.navContText}>
                         <Icon onPress={() =>
@@ -125,7 +125,7 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                 </ScrollView>}
                 </View>
             </View>
-        </View>
+            </SafeAreaView>
     )
 }
 

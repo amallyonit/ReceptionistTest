@@ -1,22 +1,21 @@
 import React, { useEffect, useState } from "react"
-import { StyleSheet, Text, View } from "react-native"
+import { Image, StyleSheet, View } from "react-native"
 import Color from "../theme/Color"
 import Fonts from "../theme/Fonts"
-import Icon from "react-native-vector-icons/MaterialCommunityIcons"
-
+const logoImage = require('../../assets/EzEntry-removebg-preview.png')
 const SplashEzEntryScreen = ({navigation}:any)=>{
-    const [splash,setSplash] = useState(false)
+    console.log("nav ",navigation)
     useEffect(()=>{
-        setTimeout(()=>{
-            setSplash(true)
-        },1000)
-        if(splash){
-        navigation.navigate('Login')
-        }
-    })
+        console.log("time out")
+            setTimeout(()=>{
+                console.log("1 sec timeoout")
+                navigation.navigate('Login')
+            },1000)
+            navigation.navigate('Login')
+    },[])
     return(
         <View style={styles.centeredView}>
-            <Text style={styles.entryText}><Icon name="pen" size={20} color={Color.blueRecColor}></Icon>EzEntry</Text>
+            <Image source={logoImage}></Image>
         </View>
     )
 }

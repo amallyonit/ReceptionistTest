@@ -1,6 +1,6 @@
 "use strict"
 import React, { useState } from "react"
-import { Dimensions, Image, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
+import { Dimensions, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import Fonts from "../theme/Fonts"
@@ -34,17 +34,8 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
 
 
     return (
-        <View>
-        <View style={styles.container}>
-        <View style={{width:'100%',backgroundColor:Color.blueRecColor,height:60,alignItems:'center',flexDirection:'row'}}>
-        <Text style={{color:Color.whiteRecColor,fontSize:16,flex:1,marginLeft:15}}>
-            <Icon onPress={() =>
-               navigation.navigate("Home")
-               } name="arrow-left" size={28} color={Color.whiteRecColor}></Icon>
-        </Text>
-            <Text style={{marginLeft:10,color:Color.whiteRecColor,fontSize:18,fontFamily:Fonts.recFontFamily.titleRecFont,flex:2}}>{data.appBarTitle}</Text>
-        </View>
-        
+        <SafeAreaView>
+                    <View style={styles.container}>        
         <View style={styles.boxRow}>
                 <Pressable style={styles.uploadBox}>
                     <Pressable style={styles.cusButton}>
@@ -114,14 +105,13 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
                     </View>
             </View>
         </View>
-        </View>
+        </SafeAreaView>
     )
 }
 
 const styles = StyleSheet.create({
     container: {
         width: '100%',
-        backgroundColor: Color.greenRecColor,
         height: 60,
     },
     statusView:{

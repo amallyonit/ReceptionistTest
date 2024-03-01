@@ -1,5 +1,5 @@
 "use strict"
-import { Image, Text, View, TextInput, StyleSheet, Dimensions, Pressable } from "react-native"
+import { Image, Text, View, TextInput, StyleSheet, Dimensions, Pressable, SafeAreaView, ScrollView } from "react-native"
 import Color from "../theme/Color"
 import Fonts from "../theme/Fonts"
 import { useState } from "react";
@@ -11,6 +11,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Snackbar from 'react-native-snackbar';
 import { CommonModal } from "../components/RecCommonModal";
 import notifee, { AndroidNotificationSettings, EventType, Notification } from '@notifee/react-native';
+import NotificationSounds from  'react-native-notification-sounds';
+
 
 const receLogo =  require('../../assets/recimages/Frame.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
@@ -34,9 +36,11 @@ const LoginScreen = ({navigation}:any) =>{
             StoreValue(MiscStoreKeys.EZ_LOGIN,response.data)
             let userLocations = response.data.Data[1]
             if(response.data.Data[0][0].UserType=='U'){
+              const soundsList = await NotificationSounds.getNotifications('notification');
               const channelId = await notifee.createChannel({
-                id: 'default',
-                name: 'Default Channel',
+                id: 'custom-sound',
+                name: 'System Sound',
+                sound:soundsList[0].url
               });
               // Display a notification
               await notifee.displayNotification({
@@ -48,12 +52,6 @@ const LoginScreen = ({navigation}:any) =>{
                     id: 'default',
                   },
                 },
-              });
-              notifee.onForegroundEvent((event) => {
-                if (event.type === EventType.ACTION_PRESS) {
-                  // Open the specific app screen.
-                  navigation.navigate('Activity');
-                }
               });
               navigation.navigate('Activity')
             }else{
@@ -76,6 +74,8 @@ const LoginScreen = ({navigation}:any) =>{
       }
     }
     return(
+      <SafeAreaView>
+        <ScrollView>
         <View style={styles.container}>
         <Image source={receLogo} style={styles.image} />
         <Text style={styles.title}>EzEntry</Text>
@@ -94,6 +94,8 @@ const LoginScreen = ({navigation}:any) =>{
         <Image source={receBottomLogo} style={styles.bottomLogo} />
         <CommonModal confirm={isLoader}></CommonModal>
         </View>
+        </ScrollView>
+      </SafeAreaView>
     )
 }
 
