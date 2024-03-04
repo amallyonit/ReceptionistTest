@@ -1,10 +1,10 @@
 "use strict"
-import React from "react"
-import { Dimensions, Image, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import React, { useEffect, useState } from "react"
+import { Alert, BackHandler, Dimensions, Image, Pressable, SafeAreaView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Fonts from "../theme/Fonts"
 import Color from "../theme/Color"
 import LinearGradient from "react-native-linear-gradient"
-import { InfoFormProps, RecpImgArray } from "../models/RecepModels"
+import { InfoFormProps, RecpImgArray, UserPayload } from "../models/RecepModels"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
@@ -19,11 +19,32 @@ const receDelLog = require('../../assets/recscreen/DELIVERY.png')
 const receBottomLogo = require('../../assets/recimages/Group.png') 
 
 const HomeScreen = ({ route,navigation }: any) => {
+    useEffect(() => {
+        const backAction = () => {
+          Alert.alert('EzEntry App','Are you sure you want to log out?', [
+            {
+              text: 'Cancel',
+              onPress: () => null,
+              style: 'cancel',
+            },
+            {text: 'YES', onPress: () => BackHandler.exitApp()},
+          ]);
+          return true;
+        };
+    
+        const backHandler = BackHandler.addEventListener(
+          'hardwareBackPress',
+          backAction,
+        );
+    
+        return () => backHandler.remove();
+      }, []);
     let propData:InfoFormProps = {
         type:'',
         appBarTitle:'',
         category:0
     }
+    const [usertoken, setUserToken] = useState<UserPayload>({ token: '', userid: '' })
     const checkFormScreen=(type:any)=>{
         
         switch (type) {
@@ -93,7 +114,7 @@ const HomeScreen = ({ route,navigation }: any) => {
 
     return (
         <SafeAreaView>
-                    <View style={styles.container}>
+            <View style={styles.container}>
             <Image source={receLogo} style={styles.image} />
             <Text style={styles.title}>EzEntry</Text>
             <View style={styles.cardGroupContainer}>
@@ -165,6 +186,7 @@ const HomeScreen = ({ route,navigation }: any) => {
                 <Pressable style={styles.viewSec}>
                 <Icon style={{marginRight:'auto',fontSize:16,borderBottomWidth:1,borderBottomColor:Color.blueRecColor}} name="logout" onPress={logoutApp} color={Color.blueRecColor}>Logout</Icon>
                 <Icon onPress={()=>{navigation.navigate('History')}} style={{marginLeft:'auto',fontSize:16,borderBottomWidth:1,borderBottomColor:Color.blueRecColor}} name="history" color={Color.blueRecColor}>View History</Icon>
+                <Icon onPress={()=>{navigation.navigate('Notfies')}} style={{marginLeft:'auto',fontSize:16,borderBottomWidth:1,borderBottomColor:Color.blueRecColor}} name="history" color={Color.blueRecColor}>Notfies</Icon>
                 </Pressable>
             </View>
             <Image source={receBottomLogo} style={styles.bottomLogo} />

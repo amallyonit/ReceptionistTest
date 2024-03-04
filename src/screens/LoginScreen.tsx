@@ -2,7 +2,7 @@
 import { Image, Text, View, TextInput, StyleSheet, Dimensions, Pressable, SafeAreaView, ScrollView } from "react-native"
 import Color from "../theme/Color"
 import Fonts from "../theme/Fonts"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import React from "react";
 import { PostUserLogin } from "../requests/recLooginRequest";
 import { StoreValue } from "../wrapper/storedata.wrapper";
@@ -11,22 +11,29 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Snackbar from 'react-native-snackbar';
 import { CommonModal } from "../components/RecCommonModal";
 import notifee, { AndroidNotificationSettings, EventType, Notification } from '@notifee/react-native';
-import NotificationSounds from  'react-native-notification-sounds';
+import App from "../../App";
 
 
 const receLogo =  require('../../assets/recimages/Frame.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
 
 const LoginScreen = ({navigation}:any) =>{
+    useEffect(()=>{
+      onCheckUserToken()
+    },[])
     const [userId,setUserId]=  useState("");
     const [password,setPassword]=  useState("");
     const [isLoader,setIsLoader] =useState(false)
     const fetchLogin =async ()=>{
+      const token = await AsyncStorage.getItem('FCM_Token')
+      console.log("device")
       setIsLoader(true)
       let payload = {
         UserID:userId,
-        Password:password
+        Password:password,
+        UserDeviceToken:token
       }
+      console.log("payload ",payload)
       try {
         PostUserLogin(payload)?.then(async (response:any)=>{
           console.log("resposne ",response)
@@ -36,23 +43,6 @@ const LoginScreen = ({navigation}:any) =>{
             StoreValue(MiscStoreKeys.EZ_LOGIN,response.data)
             let userLocations = response.data.Data[1]
             if(response.data.Data[0][0].UserType=='U'){
-              const soundsList = await NotificationSounds.getNotifications('notification');
-              const channelId = await notifee.createChannel({
-                id: 'custom-sound',
-                name: 'System Sound',
-                sound:soundsList[0].url
-              });
-              // Display a notification
-              await notifee.displayNotification({
-                title: 'Notification Title',
-                body: 'Main body content of the notification',
-                android: {
-                  channelId,
-                  pressAction: {
-                    id: 'default',
-                  },
-                },
-              });
               navigation.navigate('Activity')
             }else{
               navigation.navigate('Home',{userLocations})
@@ -69,6 +59,20 @@ const LoginScreen = ({navigation}:any) =>{
           })
           setIsLoader(false)
         }) 
+      } catch (error) {
+        
+      }
+    }
+    const onCheckUserToken = () =>{
+      try {
+        AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN).then((response: any) => {
+          let items = JSON.parse(response)
+          if(items.Token!=""){
+            navigation.navigate('Home')
+          }
+      }).catch((error: any) => {
+          console.log("error response ", error)
+      })
       } catch (error) {
         
       }

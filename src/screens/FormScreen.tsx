@@ -1,8 +1,7 @@
 "use strict"
 import React, { useEffect, useState } from "react"
-import { ActivityIndicator, Alert, Dimensions, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
+import { ActivityIndicator, Alert, Dimensions, FlatList, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import Color from "../theme/Color"
-import Fonts from "../theme/Fonts"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import { InfoFormProps, UserLoginLocation, UserPayload } from "../models/RecepModels";
 import { Dropdown } from "react-native-element-dropdown";
@@ -10,37 +9,15 @@ import { launchCamera, CameraOptions } from 'react-native-image-picker';
 import { GetAllRevisitorsData, GetPhoneNumberDetails, GetUsersByLocation, PostVisitorData } from "../requests/recHomeRequest"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
 
 const FormScreen = ({ route, navigation }: any) => { 
-    const data: InfoFormProps = route.params["propData"]
-    navigation.setOptions({ headerTitle: data.appBarTitle})
-    const [userslst, setUserlist] = useState([])
-    const [phonenos, setPhonenos] = useState([])
-    const [tempPhone,setTempPhone] = useState([])
-    const [location, setLocations] = useState<UserLoginLocation[]>([])
-    const [detail,setDetails] = useState([])
-    const [usertoken, setUserToken] = useState<UserPayload>({ token: '', userid: '' })
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isLoaderTrue, setIsLoaderTrue] = useState(false)
-    const [selectedImage, setSelectedImage] = useState(null);
-    const [imageBase, setBase64] = useState("")
-    const [mobile, setMobile] = useState("")
-    const [visiorname, setVisitorname] = useState("")
-    const [place, setPlace] = useState("")
-    const [purpose, setPurpose] = useState("")
-    const [visitors, setVisitors] = useState("")
-    const [remarks, setRemarks] = useState("")
-    const [meet, setMeetWith] = useState("")
-    let typeFormData = {
-        locationCode: '',
-        imageDatas: ''
-    }
-
     useEffect(() => {
-        console.log("how many times")
+        navigation.setOptions({ headerTitle: data.appBarTitle})
         getVisiorNumbers()
+        setMobile('')
         try {
             AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN).then((response: any) => {
                 let items = JSON.parse(response)
@@ -61,6 +38,26 @@ const FormScreen = ({ route, navigation }: any) => {
             console.log("error ", error)
         }
     }, [])
+    const data: InfoFormProps = route.params["propData"]
+    const [userslst, setUserlist] = useState([])
+    const [phonenos, setPhonenos] = useState([])
+    const [location, setLocations] = useState<UserLoginLocation[]>([])
+    const [usertoken, setUserToken] = useState<UserPayload>({ token: '', userid: '' })
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isLoaderTrue, setIsLoaderTrue] = useState(false)
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imageBase, setBase64] = useState("")
+    const [mobile, setMobile] = useState("")
+    const [visiorname, setVisitorname] = useState("")
+    const [place, setPlace] = useState("")
+    const [purpose, setPurpose] = useState("")
+    const [visitors, setVisitors] = useState("")
+    const [remarks, setRemarks] = useState("")
+    const [meet, setMeetWith] = useState("")
+    let typeFormData = {
+        locationCode: '',
+        imageDatas: ''
+    }
     const getUsersByLocationName = (code: any) => {
         let payload = {
             UserLocationCode: code
@@ -97,9 +94,9 @@ const FormScreen = ({ route, navigation }: any) => {
         }
     }
 
-    const getDetailsByPhoneno=()=>{
+    const getDetailsByPhoneno=(value:any)=>{
         let payload = {
-            VisitorMobileNo:mobile
+            VisitorMobileNo:mobile!=''?mobile:value
         }
         console.log("mobile no ",payload)
         try {
@@ -191,7 +188,7 @@ const FormScreen = ({ route, navigation }: any) => {
     }
     return (
         <SafeAreaView>
-                    <ScrollView>
+        <ScrollView>
             <View>
                 <View style={styles.container}>
                     <View style={{marginTop:Dimensions.get('window').width > 756 ? 10:0,width:'100%'}}>
@@ -212,9 +209,8 @@ const FormScreen = ({ route, navigation }: any) => {
                             searchPlaceholder="Search... Phone numbers"
                             value={mobile}
                             onChange={(item: any) => {
-                                console.log("item vals",item)
-                                setMobile(item.VisitorMobileNo)
-                                getDetailsByPhoneno()
+                                console.log("item vals",mobile)
+                                getDetailsByPhoneno(item.VisitorMobileNo)
                             }}
                         />
                         <TextInput

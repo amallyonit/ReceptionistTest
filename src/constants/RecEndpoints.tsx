@@ -5,5 +5,6 @@ export const ServerEndpoints = {
     GET_VISITOR_HISTORY:'api/v1/recHome/getVisitorHistoryByUserCode',
     POST_NOTIFICATION_DATA:'api/v1/recAdmin/getNotificationsByUserType',
     GET_ALL_REVISITORS_DATA:'api/v1/recHome/getVisitorsMobileNumber',
-    GET_DETAILS_BY_PHONENUMBER:'api/v1/recHome/getSelectorVisitorDataByPhoneNumber'
+    GET_DETAILS_BY_PHONENUMBER:'api/v1/recHome/getSelectorVisitorDataByPhoneNumber',
+    POST_NOTIFICATION_TOKEN:'api/v1/recNotific/registerMessageData'
 }

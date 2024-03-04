@@ -78,16 +78,7 @@ const ViewHistoryScreen = ({ navigation }: any) => {
     }
     return (
             <SafeAreaView>
-                            <View style={styles.container}>
-                <View style={styles.navContainer}>
-                    <Text style={styles.navContText}>
-                        <Icon onPress={() =>
-                            navigation.navigate("Home")
-                        } name="arrow-left" size={28} color={Color.whiteRecColor}></Icon>
-                    </Text>
-                    <Text style={{ marginLeft: 10, color: Color.whiteRecColor, fontSize: 18, fontFamily: Fonts.recFontFamily.titleRecFont, flex: 2 }}>View History</Text>
-                </View>
-
+                <View style={styles.container}>
                 <View style={styles.boxRow}>
                     <View style={styles.uploadBox}>
                         <View style={styles.inputView}>

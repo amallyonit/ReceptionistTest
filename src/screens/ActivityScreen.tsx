@@ -9,7 +9,6 @@ import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import { GetNotificationByUserCode } from "../requests/recAdminRequest"
 import { Card } from "react-native-elements"
 import NotificationPop from "../components/RecNotification"
-import { color } from "react-native-elements/dist/helpers"
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
@@ -21,7 +20,7 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
 
   useEffect(() => {
     getNotifications()
-  }, [])
+  },[])
 
   const getNotifications = () => {
     try {
@@ -45,7 +44,6 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
   const generateNotfis = (data: any) => {
     try {
       GetNotificationByUserCode(data)?.then((response) => {
-        console.log("response ", response.data.Status)
         if (response.data.Status) {
           setViewNots(response.data.Data[0])
         }
@@ -60,14 +58,6 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
   return (
     <SafeAreaView>
       <View style={styles.container}>
-        <View style={{ width: '100%', marginBottom: Dimensions.get('window').height * 0.0, backgroundColor: Color.blueRecColor, height: 60, alignItems: 'center', flexDirection: 'row' }}>
-          <Text style={{ color: Color.whiteRecColor, fontSize: 16, flex: 1.6, marginLeft: 15 }}>
-            <Icon onPress={() =>
-              navigation.navigate("Login")
-            } name="arrow-left" size={28} color={Color.whiteRecColor}></Icon>
-          </Text>
-          <Text style={{ marginLeft: 10, color: Color.whiteRecColor, fontSize: 18, fontFamily: Fonts.recFontFamily.titleRecFont, flex: 2 }}>Notifications</Text>
-        </View>
         <View style={{ width: '95%' }}>
           <Card>
             <Card.Title>Notifications</Card.Title>
@@ -89,7 +79,7 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
             })}
           </Card>
         </View>
-        <NotificationPop confirm={true}></NotificationPop>
+        {/* <NotificationPop confirm={true}></NotificationPop> */}
       </View>
     </SafeAreaView>
   )

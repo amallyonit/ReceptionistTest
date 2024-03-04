@@ -66,3 +66,9 @@ export interface UserLoginLocation {
     LocationName: any
     LocationPremise: any
 }
+
+export interface NotificationData{
+	NotificationDeviceToken:any
+	NotificationsData:any
+	NotificationCreatedAt:any
+}

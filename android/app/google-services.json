@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "671903861926",
+    "project_id": "ezentry-94a9a",
+    "storage_bucket": "ezentry-94a9a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:671903861926:android:c0214837bcf19af5c0b867",
+        "android_client_info": {
+          "package_name": "com.receptionisttest"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDS9UHITEZsvmyGFxwKBSideMYa74fJcmo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
