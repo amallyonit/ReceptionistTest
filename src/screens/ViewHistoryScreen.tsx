@@ -47,11 +47,11 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                console.log("error ",error)
            }
     }
-    const getViewHistoryByUser = (userpayld:UserPayload,loader?:boolean)=>{
+    const getViewHistoryByUser = async (userpayld:UserPayload,loader?:boolean)=>{
         if(loader){
             setIsLoader(true)}else{setIsLoader(false)}
         try {
-            GeViewHistoryData(userpayld)?.then((response)=>{
+            await GeViewHistoryData(userpayld)?.then((response:any)=>{
                 console.log("response ",response.data.Status)
                 if(response.data.Status){
                     setViewList(response.data.Data)

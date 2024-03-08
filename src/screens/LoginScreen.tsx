@@ -18,8 +18,7 @@ const receLogo =  require('../../assets/recimages/Frame.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
 
 const LoginScreen = ({navigation}:any) =>{
-    useEffect(()=>{
-      onCheckUserToken()
+    useEffect( ()=>{
     },[])
     const [userId,setUserId]=  useState("");
     const [password,setPassword]=  useState("");
@@ -35,7 +34,7 @@ const LoginScreen = ({navigation}:any) =>{
       }
       console.log("payload ",payload)
       try {
-        PostUserLogin(payload)?.then(async (response:any)=>{
+        await PostUserLogin(payload)?.then(async (response:any)=>{
           console.log("resposne ",response)
           if(response?.data.Status){
             setIsLoader(false)
@@ -59,20 +58,6 @@ const LoginScreen = ({navigation}:any) =>{
           })
           setIsLoader(false)
         }) 
-      } catch (error) {
-        
-      }
-    }
-    const onCheckUserToken = () =>{
-      try {
-        AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN).then((response: any) => {
-          let items = JSON.parse(response)
-          if(items.Token!=""){
-            navigation.navigate('Home')
-          }
-      }).catch((error: any) => {
-          console.log("error response ", error)
-      })
       } catch (error) {
         
       }

@@ -67,7 +67,7 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
                 <View key={i} style={styles.user}>
                   <Image
                     style={styles.image}
-                    source={camLogo}
+                    source={{ uri:`data:image/png;base64,${u.VisitorImage}` }}
                   />
                   <Text style={styles.name} onPress={(item) => {
                     console.log("valur ", confirm)
@@ -115,8 +115,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1
   },
   image: {
-    width: 100,
-    height: 100,
+    borderRadius:100,
+    width: 80,
+    height: 80,
     marginRight: 10,
   },
   name: {

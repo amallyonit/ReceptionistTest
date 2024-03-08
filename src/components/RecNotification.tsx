@@ -1,21 +1,15 @@
-import React, { ReactElement, useEffect } from "react";
+import React, { ReactElement } from "react";
 import { useState } from "react";
-import { Alert, AppRegistry, Dimensions, Modal, Pressable, StyleSheet, Text, View } from "react-native";
+import { Alert, Dimensions, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import Color from "../theme/Color";
-import { Divider, Icon, Image } from "react-native-elements";
+import { Icon, Image } from "react-native-elements";
 import Fonts from "../theme/Fonts";
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
-export const NotificationPop = ({confirm}:{confirm:boolean}):ReactElement =>{
-    const [isModalVisible,setIsModalVisible] = useState(false)
-    useEffect(()=>{
-        if(confirm){
-            setIsModalVisible(true)
-        }else{
-            setIsModalVisible(false)
-        }
-    },[])
+const NotificationPop = ({ route,navigation }: any):ReactElement =>{
+    const [isModalVisible,setIsModalVisible] = useState(true)
+
     return(
         <Modal
         animationType="fade"
@@ -23,8 +17,7 @@ export const NotificationPop = ({confirm}:{confirm:boolean}):ReactElement =>{
         statusBarTranslucent={true}
         visible={isModalVisible}
         onRequestClose={() => {
-            Alert.alert('User Cancelled !');
-            setIsModalVisible(!isModalVisible);
+            Alert.alert('User Cancelled!');
         }}>
         <View style={styles.centeredView}>
             <View style={styles.modalView}>
@@ -78,7 +71,6 @@ export const NotificationPop = ({confirm}:{confirm:boolean}):ReactElement =>{
     </Modal>
     )
 }
-
 
 const styles = StyleSheet.create({
     centeredView: {

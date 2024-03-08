@@ -41,6 +41,7 @@ const FormScreen = ({ route, navigation }: any) => {
     const data: InfoFormProps = route.params["propData"]
     const [userslst, setUserlist] = useState([])
     const [phonenos, setPhonenos] = useState([])
+    const [uDevToken,setUDevToken] = useState<{MeetingUserCode:'',MeetingDevToken:''}>({MeetingUserCode:'',MeetingDevToken:''})
     const [location, setLocations] = useState<UserLoginLocation[]>([])
     const [usertoken, setUserToken] = useState<UserPayload>({ token: '', userid: '' })
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -58,12 +59,12 @@ const FormScreen = ({ route, navigation }: any) => {
         locationCode: '',
         imageDatas: ''
     }
-    const getUsersByLocationName = (code: any) => {
+    const getUsersByLocationName = async (code: any) => {
         let payload = {
             UserLocationCode: code
         }
         try {
-            GetUsersByLocation(JSON.stringify(payload))?.then((response) => {
+           await GetUsersByLocation(JSON.stringify(payload))?.then((response:any) => {
                 console.log("response ", response.data)
                 setUserlist(response.data.Data)
             }).catch((error: any) => {
@@ -75,13 +76,13 @@ const FormScreen = ({ route, navigation }: any) => {
     }
 
 
-    const getVisiorNumbers = () => {
+    const getVisiorNumbers = async () => {
         let payload = {
             UserCode: "",
         }
 
         try {
-            GetAllRevisitorsData(JSON.stringify(payload))?.then((response) => {
+           await GetAllRevisitorsData(JSON.stringify(payload))?.then((response:any) => {
                 console.log(response)
                 if (response.data.Status) {
                     setPhonenos(response.data.Data)
@@ -94,13 +95,13 @@ const FormScreen = ({ route, navigation }: any) => {
         }
     }
 
-    const getDetailsByPhoneno=(value:any)=>{
+    const getDetailsByPhoneno=async (value:any)=>{
         let payload = {
             VisitorMobileNo:mobile!=''?mobile:value
         }
         console.log("mobile no ",payload)
         try {
-            GetPhoneNumberDetails(payload)?.then((response)=>{
+           await GetPhoneNumberDetails(payload)?.then((response:any)=>{
                 if(response.data.Status){
                     setBase64(response.data.Data[0].VisitorImage)
                     setPlace(response.data.Data[0].VisitTranVisitorFrom)
@@ -151,9 +152,10 @@ const FormScreen = ({ route, navigation }: any) => {
         setVisitors("")
         setRemarks("")
         setMeetWith("")
+        setUDevToken({MeetingUserCode:'',MeetingDevToken:''})
     }
 
-    const onSendRequest = () => {
+    const onSendRequest = async () => {
         setIsLoaderTrue(true)
         let payload = {
             VisitorName: visiorname,
@@ -169,22 +171,28 @@ const FormScreen = ({ route, navigation }: any) => {
             VisitTranCheckoutTime: '',
             VisitTranVisitType: '',
             VisitTranVisitStatus: '',
-            VisitTranRemarks: remarks
+            VisitTranRemarks: remarks,
+            MeetingUserCode:uDevToken.MeetingUserCode,
+            MeetingDevToken:uDevToken.MeetingDevToken
         }
-        PostVisitorData(payload)?.then((response: any) => {
-            console.log("response ", response)
-            if (response.data.Status) {
-                setIsModalVisible(true)
-                setIsLoaderTrue(false)
-                resetVisitForm()
-            } else {
-                setIsModalVisible(false)
-                setIsLoaderTrue(false)
-                resetVisitForm()
-            }
-        }).catch((error) => {
-            console.log("error ", error)
-        })
+        try {
+            await PostVisitorData(payload)?.then((response: any) => {
+                console.log("response ", response)
+                if (response.data.Status) {
+                    setIsModalVisible(true)
+                    setIsLoaderTrue(false)
+                    resetVisitForm()
+                } else {
+                    setIsModalVisible(false)
+                    setIsLoaderTrue(false)
+                    resetVisitForm()
+                }
+            }).catch((error) => {
+                console.log("error ", error)
+            })
+        } catch (error) {
+            
+        }
     }
     return (
         <SafeAreaView>
@@ -266,6 +274,7 @@ const FormScreen = ({ route, navigation }: any) => {
                             value={meet}
                             onChange={(item: any) => {
                                 setMeetWith(item.UserCode)
+                                setUDevToken({MeetingUserCode:item.UserCode,MeetingDevToken:item.UserDeviceToken})
                             }}
                         />
                         <TextInput

@@ -19,32 +19,20 @@ const receDelLog = require('../../assets/recscreen/DELIVERY.png')
 const receBottomLogo = require('../../assets/recimages/Group.png') 
 
 const HomeScreen = ({ route,navigation }: any) => {
-    useEffect(() => {
-        const backAction = () => {
-          Alert.alert('EzEntry App','Are you sure you want to log out?', [
-            {
-              text: 'Cancel',
-              onPress: () => null,
-              style: 'cancel',
-            },
-            {text: 'YES', onPress: () => BackHandler.exitApp()},
-          ]);
-          return true;
-        };
-    
-        const backHandler = BackHandler.addEventListener(
-          'hardwareBackPress',
-          backAction,
-        );
-    
-        return () => backHandler.remove();
-      }, []);
     let propData:InfoFormProps = {
         type:'',
         appBarTitle:'',
         category:0
     }
     const [usertoken, setUserToken] = useState<UserPayload>({ token: '', userid: '' })
+    useEffect(() => {
+        let propData:InfoFormProps = {
+            type:'',
+            appBarTitle:'',
+            category:0
+        }
+      }, []);
+
     const checkFormScreen=(type:any)=>{
         
         switch (type) {

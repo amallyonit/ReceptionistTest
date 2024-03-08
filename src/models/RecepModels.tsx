@@ -35,6 +35,7 @@ export interface ViewHistory {
 
 export interface ViewNotification{
     VisitorName: any
+    VisitorImage: any
     VisitorMobileNo: any
     VisitTranVisitorFrom: any
     VisitTranMeetingWith: any

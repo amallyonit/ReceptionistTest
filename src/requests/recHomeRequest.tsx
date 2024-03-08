@@ -3,7 +3,7 @@ import { ApiConfig } from "../constants/RecConfig";
 import { ServerConfig } from "../constants/RecServerconf";
 import { ServerEndpoints } from "../constants/RecEndpoints";
 
-export function GetUsersByLocation(data:any){
+export async function GetUsersByLocation(data:any){
     try {
         return axios({
             method:'post',
@@ -16,7 +16,7 @@ export function GetUsersByLocation(data:any){
     }
 }
 
-export function PostVisitorData(data:any){
+export async  function PostVisitorData(data:any){
     try {
         return axios({
             method:'post',
@@ -29,7 +29,7 @@ export function PostVisitorData(data:any){
     }
 }
 
-export function GeViewHistoryData(data:any){
+export async function GeViewHistoryData(data:any){
     try {
         return axios({
             method:'post',
@@ -42,7 +42,7 @@ export function GeViewHistoryData(data:any){
     }
 }
 
-export function GetAllRevisitorsData(data:any){
+export async function GetAllRevisitorsData(data:any){
     try {
         return axios({
             method:'post',
@@ -55,7 +55,7 @@ export function GetAllRevisitorsData(data:any){
     }
 }
 
-export function GetPhoneNumberDetails(data:any){
+export async function GetPhoneNumberDetails(data:any){
     try {
         return axios({
             method:'post',
