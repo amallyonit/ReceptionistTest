@@ -1,4 +1,4 @@
-import React, { ReactElement } from "react";
+import React, { JSX, ReactElement } from "react";
 import { useState } from "react";
 import { Alert, Dimensions, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import Color from "../theme/Color";
@@ -7,7 +7,7 @@ import Fonts from "../theme/Fonts";
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
-const NotificationPop = ({ route,navigation }: any):ReactElement =>{
+const NotificationPop = ({ route,navigation }: any):JSX.Element =>{
     const [isModalVisible,setIsModalVisible] = useState(true)
 
     return(
@@ -21,7 +21,7 @@ const NotificationPop = ({ route,navigation }: any):ReactElement =>{
         }}>
         <View style={styles.centeredView}>
             <View style={styles.modalView}>
-            <Icon style={styles.iconStyle} color={Color.whiteRecColor} size={40} name="notifications-none"></Icon>
+            <Icon style={styles.iconStyle} color={Color.whiteRecColor} size={40} name="notifications-none" />
                 <Text style={styles.modalTitleStyle}>You've got a Delivery at the main gate</Text>
                 <View style={styles.hairline}></View>
                 <View style={styles.modalContentStyle}>

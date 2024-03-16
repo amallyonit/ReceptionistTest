@@ -36,25 +36,47 @@
 //     if (Platform.OS == 'ios') {
 //         await notifee.requestPermission()
 //     }
-
-//     // Create a channel (required for Android)
-//     const channelId = await notifee.createChannel({
-//         id: data?.data?.channel_id,
-//         name: data?.data?.channel_name,
-//         sound: data?.data?.sound_name,
-//         importance: AndroidImportance.HIGH,
-//     });
-
-//     // Display a notification
-//     await notifee.displayNotification({
-//         title: data?.notification.title,
-//         body: data?.notification.body,
-//         android: {
-//             channelId,
-
-//         },
-//     });
-    
+//             const channelId = await notifee.createChannel({
+//             id:'default',
+//             name:'EzEntry Notifications',
+//             importance:AndroidImportance.HIGH,
+//             lights:true,
+//             lightColor:Color.blueRecColor,
+//             sound:'not_ez_sound',
+//             visibility:AndroidVisibility.PUBLIC,
+//           })
+//          await notifee.displayNotification({
+//             title:'EzEntry Notification',
+//             body:"Amal want to meet you",
+//             android:{
+//               smallIcon:'not_bell_icon',
+//               channelId,
+//               largeIcon:require('./assets/ez_entry_not.png'),
+//               sound:'not_ez_sound',
+//               channelId,
+//               category:AndroidCategory.CALL,
+//               fullScreenAction:{
+//                 id:'default',
+//               },
+//               color:Color.blueRecColor,
+//               actions: [
+//                 {
+//                   title: 'Accept',
+//                   icon: 'https://my-cdn.com/icons/reply.png',
+//                   pressAction: {
+//                     id: 'Accept',
+//                   },
+//                 },
+//                 {
+//                   title: 'Deny',
+//                   icon: 'https://my-cdn.com/icons/reply.png',
+//                   pressAction: {
+//                     id: 'Deny',
+//                   },
+//                 },
+//               ],
+//             }
+//           })    
 // }
 
 // export async function notificationListeners() {
@@ -69,18 +91,6 @@
 //             'Notification caused app to open from background state:',
 //             remoteMessage,
 //         );
-
-//         if (!!remoteMessage?.data && remoteMessage?.data?.redirect_to == "ProductDetail") {
-//             setTimeout(() => {
-//                 navigation.navigate('')
-//             }, 1200);
-//         }
-
-//         if (!!remoteMessage?.data && remoteMessage?.data?.redirect_to == "Profile") {
-//             setTimeout(() => {
-//                 NavigationService.navigate("Profile", { data: remoteMessage?.data })
-//             }, 1200);
-//         }
 //     });
 
 //     // Check whether an initial notification is available

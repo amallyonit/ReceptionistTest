@@ -6,6 +6,8 @@ import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
+import io.wazo.callkeep.RNCallKeepPackage
+import com.facebook.react.shell.MainReactPackage;
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.load
 import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
@@ -42,4 +44,10 @@ class MainApplication : Application(), ReactApplication {
     }
     ReactNativeFlipper.initializeFlipper(this, reactNativeHost.reactInstanceManager)
   }
+  private fun getPackages(): List<ReactPackage> {
+    return listOf(
+        MainReactPackage(),
+        RNCallKeepPackage()
+    )
+}
 }
