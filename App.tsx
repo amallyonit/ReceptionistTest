@@ -68,7 +68,8 @@ const callerID = uuid.v4().toString()
 
 const onMessageGetter = async ()=>{
   messaging().onMessage(async (message:any)=>{
-    const messString:any = JSON.parse(message.notification.body)
+    console.log("message ",message.data['data_fcm'])
+    const messString:any = JSON.parse(message.data['data_fcm'])
     const channelId = await notifee.createChannel({
       id:'default',
       name:'EzEntry Notifications',

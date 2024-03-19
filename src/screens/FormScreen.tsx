@@ -14,6 +14,10 @@ const camLogo = require("../../assets/recscreen/CAMERA.png")
 
 
 const FormScreen = ({ route, navigation }: any) => { 
+    let typeFormData = {
+        locationCode: '',
+        imageDatas: ''
+    }
     useEffect(() => {
         navigation.setOptions({ headerTitle: data.appBarTitle})
         getVisiorNumbers()
@@ -23,6 +27,7 @@ const FormScreen = ({ route, navigation }: any) => {
                 let items = JSON.parse(response)
                 if (items.Status) {
                     setLocations(items.Data[1])
+                    typeFormData.locationCode = items.Data[0][0].UserCode
                     let tokenPay: UserPayload = {
                         userid: items.Data[0][0].UserCode,
                         token: items.Token
@@ -55,10 +60,6 @@ const FormScreen = ({ route, navigation }: any) => {
     const [visitors, setVisitors] = useState("1")
     const [remarks, setRemarks] = useState("")
     const [meet, setMeetWith] = useState("")
-    let typeFormData = {
-        locationCode: '',
-        imageDatas: ''
-    }
     const getUsersByLocationName = async (code: any) => {
         let payload = {
             UserLocationCode: code
