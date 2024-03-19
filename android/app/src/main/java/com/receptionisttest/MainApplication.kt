@@ -4,6 +4,7 @@ import android.app.Application
 import com.facebook.react.PackageList
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
+import com.swmansion.reanimated.ReanimatedPackage
 import com.facebook.react.ReactNativeHost
 import com.facebook.react.ReactPackage
 import io.wazo.callkeep.RNCallKeepPackage
@@ -44,10 +45,4 @@ class MainApplication : Application(), ReactApplication {
     }
     ReactNativeFlipper.initializeFlipper(this, reactNativeHost.reactInstanceManager)
   }
-  private fun getPackages(): List<ReactPackage> {
-    return listOf(
-        MainReactPackage(),
-        RNCallKeepPackage()
-    )
-}
 }

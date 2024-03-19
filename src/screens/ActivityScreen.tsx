@@ -1,5 +1,5 @@
 import React, { Children, ReactElement, useEffect, useState } from "react"
-import { Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Alert, BackHandler, Dimensions, Image, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import Fonts from "../theme/Fonts"
@@ -9,7 +9,6 @@ import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import { GetNotificationByUserCode } from "../requests/recAdminRequest"
 import { Card } from "react-native-elements"
 import NotificationPop from "../components/RecNotification"
-
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
 const ActivityScreen = ({ route, navigation }: any): ReactElement => {
@@ -19,6 +18,7 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
   const [confirm, setConfirm] = useState(false)
 
   useEffect(() => {
+
     getNotifications()
   },[])
 
@@ -57,6 +57,7 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
 
   return (
     <SafeAreaView>
+      
       <View style={styles.container}>
         <View style={{ width: '95%' }}>
           <Card>
@@ -87,7 +88,7 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
+    alignItems: "center", 
   },
   cardGroup: {
     margin: Dimensions.get('window').height * 0.01,

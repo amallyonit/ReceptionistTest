@@ -10,8 +10,7 @@ import { MiscStoreKeys } from "../constants/RecStorageKeys";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Snackbar from 'react-native-snackbar';
 import { CommonModal } from "../components/RecCommonModal";
-import notifee, { AndroidNotificationSettings, EventType, Notification } from '@notifee/react-native';
-import App from "../../App";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 
 const receLogo =  require('../../assets/recimages/Frame.png')
@@ -23,6 +22,10 @@ const LoginScreen = ({navigation}:any) =>{
     const [userId,setUserId]=  useState("");
     const [password,setPassword]=  useState("");
     const [isLoader,setIsLoader] =useState(false)
+    const [showPass,setShowPass] = useState(false)
+    const onVisiblePassword = ()=>{
+      setShowPass(!showPass)
+    }
     const fetchLogin =async ()=>{
       const token = await AsyncStorage.getItem('FCM_Token')
       console.log("device")
@@ -42,7 +45,7 @@ const LoginScreen = ({navigation}:any) =>{
             StoreValue(MiscStoreKeys.EZ_LOGIN,response.data)
             let userLocations = response.data.Data[1]
             if(response.data.Data[0][0].UserType=='U'){
-              navigation.navigate('Activity')
+              navigation.navigate('Admin')
             }else{
               navigation.navigate('Home',{userLocations})
             }
@@ -70,8 +73,20 @@ const LoginScreen = ({navigation}:any) =>{
         <Text style={styles.title}>EzEntry</Text>
         <View style={styles.inputView}>
             <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='User ID' value={userId} onChangeText={setUserId} autoCorrect={false} autoCapitalize='none' />
-            <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='Password' secureTextEntry value={password} onChangeText={setPassword} autoCorrect={false}
+            <View style={styles.searchSection}>
+            <TextInput style={styles.inputPass} 
+            placeholderTextColor={Color.blackRecColor} placeholder='Password' 
+            secureTextEntry={!showPass}
+            value={password} onChangeText={setPassword} autoCorrect={false}
         autoCapitalize='none'/>
+              <MaterialCommunityIcons 
+                    name={showPass ? 'eye-off' : 'eye'} 
+                    size={24} 
+                    color={Color.blackRecColor}
+                    style={styles.searchIcon} 
+                    onPress={onVisiblePassword} 
+                /> 
+            </View>
         </View>
 
         <View style={styles.buttonView}>
@@ -199,9 +214,6 @@ const styles = StyleSheet.create({
       marginHorizontal : 20,
       color:Color.blackRecColor
     },
-    icon: {
-      marginRight: 5,
-    },
     placeholderStyle: {
       fontSize: 16,
       color:Color.blackRecColor
@@ -219,6 +231,27 @@ const styles = StyleSheet.create({
       fontSize: 16,
       color:Color.blackRecColor
     },
+    searchSection: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center'
+  },
+  searchIcon: {
+      zIndex:100,
+      paddingRight:15
+  },
+  inputPass: {
+      flex: 1,
+      width:'100%',
+      paddingTop: 10,
+      paddingRight: 10,
+      paddingBottom: 10,
+      paddingLeft: 0,
+      marginLeft:16,
+      color: '#424242',
+      borderBottomWidth:1
+  },
   })
 
 export default LoginScreen

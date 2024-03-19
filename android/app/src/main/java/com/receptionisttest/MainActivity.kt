@@ -14,8 +14,6 @@ class MainActivity : ReactActivity() {
    * Returns the name of the main component registered from JavaScript. This is used to schedule
    * rendering of the component.
    */
-  //override fun getMainComponentName(): String = "ReceptionistTest"
-
     override fun getMainComponentName(): String {
         return NotifeeApiModule.getMainComponent("ReceptionistTest")
     }
@@ -27,13 +25,14 @@ class MainActivity : ReactActivity() {
    */
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
-  /**permission result */    
-  override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
-    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-    when (requestCode) {
-        RNCallKeepModule.REQUEST_READ_PHONE_STATE -> {
-            RNCallKeepModule.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        }
-    }
-}
+  
+  //Permission results 
+  override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+      super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+      if (grantResults.isNotEmpty()) {
+          when (requestCode) {
+              RNCallKeepModule.REQUEST_READ_PHONE_STATE -> RNCallKeepModule.onRequestPermissionsResult(requestCode, permissions, grantResults)
+          }
+      }
+  }
 }

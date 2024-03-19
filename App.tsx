@@ -11,17 +11,19 @@ import ActivityScreen from './src/screens/ActivityScreen';
 import Color from './src/theme/Color';
 import Fonts from './src/theme/Fonts';
 import messaging from "@react-native-firebase/messaging"
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useState } from 'react';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { createRef, useEffect, useState } from 'react';
 import { NotificationData } from './src/models/RecepModels';
 import { RegisterMessageToken } from './src/requests/recNotifiRequest';
-import notifee, { AndroidCategory, AndroidImportance, AndroidStyle, AndroidVisibility, EventType, RepeatFrequency, TriggerType } from '@notifee/react-native';
+import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+import uuid from "react-native-uuid"
+import { PermissionsAndroid, Platform } from 'react-native';
+import RNCallKeep from "react-native-callkeep";
 import NotificationPop from './src/components/RecNotification';
 import { MiscStoreKeys } from './src/constants/RecStorageKeys';
-import RNCallKeep, { IOptions } from 'react-native-callkeep';
-import uuid from "react-native-uuid"
-import { PermissionsAndroid } from 'react-native';
-
+import SplashEzEntryScreen from './src/screens/SplashEzEntryScreen';
+import AdminScreen from './src/screens/AdminScreen';
+import SettingScreen from './src/screens/SettingsScreen';
 const Stack = createNativeStackNavigator()
 
 const onRegisterMessaging = async () => {
@@ -45,12 +47,28 @@ const onRegisterMessaging = async () => {
       console.log("error ",error)
     }
     await AsyncStorage.setItem('FCM_Token', token)
-    console.log("token registerd ", token)
   }
 }
 
+RNCallKeep.setup({
+  ios:{
+    appName:'EZEntry'
+  },
+  android:{
+    alertTitle:'Permission Required',
+    alertDescription:'access contacts',
+    imageName:'',
+    cancelButton: 'Cancel',
+    okButton: 'ok',
+    additionalPermissions:[PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE]
+  }
+})
+
+const callerID = uuid.v4().toString()
+
 const onMessageGetter = async ()=>{
   messaging().onMessage(async (message:any)=>{
+    const messString:any = JSON.parse(message.notification.body)
     const channelId = await notifee.createChannel({
       id:'default',
       name:'EzEntry Notifications',
@@ -59,9 +77,8 @@ const onMessageGetter = async ()=>{
     })
    await notifee.displayNotification({
       title:'EzEntry Notification',
-      body:"Amal want to meet you",
+      body:`${messString.VisitorName} want to meet you`,
       android:{ 
-        smallIcon:'ic_ezentry_trans',
         channelId,
         largeIcon:require('./assets/ez_entry_not.png'),
         sound:'not_ez_sound',
@@ -71,7 +88,7 @@ const onMessageGetter = async ()=>{
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Accept',
-              launchActivity:'default'
+              // mainComponent:'custom-pop-component'
             },
           },
           {
@@ -79,42 +96,32 @@ const onMessageGetter = async ()=>{
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Deny',
-              launchActivity:'default',
+              // mainComponent:'custom-pop-component'
             },
           },
         ],
       }
     })
+    displayincomingCall(messString)
   })
+
 }
 
-async function requestPhoneNumbersPermission() {
-  try {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.READ_PHONE_NUMBERS,
-      {
-        title: 'Phone Numbers Permission',
-        message: 'This app needs access to your phone numbers.',
-        buttonNeutral: 'Ask Me Later',
-        buttonNegative: 'Cancel',
-        buttonPositive: 'OK',
-      },
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      console.log('Phone numbers permission granted');
-    } else {
-      console.log('Phone numbers permission denied');
+const displayincomingCall = (data?:any) =>{
+  RNCallKeep.displayIncomingCall(callerID,'EZEntry Notification',`${data.VisitorName} and ${data.vistno} waiting  at the main gate.`,'generic',false) 
+}
+const checkApplicationPermission = async () => {
+  if (Platform.OS === 'android') {
+    try {
+      await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
+      await PermissionsAndroid.request('android.permission.CALL_PHONE')
+      await PermissionsAndroid.request('android.permission.READ_PHONE_STATE')
+    } catch (error) {
     }
-  } catch (err) {
-    console.warn(err);
   }
 }
-
-
-
 const App = () => {
-  const [isLogin,setIsLogin] = useState("")
-
+  const navigationRef:any = createRef();
   useEffect(() => {
     notifee.requestPermission()
     onRegisterMessaging();
@@ -125,15 +132,17 @@ const App = () => {
       // Check if the user pressed the "Mark as read" action
       if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
           console.log("event pressed ",pressAction.id);
+          navigationRef.navigate('Popup')
       }else if(type === EventType.ACTION_PRESS && pressAction.id === 'Deny'){
           await notifee.cancelNotification(notification.id);
+          navigationRef.navigate('Popup')
       }
       
     });
-    requestPhoneNumbersPermission()
+    checkApplicationPermission()
   }, [])
   return (
-     <NavigationContainer>
+     <NavigationContainer ref={navigationRef}>
       <Stack.Navigator  screenOptions={{
         headerTintColor: Color.whiteRecColor,
         headerTitleAlign: 'center', headerTitleStyle: {
@@ -142,13 +151,17 @@ const App = () => {
         }, headerStyle: {
           backgroundColor: Color.blueRecColor,
         }, headerShown: true, statusBarAnimation: 'fade', statusBarTranslucent: true, statusBarHidden: false, statusBarColor: Color.blueRecColor
-      }} initialRouteName={isLogin}>
+      }} initialRouteName='Splash'>
+        <Stack.Screen name='Splash' options={{ headerShown: false }} component={SplashEzEntryScreen}></Stack.Screen>
         <Stack.Screen name='Login' options={{ headerShown: false }} component={LoginScreen}></Stack.Screen>
         <Stack.Screen name='Home' options={{ headerShown: false }} component={HomeScreen}></Stack.Screen>
         <Stack.Screen name='Form' component={FormScreen}></Stack.Screen>
         <Stack.Screen name='PickDel' options={{ headerTitle: 'Delivery / Pickup' }} component={FormDeliveryScreen}></Stack.Screen>
         <Stack.Screen name='History' options={{ headerTitle: 'View History' }} component={ViewHistoryScreen}></Stack.Screen>
-        <Stack.Screen name='Activity' component={ActivityScreen}></Stack.Screen>
+        <Stack.Screen name='Admin' options={{ headerShown: false }} component={AdminScreen}></Stack.Screen>
+        <Stack.Screen name='Activity'  component={ActivityScreen}></Stack.Screen>
+        <Stack.Screen name='Settings'component={SettingScreen}></Stack.Screen>
+        <Stack.Screen name='Popup' component={NotificationPop}></Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );

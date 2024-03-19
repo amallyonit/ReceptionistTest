@@ -52,7 +52,7 @@ const FormScreen = ({ route, navigation }: any) => {
     const [visiorname, setVisitorname] = useState("")
     const [place, setPlace] = useState("")
     const [purpose, setPurpose] = useState("")
-    const [visitors, setVisitors] = useState("")
+    const [visitors, setVisitors] = useState("1")
     const [remarks, setRemarks] = useState("")
     const [meet, setMeetWith] = useState("")
     let typeFormData = {
@@ -149,7 +149,7 @@ const FormScreen = ({ route, navigation }: any) => {
         setVisitorname("")
         setPlace("")
         setPurpose("")
-        setVisitors("")
+        setVisitors("1")
         setRemarks("")
         setMeetWith("")
         setUDevToken({MeetingUserCode:'',MeetingDevToken:''})
@@ -279,7 +279,7 @@ const FormScreen = ({ route, navigation }: any) => {
                         />
                         <TextInput
                             value={visitors}
-                            onChangeText={vistno => setVisitors(vistno)}
+                            onChangeText={(vistno:any) => setVisitors(vistno)}
                             keyboardType="numeric" placeholderTextColor={Color.blackRecColor}
                             style={styles.input} placeholder='No of Visitors' autoCapitalize='none' />
                     </View>

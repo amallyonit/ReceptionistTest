@@ -1,38 +1,46 @@
 import React, { useEffect, useState } from "react"
-import { Animated, Image } from "react-native";
-import BootSplash from "react-native-bootsplash";
+import { ActivityIndicator, Image, StyleSheet, View } from "react-native"
+import Color from "../theme/Color"
+import Fonts from "../theme/Fonts"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { MiscStoreKeys } from "../constants/RecStorageKeys"
 const logoImage = require('../../assets/EzEntry-removebg-preview.png')
+const SplashEzEntryScreen = ({navigation}:any)=>{
+  useEffect(() => {
+    setTimeout(async () => {
+      await AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN).then((response) =>
+      {
+        const value = JSON.parse(response!)
+        console.log(value)
+        if(value!=null){
+          navigation.replace(value.Data[0][0].UserType=="L"?'Home':'Admin')    
+          console.log(value);
+        }else{
+          navigation.replace('Login')
+        }
+      }
+      );
+    }, 3000);
+  }, []);
+    return(
+        <View style={styles.centeredView}>
+            <Image source={logoImage}></Image>
+        </View>
+    )
+}
 
-type Props = {
-  onAnimationEnd: () => void;
-};
-
-const SplashEzEntryScreen = ({ onAnimationEnd }: Props) => {
-  const [opacity] = useState(() => new Animated.Value(1));
-
-  const { container, logo} = BootSplash.useHideAnimation({
-    manifest: require("../assets/bootsplash_manifest.json"),
-    logo: require("../../assets/EzEntry-removebg-preview.png"),
-    statusBarTranslucent: true,
-    navigationBarTranslucent: false,
-
-    animate: () => {
-      // Perform animations and call onAnimationEnd
-      Animated.timing(opacity, {
-        useNativeDriver: true,
-        toValue: 0,
-        duration: 500,
-      }).start(() => {
-        onAnimationEnd();
-      });
+const styles = StyleSheet.create({
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
     },
-  });
+    entryText:{
+        color:Color.blueRecColor,
+        fontFamily:Fonts.recFontFamily.titleRecFont,
+        fontSize:20
+    }
+})
 
-  return (
-    <Animated.View {...container} style={[container.style, { opacity }]}>
-      <Image {...logo} />
-      {/* <Image {...brand} /> */}
-    </Animated.View>
-  );
-};
 export default SplashEzEntryScreen

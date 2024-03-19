@@ -7,7 +7,7 @@ import Fonts from "../theme/Fonts";
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
-const NotificationPop = ({ route,navigation }: any):JSX.Element =>{
+const NotificationPop = ({navigation}:any):JSX.Element =>{
     const [isModalVisible,setIsModalVisible] = useState(true)
 
     return(

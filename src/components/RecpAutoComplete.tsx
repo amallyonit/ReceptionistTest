@@ -1,91 +1,176 @@
-import React, { useEffect, useState } from "react"
-import { FlatList, StyleSheet, Text, TextInput, View } from "react-native"
-import Color from "../theme/Color"
-import LinearGradient from "react-native-linear-gradient";
-import { ListItem } from "react-native-elements";
-import { UserPayload } from "../models/RecepModels";
+import {
+  Platform,
+  StyleSheet,
+  SafeAreaView,
+  Pressable,
+  TouchableWithoutFeedback,
+  Keyboard,
+  FlatList,
+  useWindowDimensions,
+  View,
+  TextInput,
+  Text,
+} from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useState, useEffect } from "react";
+import React from "react";
+import { Icon } from "react-native-elements";
+import Color from "../theme/Color";
+import { GetAllRevisitorsData } from "../requests/recHomeRequest";
 
-const RecepAutocomplete = () => {
-    const uData:UserPayload[]=[
-        {token:'123',userid:'amal'},
-        {token:'124',userid:'anu'},
-        {token:'125',userid:'ram'},
-        {token:'126',userid:'athul'}
-    ]
-    const [inputValue, setInputValue] = useState('');
-    const [suggestions, setSuggestions] = useState<UserPayload[]>([]);
-    const [inData,setInData] = useState<UserPayload[]>([])
-    useEffect(()=>{
-        setSuggestions(uData)
-        setInData(uData.slice())
-    },[])
-    const handleChange = (event:any) => {
-      const value = event.target.value;
-      setInputValue(value);
-    };
-  
-    const handleSelect = (value:any) => {
-      setInputValue(value);
-      setSuggestions([]);
-    };
-    const filterNames = (item:any) => {
-        // 1.
-        let search = inputValue.toLowerCase().replace(/ /g,"_"); 
-        //2.
-        if(item.userid.startsWith(search, 14)){
-           //3.
-           return formatNames(item);
-        }else{ 
-           //4.
-           suggestions.splice(suggestions.indexOf(item), 1);
-           return null;
-        }
-     }
-     
 
-    const formatNames = (item:any) => {
-        let heroName = item.userid.charAt(14).toUpperCase() + item.userid.slice(15);
-        heroName = heroName.replace(/_/g, " ");
-        return heroName;
-     }
-     
-    
-    return (
-        <View style={{width:'100%'}}>
-            <TextInput
-                style={styles.input} 
-                value={inputValue}
-                onChange={handleChange}
-                placeholderTextColor={Color.blackRecColor}
-                placeholder='Name of Vistor' autoCapitalize='none' />
-            <FlatList data={suggestions} keyExtractor = {(i)=>i.token.toString()}
-            extraData = {inputValue} 
-            renderItem = {({item}) =>
-                <Text style={styles.flatList}>{formatNames(item)}
-                </Text>} 
-            />
-        </View>
-    )
+export interface SearchResults {
+  document: Document;
+}
 
+export interface Document {
+  _id: string;
+  country: string;
+  exchange: string;
+  exchangeScore: number;
+  id: string;
+  in_SP_500: number;
+  industry: string;
+  isActivelyTrading: boolean;
+  isEtf: boolean;
+  isFund: boolean;
+  marketCap: number;
+  name: string;
+  sector: string;
+  ticker: string;
+}
+
+export default function SearchScreen() {
+  const { top } = useSafeAreaInsets();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResults[]>([]);
+  const getSearchResults = async (text:any) => {
+    let payload = {
+        UserCode: "",
+    }
+
+    try {
+       await GetAllRevisitorsData(JSON.stringify(payload))?.then((response:any) => {
+            console.log(response)
+            if (response.data.Status) {
+                searchResults(response.data.Data)
+            }
+        }).catch((error: any) => {
+            console.log("error ", error)
+        })
+    } catch (error) {
+        console.log("error ", error)
+    }
+}
+
+  useEffect(() => {
+    async function fetchStocks() {
+      setSearchResults(await getSearchResults(searchQuery));
+    }
+
+    fetchStocks();
+  }, [searchQuery]);
+
+  const handleSubmit = async (text: string) => {
+    const stocks = (await getSearchResults(text)) as SearchResults[];
+  };
+
+  return (
+    <SafeAreaView style={{ flex: 1, paddingTop: top }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginHorizontal: 10,
+        }}
+      >
+        <TextInput
+          returnKeyType="search"
+          placeholder="Search stocks ..."
+          autoFocus
+          placeholderTextColor={Color.blackRecColor}
+          style={{ width: "100%",color:Color.blackRecColor,borderBottomWidth:1 }}
+          onChangeText={(text) => setSearchQuery(text)}
+          onSubmitEditing={async (e) => {
+            await handleSubmit(e.nativeEvent.text);
+          }}
+        />
+      </View>
+
+      <TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
+        {searchQuery ? (
+          <>
+            {searchResults.length === 0 ? (
+              <View
+                style={{
+                  flex: 0.75,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text style={styles.title}>No Stocks Matching Search</Text>
+              </View>
+            ) : (
+              <FlatList
+                data={searchResults}
+                keyExtractor={(item) => item.document.ticker}
+                renderItem={({ item }) => (
+                  <Pressable
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginVertical: 15,
+                      paddingHorizontal: 10,
+                    }}
+                    onPress={() => console.log("data")}
+                  >
+                    <View style={{ width: "75%" }}>
+                      <Text style={styles.title}>{item.document.ticker}</Text>
+                      <Text>{item.document.name}</Text>
+                    </View>
+
+                    <Text style={[styles.title, { paddingTop: 5 }]}>
+                      {String.fromCodePoint(
+                        ...[...item.document.country.toUpperCase()].map(
+                          (x) => 0x1f1a5 + x.charCodeAt(0)
+                        )
+                      )}
+                    </Text>
+                  </Pressable>
+                )}
+              />
+            )}
+          </>
+        ) : (
+          <View
+            style={{
+              flex: 0.75,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.title}>Search Stocks ...</Text>
+          </View>
+        )}
+      </TouchableWithoutFeedback>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
-    flatList:{
-        paddingLeft: 15, 
-        marginTop:15, 
-        paddingBottom:15,
-        fontSize: 20,
-        borderBottomColor: '#26a69a',
-        borderBottomWidth:1
-    },
-    input:{
-        height: 40,
-        paddingHorizontal: 20,
-        borderColor: Color.blackRecColor,
-        color: Color.blackRecColor,
-        borderBottomWidth: 1,
-        borderRadius: 50,
-    },
-})
-
-export default RecepAutocomplete
+  container: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color:Color.blackRecColor
+  },
+  separator: {
+    marginVertical: 30,
+    height: 1,
+    width: "80%",
+  },
+});

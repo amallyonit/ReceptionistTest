@@ -6,14 +6,25 @@ import {AppRegistry,PermissionsAndroid} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
 import NotificationPop from './src/components/RecNotification';
-import notifee, { AndroidLaunchActivityFlag, AndroidImportance, AndroidVisibility, EventType, RepeatFrequency, TriggerType, AndroidCategory, AndroidStyle } from '@notifee/react-native';
+import notifee, { AndroidImportance, EventType} from '@notifee/react-native';
 import messaging from "@react-native-firebase/messaging"
-import RNCallKeep from 'react-native-callkeep';
 import uuid from "react-native-uuid"
+import RNCallKeep from "react-native-callkeep"
 
-messaging().getInitialNotification().then((response)=>{
-  console.log("first hit")
+RNCallKeep.setup({
+  ios:{
+    appName:'EZEntry'
+  },
+  android:{
+    alertTitle:'Permission Required',
+    alertDescription:'access contacts',
+    cancelButton: 'Cancel',
+    okButton: 'ok',
+    additionalPermissions:[PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE]
+  }
 })
+const callerID = uuid.v4().toString()
+
 messaging().setBackgroundMessageHandler(async(message)=>{
   const channelId = await notifee.createChannel({
     id:'default',
@@ -21,9 +32,13 @@ messaging().setBackgroundMessageHandler(async(message)=>{
     importance:AndroidImportance.HIGH,
     sound:'not_ez_sound',
   })
+  let messageString;
+  if(message.notification.body!=undefined){
+    messageString = JSON.parse(message.notification.body)
+  }
  await notifee.displayNotification({
     title:'EzEntry Notification',
-    body:"Amal want to meet you",
+    body:`${messageString.VisitorName} want to meet you`,
     android:{ 
       smallIcon:'ic_ezentry_trans',
       channelId,
@@ -35,7 +50,7 @@ messaging().setBackgroundMessageHandler(async(message)=>{
           icon: 'https://my-cdn.com/icons/reply.png',
           pressAction: {
             id: 'Accept',
-            launchActivity:'default'
+            mainComponent:'custom-pop-component'
           },
         },
         {
@@ -43,55 +58,14 @@ messaging().setBackgroundMessageHandler(async(message)=>{
           icon: 'https://my-cdn.com/icons/reply.png',
           pressAction: {
             id: 'Deny',
-            launchActivity:'default',
+            mainComponent:'custom-pop-component'
           },
         },
       ],
     }
   })
-  displayIncomingCall('EzEntry Notification')
-
+  RNCallKeep.displayIncomingCall(callerID,'EZEntryNOtification',`${messageString.VisitorName} want to meet you`,'generic',false)  
 })
-const displayIncomingCall = (number) => {
-
-  const options = {
-    ios: {
-      appName: 'My app name',
-    },
-    android: {
-      alertTitle: 'Permissions required',
-      alertDescription: 'This application needs to access your phone accounts',
-      cancelButton: 'Cancel',
-      okButton: 'ok',
-      imageName: 'phone_account_icon',
-      additionalPermissions: [
-        PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE,  
-        PermissionsAndroid.PERMISSIONS.READ_CALL_LOG,  
-        PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
-        PermissionsAndroid.PERMISSIONS.READ_PHONE_NUMBER
-      ],
-      foregroundService: {
-        channelId: 'com.company.my',
-        channelName: 'Foreground service for my app',
-        notificationTitle: 'My app is running on background',
-        notificationIcon: 'Path to the resource icon of the notification',
-      },
-      selfManaged:true
-    }
-  };
-
-  RNCallKeep.setup(options)
-  RNCallKeep.displayIncomingCall(uuid.v1().toLocaleString(), 'ezEntry Notification', 'ezEntry Notification', 'number', false);
-
-
-  RNCallKeep.setup(options).then((accepted)=>{
-    RNCallKeep.endCall()
-    console.log("call attend",accepted)
-  }).catch(()=>{
-
-  })
-  RNCallKeep.displayIncomingCall(uuid.v3().toLocaleString(), number.toString(), number.toString(), 'number', false);
-}
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {
     const { notification, pressAction } = detail;
@@ -105,3 +79,4 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
   });
 
 AppRegistry.registerComponent(appName, () => App);
+AppRegistry.registerComponent('custom-pop-component',()=>NotificationPop)
