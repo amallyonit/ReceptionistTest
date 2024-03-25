@@ -7,15 +7,15 @@ import Fonts from "../theme/Fonts";
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
-const NotificationPop = ({navigation}:any):JSX.Element =>{
-    const [isModalVisible,setIsModalVisible] = useState(true)
+const NotificationPop = ({confirm}:{confirm:boolean}):JSX.Element =>{
+    const [isModalVisible,setIsModalVisible] = useState(confirm)
 
     return(
         <Modal
         animationType="fade"
         transparent={false}
         statusBarTranslucent={true}
-        visible={isModalVisible}
+        visible={true}
         onRequestClose={() => {
             Alert.alert('User Cancelled!');
         }}>

@@ -18,7 +18,6 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
   const [confirm, setConfirm] = useState(false)
 
   useEffect(() => {
-
     getNotifications()
   },[])
 

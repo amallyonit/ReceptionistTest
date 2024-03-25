@@ -67,3 +67,16 @@ export async function GetPhoneNumberDetails(data:any){
         console.log("error ",error)
     }
 }
+
+export async function UpdateVisitStatus(data:any){
+    try {
+        return axios({
+            method:'post',
+            headers:ApiConfig,
+            url:ServerConfig.urlString+ServerEndpoints.UPDATE_VISITOR_STATUS,
+            data:data
+        })
+    } catch (error) {
+        console.log("error ",error)
+    }
+}

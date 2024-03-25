@@ -43,6 +43,7 @@ const LoginScreen = ({navigation}:any) =>{
             setIsLoader(false)
             AsyncStorage.removeItem('LOGIN')
             StoreValue(MiscStoreKeys.EZ_LOGIN,response.data)
+            AsyncStorage.setItem('FCM_STATUS','')
             let userLocations = response.data.Data[1]
             if(response.data.Data[0][0].UserType=='U'){
               navigation.navigate('Admin')
@@ -72,23 +73,23 @@ const LoginScreen = ({navigation}:any) =>{
         <Image source={receLogo} style={styles.image} />
         <Text style={styles.title}>EzEntry</Text>
         <View style={styles.inputView}>
-            <TextInput style={styles.input} placeholderTextColor={Color.blackRecColor} placeholder='User ID' value={userId} onChangeText={setUserId} autoCorrect={false} autoCapitalize='none' />
-            <View style={styles.searchSection}>
-            <TextInput style={styles.inputPass} 
+            <TextInput style={styles.input} autoComplete="off" placeholderTextColor={Color.blackRecColor} placeholder='User ID' value={userId} onChangeText={setUserId} autoCorrect={false} autoCapitalize='none' />
+        </View>
+        <View style={styles.sectionStyle}>
+        <TextInput style={{flex:1,color:'#464646'}}
+        autoComplete="off"
             placeholderTextColor={Color.blackRecColor} placeholder='Password' 
             secureTextEntry={!showPass}
             value={password} onChangeText={setPassword} autoCorrect={false}
         autoCapitalize='none'/>
-              <MaterialCommunityIcons 
+                      <MaterialCommunityIcons 
                     name={showPass ? 'eye-off' : 'eye'} 
                     size={24} 
                     color={Color.blackRecColor}
-                    style={styles.searchIcon} 
+                    style={styles.imageStyle} 
                     onPress={onVisiblePassword} 
                 /> 
-            </View>
         </View>
-
         <View style={styles.buttonView}>
          <Pressable android_ripple={{color:Color.lightRecBlue}} style={styles.cusButton} onPress={fetchLogin}>
               <Text style={styles.cusText}>Login</Text>
@@ -107,6 +108,22 @@ const styles = StyleSheet.create({
     container : {
       alignItems : "center",
       paddingTop:Dimensions.get('window').height * 0.2,
+    },
+    sectionStyle: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      borderBottomWidth: 1,
+      flex:1,
+      borderColor: '#000',
+      height: 40,
+      borderRadius: 5,
+      margin: 10,
+      marginHorizontal:Dimensions.get('window').width > 756 ? Dimensions.get('window').height * 0.04: Dimensions.get('window').height * 0.07
+    },
+    imageStyle: {
+      color:Color.blackRecColor,
+      alignItems: 'flex-start',
     },
     image : {
       height : 160,

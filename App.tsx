@@ -1,5 +1,5 @@
 "use strict"
-import { NavigationContainer, useNavigation,ParamListBase,  NavigationProp } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import * as React from 'react';
 import LoginScreen from './src/screens/LoginScreen';
@@ -15,15 +15,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createRef, useEffect, useState } from 'react';
 import { NotificationData } from './src/models/RecepModels';
 import { RegisterMessageToken } from './src/requests/recNotifiRequest';
-import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
-import uuid from "react-native-uuid"
-import { PermissionsAndroid, Platform } from 'react-native';
-import RNCallKeep from "react-native-callkeep";
+import notifee, { AndroidImportance, AndroidStyle, EventType } from '@notifee/react-native';
+import { Alert, PermissionsAndroid, Platform } from 'react-native';
 import NotificationPop from './src/components/RecNotification';
-import { MiscStoreKeys } from './src/constants/RecStorageKeys';
 import SplashEzEntryScreen from './src/screens/SplashEzEntryScreen';
 import AdminScreen from './src/screens/AdminScreen';
 import SettingScreen from './src/screens/SettingsScreen';
+import { GetPhoneNumberDetails, UpdateVisitStatus } from './src/requests/recHomeRequest';
+
 const Stack = createNativeStackNavigator()
 
 const onRegisterMessaging = async () => {
@@ -50,24 +49,10 @@ const onRegisterMessaging = async () => {
   }
 }
 
-RNCallKeep.setup({
-  ios:{
-    appName:'EZEntry'
-  },
-  android:{
-    alertTitle:'Permission Required',
-    alertDescription:'access contacts',
-    imageName:'',
-    cancelButton: 'Cancel',
-    okButton: 'ok',
-    additionalPermissions:[PermissionsAndroid.PERMISSIONS.READ_PHONE_STATE]
-  }
-})
 
-const callerID = uuid.v4().toString()
-
-const onMessageGetter = async ()=>{
-  messaging().onMessage(async (message:any)=>{
+const onMessageGetter = async (message:any)=>{
+    let img =""
+    AsyncStorage.setItem('FCM_Data_key',message.data['mastercode'])
     console.log("message ",message.data['data_fcm'])
     const messString:any = JSON.parse(message.data['data_fcm'])
     const channelId = await notifee.createChannel({
@@ -76,74 +61,116 @@ const onMessageGetter = async ()=>{
       importance:AndroidImportance.HIGH,
       sound:'not_ez_sound',
     })
-   await notifee.displayNotification({
-      title:'EzEntry Notification',
-      body:`${messString.VisitorName} want to meet you`,
-      android:{ 
-        channelId,
-        largeIcon:require('./assets/ez_entry_not.png'),
-        sound:'not_ez_sound',
-        actions: [
-          {
-            title: 'Accept',
-            icon: 'https://my-cdn.com/icons/reply.png',
-            pressAction: {
-              id: 'Accept',
-              // mainComponent:'custom-pop-component'
-            },
-          },
-          {
-            title: 'Deny',
-            icon: 'https://my-cdn.com/icons/reply.png',
-            pressAction: {
-              id: 'Deny',
-              // mainComponent:'custom-pop-component'
-            },
-          },
-        ],
-      }
-    })
-    displayincomingCall(messString)
-  })
-
-}
-
-const displayincomingCall = (data?:any) =>{
-  RNCallKeep.displayIncomingCall(callerID,'EZEntry Notification',`${data.VisitorName} and ${data.vistno} waiting  at the main gate.`,'generic',false) 
-}
-const checkApplicationPermission = async () => {
-  if (Platform.OS === 'android') {
-    try {
-      await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
-      await PermissionsAndroid.request('android.permission.CALL_PHONE')
-      await PermissionsAndroid.request('android.permission.READ_PHONE_STATE')
-    } catch (error) {
+    let dataString=""
+    if(messString.VisitTranNoOfVisitors!=undefined){
+      dataString = `${messString.VisitorName} ${" and "} ${messString.VisitTranNoOfVisitors} ${" is waiting at Main Gate From "} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
+    }else{
+      dataString = `${messString.VisitorName} ${" and "} ${" is waiting at Main Gate From "} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
     }
-  }
-}
-const App = () => {
-  const navigationRef:any = createRef();
-  useEffect(() => {
-    notifee.requestPermission()
-    onRegisterMessaging();
-    onMessageGetter();
+    if(messString.VisitorMobileNo!=""){
+      let payload = {
+        VisitorMobileNo:messString.VisitorMobileNo
+    }
+      await GetPhoneNumberDetails(payload).then((response:any)=>{
+        img = response.data.Data[0].VisitorImage
+      }).catch((error)=>{
+        console.log("error ",error)
+      })
+    }
+    if(img!=""){
+      await notifee.displayNotification({
+        title:'EzEntry Notification',
+        body:dataString,
+         android:{ 
+          ongoing:true,
+          loopSound:true,
+          smallIcon:'cus_icon_color',
+          channelId,
+          color:Color.blueRecColor,
+          largeIcon:require('./assets/cus_icon_color.png'),
+          sound:'bel_ring_tone',
+          style:{
+            type:AndroidStyle.BIGPICTURE,picture:`data:image/png;base64,${img}`
+          },
+          actions: [
+            {
+              title: 'Accept',
+              icon: 'https://my-cdn.com/icons/reply.png',
+              pressAction: {
+                id: 'Accept',
+              },
+            },
+            {
+              title: 'Deny',
+              icon: 'https://my-cdn.com/icons/reply.png',
+              pressAction: {
+                id: 'Deny',
+              },
+            },
+          ],
+          fullScreenAction:{
+            id:'default'
+          },
+        }
+      })
+    }
     notifee.onForegroundEvent(async ({ type, detail }) => {
       console.log("event pressed ",detail,type)
       const { notification, pressAction }:any = detail;
       // Check if the user pressed the "Mark as read" action
       if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
+        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+       AsyncStorage.setItem('FCM_STATUS','ACCEPTED')
+    //call the api to get update  api
+    let payload={
+      VisitorMasterCode:dataKey,
+      VisitTranVisitStatus:'A'
+    }
+    try {
+      await UpdateVisitStatus(payload).then((response)=>{
+        console.log("update sucess",response)
+      }).catch((error)=>{
+        console.log("error ",error)
+      })
+    } catch (error) {
+      console.log("error while updating visitor status")
+    }
           console.log("event pressed ",pressAction.id);
-          navigationRef.navigate('Popup')
       }else if(type === EventType.ACTION_PRESS && pressAction.id === 'Deny'){
           await notifee.cancelNotification(notification.id);
-          navigationRef.navigate('Popup')
+          const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+          const getUpdateKey =  await AsyncStorage.getItem('FCM_STATUS')
+        if(getUpdateKey=='ACCEPTED'){
+          let payload={
+            VisitorMasterCode:dataKey,
+            VisitTranVisitStatus:'R'
+          }
+          try {
+            await UpdateVisitStatus(payload).then((response)=>{
+              console.log("update sucess",response)
+            }).catch((error)=>{
+              console.log("error ",error)
+            })
+          } catch (error) {
+            console.log("error while updating visitor status")
+          }
+        }
       }
-      
-    });
-    checkApplicationPermission()
+  })
+}
+
+const App = () => {
+  const navigationRef:any = createRef();
+  useEffect(() => {
+    notifee.requestPermission()
+    onRegisterMessaging();
+    const messageSetile =  messaging().onMessage(onMessageGetter)
+    return ()=>{
+      messageSetile()
+    }
   }, [])
   return (
-     <NavigationContainer ref={navigationRef}>
+     <NavigationContainer>
       <Stack.Navigator  screenOptions={{
         headerTintColor: Color.whiteRecColor,
         headerTitleAlign: 'center', headerTitleStyle: {
@@ -162,7 +189,6 @@ const App = () => {
         <Stack.Screen name='Admin' options={{ headerShown: false }} component={AdminScreen}></Stack.Screen>
         <Stack.Screen name='Activity'  component={ActivityScreen}></Stack.Screen>
         <Stack.Screen name='Settings'component={SettingScreen}></Stack.Screen>
-        <Stack.Screen name='Popup' component={NotificationPop}></Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );

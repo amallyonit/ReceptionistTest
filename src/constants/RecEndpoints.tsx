@@ -6,5 +6,6 @@ export const ServerEndpoints = {
     POST_NOTIFICATION_DATA:'api/v1/recAdmin/getNotificationsByUserType',
     GET_ALL_REVISITORS_DATA:'api/v1/recHome/getVisitorsMobileNumber',
     GET_DETAILS_BY_PHONENUMBER:'api/v1/recHome/getSelectorVisitorDataByPhoneNumber',
-    POST_NOTIFICATION_TOKEN:'api/v1/recNotific/registerMessageData'
+    POST_NOTIFICATION_TOKEN:'api/v1/recNotific/registerMessageData',
+    UPDATE_VISITOR_STATUS:'api/v1/recHome/updateVisitStatus'
 }
