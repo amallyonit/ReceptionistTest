@@ -19,9 +19,10 @@ const FormScreen = ({ route, navigation }: any) => {
         locationCode: '',
         imageDatas: ''
     }
-    const [fErorr, setfErorr] = useState(false)
+    const [usrLcton, setUsrLcton] = useState("")
     const [userslst, setUserlist] = useState([])
     const [phonenos, setPhonenos] = useState([])
+    const [vistCode,setVisitCode]= useState("")
     const [visitStatus,setVisitStatus] = useState('B_STATUS')
     const [uDevToken,setUDevToken] = useState<{MeetingUserCode:'',MeetingDevToken:''}>({MeetingUserCode:'',MeetingDevToken:''})
     const [location, setLocations] = useState<UserLoginLocation[]>([])
@@ -111,6 +112,7 @@ const FormScreen = ({ route, navigation }: any) => {
                     setBase64(response.data.Data[0].VisitorImage)
                     setPlace(response.data.Data[0].VisitTranVisitorFrom)
                     setVisitorname(response.data.Data[0].VisitorName)
+                    setVisitCode(response.data.Data[0].VisitorCode)
                 }
             }).catch((error)=>{
                 console.log("error ",error)
@@ -149,6 +151,7 @@ const FormScreen = ({ route, navigation }: any) => {
         setUserlist([])
         setIsLoaderTrue(false)
         setSelectedImage(null)
+        setVisitCode("")
         setBase64("")
         setMobile("")
         setVisitorname("")
@@ -168,7 +171,7 @@ const FormScreen = ({ route, navigation }: any) => {
                 VisitorName: visiorname,
                 VisitorMobileNo: query,
                 VisitorImage: imageBase,
-                VisitorCode: '',
+                VisitorCode: vistCode,
                 VisitTranMasterCode: '',
                 VisitTranCategory: data.category,
                 VisitTranVisitorFrom: place,
@@ -181,7 +184,7 @@ const FormScreen = ({ route, navigation }: any) => {
                 VisitTranVisitStatus: '',
                 VisitTranRemarks: remarks,
                 MeetingUserCode:uDevToken.MeetingUserCode,
-                MeetingDevToken:uDevToken.MeetingDevToken
+                MeetingDevToken:uDevToken.MeetingDevToken,
             }
             try {
                 await PostVisitorData(payload)?.then((response: any) => {
@@ -207,15 +210,21 @@ const FormScreen = ({ route, navigation }: any) => {
                 
             }
         }else{
-            setfErorr(true)
+
         }
     }
     const [query, setQuery] = useState('');
     const [filteredSuggestions, setFilteredSuggestions] = useState([]);
   
     const handleInputChange = (text:any) => {
+        console.log("ping ")
       setQuery(text);
       filterSuggestions(text);
+      if(filteredSuggestions.length==0){
+        setVisitorname(""),
+        setPlace("")
+        setBase64("")
+      }
     };
   
     const filterSuggestions = (text:any) => {
@@ -237,8 +246,10 @@ const FormScreen = ({ route, navigation }: any) => {
                     <View style={{marginTop:Dimensions.get('window').width > 756 ? 10:10,width:'100%',overflow:'scroll'}}>
                     <View style={{width:'100%'}}>
                     <TextInput
-                        style={{ height: 40,color:Color.blackRecColor, borderBottomColor:query==""? Color.redRecColor:Color.blackRecColor, borderBottomWidth: 1, marginHorizontal:20 }}
+                        style={{ height: 40,color:Color.blackRecColor, borderBottomColor:Color.blackRecColor, borderBottomWidth: 1, marginHorizontal:20 }}
                         value={query}
+                        keyboardType="numeric"
+                        maxLength={10}
                         onChangeText={handleInputChange}
                         placeholder="Type Phone number..."
                         placeholderTextColor={Color.blackRecColor}
@@ -266,17 +277,17 @@ const FormScreen = ({ route, navigation }: any) => {
                         <TextInput
                             value={place}
                             onChangeText={plcs => setPlace(plcs)}
-                            style={styles.input} placeholderTextColor={Color.blackRecColor}
+                            style={[styles.input]} placeholderTextColor={Color.blackRecColor}
                             placeholder='From / Company name / place' autoCapitalize='none' />
                             {place==""&&(<Text style={{color:Color.redRecColor,paddingHorizontal:30}}>Please Enter the From place!</Text>)}            
                         <TextInput
                             value={purpose}
                             onChangeText={purp => setPurpose(purp)}
-                            style={styles.input} placeholderTextColor={Color.blackRecColor}
+                            style={[styles.input]} placeholderTextColor={Color.blackRecColor}
                             placeholder='Purpose of Visit' autoCapitalize='none' />
                             {purpose==""&&(<Text style={{color:Color.redRecColor,paddingHorizontal:30}}>Please Enter the Purpose of visitor!</Text>)}                 
                         <Dropdown
-                            style={styles.dropdown}
+                            style={[styles.dropdown]}
                             placeholderStyle={styles.placeholderStyle}
                             selectedTextStyle={styles.selectedTextStyle}
                             inputSearchStyle={styles.inputSearchStyle}
@@ -291,13 +302,14 @@ const FormScreen = ({ route, navigation }: any) => {
                             searchPlaceholder="Search...locations"
                             value={typeFormData.locationCode}
                             onChange={(item) => {
+                                setUsrLcton(item.LocationCode)
                                 typeFormData.locationCode = item.LocationCode
                                 getUsersByLocationName(typeFormData.locationCode)
                                 console.log("value ", typeFormData.locationCode)
                             }}
-                        />
+                        />{usrLcton==""&&(<Text style={{color:Color.redRecColor,paddingHorizontal:30}}>Please select locations</Text>)}                 
                            <Dropdown
-                            style={styles.dropdown}
+                            style={[styles.dropdown]}
                             placeholderStyle={styles.placeholderStyle}
                             selectedTextStyle={styles.selectedTextStyle}
                             inputSearchStyle={styles.inputSearchStyle}
@@ -321,7 +333,7 @@ const FormScreen = ({ route, navigation }: any) => {
                             value={visitors}
                             onChangeText={(vistno:any) => setVisitors(vistno)}
                             keyboardType="numeric" placeholderTextColor={Color.blackRecColor}
-                            style={styles.input} placeholder='No of Visitors' autoCapitalize='none' />
+                            style={[styles.input]} placeholder='No of Visitors' autoCapitalize='none' />
                     </View>
                     <View style={styles.boxRow}>
                         <View style={styles.uploadBox}>
@@ -492,10 +504,9 @@ const styles = StyleSheet.create({
     input: {
         height: Dimensions.get('window').width > 756 ? 50:40,
         paddingHorizontal: 20,
-        borderColor: Color.blackRecColor,
-        color: Color.blackRecColor,
         borderBottomWidth: 1,
         borderRadius: 50,
+        color:Color.blackRecColor
     },
     remarkInputView: {
         marginTop: Dimensions.get('window').width > 756 ? 160:150,

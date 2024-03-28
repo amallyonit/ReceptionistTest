@@ -1,4 +1,4 @@
-import React, { JSX, ReactElement } from "react";
+import React, { JSX, ReactElement, useEffect } from "react";
 import { useState } from "react";
 import { Alert, Dimensions, Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import Color from "../theme/Color";
@@ -7,15 +7,17 @@ import Fonts from "../theme/Fonts";
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
-const NotificationPop = ({confirm}:{confirm:boolean}):JSX.Element =>{
-    const [isModalVisible,setIsModalVisible] = useState(confirm)
-
+const NotificationPop = ():JSX.Element =>{
+    const [isModalVisible,setIsModalVisible] = useState(true)
+    const details:any=''
+    useEffect(()=>{
+    },[])
     return(
         <Modal
         animationType="fade"
         transparent={false}
         statusBarTranslucent={true}
-        visible={true}
+        visible={isModalVisible}
         onRequestClose={() => {
             Alert.alert('User Cancelled!');
         }}>
@@ -26,10 +28,13 @@ const NotificationPop = ({confirm}:{confirm:boolean}):JSX.Element =>{
                 <View style={styles.hairline}></View>
                 <View style={styles.modalContentStyle}>
                     <View style={{width:'30%'}}>
-                    <Image source={camLogo} style={{height:70,width:70,borderRadius:100}} />
+                    {details != "" ? <Image
+                                source={{ uri:`data:image/png;base64,${details.VisitorImage}` }}
+                                style={{height:70,width:70,borderRadius:100}}></Image> : 
+                                <Image source={camLogo} style={{height:70,width:70,borderRadius:100}} />}
                     </View>
                     <View style={{width:'70%',flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
-                        <Text style={{fontSize:18,color:Color.blackRecColor}}>Sivadarsh s</Text>
+                        <Text style={{fontSize:18,color:Color.blackRecColor}}>{details.VisitorName}</Text>
                     </View>
                 </View>
                 <View style={styles.hairline}></View>
@@ -37,7 +42,7 @@ const NotificationPop = ({confirm}:{confirm:boolean}):JSX.Element =>{
                 paddingHorizontal:10,marginTop:10,
                 borderRadius:10,backgroundColor:Color.whiteRecColor}}>
                     <View style={{width:Dimensions.get('window').width > 1024? '23%':'23%'}}>
-                        <Pressable android_ripple={{color:Color.redRecColor,borderless:true}}>
+                        <Pressable android_ripple={{color:Color.redRecColor,borderless:true}} onPress={()=>{setIsModalVisible(false)}}>
                         <Icon style={{borderRadius:100,borderColor:Color.redRecColor,
                         shadowColor: Color.redRecColor,
                         shadowOffset: {

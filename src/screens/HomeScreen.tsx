@@ -31,6 +31,24 @@ const HomeScreen = ({ route,navigation }: any) => {
             appBarTitle:'',
             category:0
         }
+        const backAction = () => {
+            Alert.alert("Hold on!", "Are you sure you want to go back?", [
+              {
+                text: "Cancel",
+                onPress: () => null,
+                style: "cancel"
+              },
+              { text: "YES", onPress: () => BackHandler.exitApp() }
+            ]);
+            return true;
+          };
+      
+          const backHandler = BackHandler.addEventListener(
+            "hardwareBackPress",
+            backAction
+          );
+      
+          return () => backHandler.remove();
       }, []);
 
     const checkFormScreen=(type:any)=>{
@@ -174,7 +192,6 @@ const HomeScreen = ({ route,navigation }: any) => {
                 <Pressable style={styles.viewSec}>
                 <Icon style={{marginRight:'auto',fontSize:16,borderBottomWidth:1,borderBottomColor:Color.blueRecColor}} name="logout" onPress={logoutApp} color={Color.blueRecColor}>Logout</Icon>
                 <Icon onPress={()=>{navigation.navigate('History')}} style={{marginLeft:'auto',fontSize:16,borderBottomWidth:1,borderBottomColor:Color.blueRecColor}} name="history" color={Color.blueRecColor}>View History</Icon>
-                <Icon onPress={()=>{navigation.navigate('Notfies')}} style={{marginLeft:'auto',fontSize:16,borderBottomWidth:1,borderBottomColor:Color.blueRecColor}} name="history" color={Color.blueRecColor}>Notfies</Icon>
                 </Pressable>
             </View>
             <Image source={receBottomLogo} style={styles.bottomLogo} />

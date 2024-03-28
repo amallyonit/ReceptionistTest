@@ -83,7 +83,7 @@ const LoginScreen = ({navigation}:any) =>{
             value={password} onChangeText={setPassword} autoCorrect={false}
         autoCapitalize='none'/>
                       <MaterialCommunityIcons 
-                    name={showPass ? 'eye-off' : 'eye'} 
+                    name={showPass ? 'eye':'eye-off'} 
                     size={24} 
                     color={Color.blackRecColor}
                     style={styles.imageStyle} 

@@ -40,6 +40,7 @@ export interface ViewNotification{
     VisitTranVisitorFrom: any
     VisitTranMeetingWith: any
     VisitTranVisitStatus: any
+    VisitTranPurpose: any
 }
 
 export interface DeliveryData {
@@ -58,7 +59,14 @@ export interface UserLoginData {
     UserPassword: any
     UserType: any
 }
-
+export interface UserLDData{
+    UserCode: any
+    UserDeviceToken: any
+    UserMobileNo: any
+    UserName: any
+    UserPassword:any
+    UserType: any
+}
 export interface UserLoginLocation {
     LocationAddress:any
     LocationCode: any

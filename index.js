@@ -1,7 +1,7 @@
 /**
  * @format
  */
-import {AppRegistry} from 'react-native';
+import {Alert, AppRegistry} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
 import notifee, { AndroidImportance,AndroidStyle, EventType} from '@notifee/react-native';
@@ -10,12 +10,13 @@ import { GetPhoneNumberDetails,UpdateVisitStatus } from './src/requests/recHomeR
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 messaging().setBackgroundMessageHandler(async(message)=>{
+  AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
   let img =""
   const channelId = await notifee.createChannel({
     id:'default',
     name:'EzEntry Notifications',
     importance:AndroidImportance.HIGH,
-    sound:'not_ez_sound',
+    sound:'old_ring_bell',
   })
   let messageString = JSON.parse(message.data['data_fcm'])
   let dataString=""
@@ -44,7 +45,7 @@ messaging().setBackgroundMessageHandler(async(message)=>{
         smallIcon:'cus_icon_color',
         channelId,
         largeIcon:require('./assets/cus_icon_color.png'),
-        sound:'bel_ring_tone',
+        sound:'old_ring_bell',
         style:{
           type:AndroidStyle.BIGPICTURE,
           picture:`data:image/png;base64,${img}`
@@ -74,14 +75,15 @@ messaging().setBackgroundMessageHandler(async(message)=>{
 })
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   const { notification, pressAction } = detail;
-
   // Check if the user pressed the "Mark as read" action
   if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
     const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+    const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
     AsyncStorage.setItem('FCM_STATUS','ACCEPTED')
     //call the api to get update  api
     let payload={
       VisitorMasterCode:dataKey,
+      VisitTranId:dataKey2,
       VisitTranVisitStatus:'A'
     }
     try {
@@ -97,10 +99,10 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
   }else if(type === EventType.ACTION_PRESS && pressAction.id === 'Deny'){
       await notifee.cancelNotification(notification.id);
       const dataKey = await AsyncStorage.getItem('FCM_Data_key')
-      const getUpdateKey =  await AsyncStorage.getItem('FCM_STATUS')
-    if(getUpdateKey=='ACCEPTED'){
+      const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
       let payload={
         VisitorMasterCode:dataKey,
+        VisitTranId:dataKey2,
         VisitTranVisitStatus:'R'
       }
       try {
@@ -112,18 +114,8 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
       } catch (error) {
         console.log("error while updating visitor status")
       }
-    }
+    
   }
 });
 
-function HeadlessCheck({ isHeadless }) {
-  if (isHeadless) {
-    // App has been launched in the background by iOS, ignore
-    return null;
-  }
-
-  return <App />;
-}
-
-
-AppRegistry.registerComponent(appName, () => HeadlessCheck);
+AppRegistry.registerComponent(appName, () => App);

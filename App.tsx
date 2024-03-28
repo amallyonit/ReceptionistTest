@@ -16,12 +16,13 @@ import { createRef, useEffect, useState } from 'react';
 import { NotificationData } from './src/models/RecepModels';
 import { RegisterMessageToken } from './src/requests/recNotifiRequest';
 import notifee, { AndroidImportance, AndroidStyle, EventType } from '@notifee/react-native';
-import { Alert, PermissionsAndroid, Platform } from 'react-native';
+import { PermissionsAndroid } from 'react-native';
 import NotificationPop from './src/components/RecNotification';
 import SplashEzEntryScreen from './src/screens/SplashEzEntryScreen';
 import AdminScreen from './src/screens/AdminScreen';
 import SettingScreen from './src/screens/SettingsScreen';
 import { GetPhoneNumberDetails, UpdateVisitStatus } from './src/requests/recHomeRequest';
+
 
 const Stack = createNativeStackNavigator()
 
@@ -49,17 +50,17 @@ const onRegisterMessaging = async () => {
   }
 }
 
-
 const onMessageGetter = async (message:any)=>{
     let img =""
     AsyncStorage.setItem('FCM_Data_key',message.data['mastercode'])
+    AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
     console.log("message ",message.data['data_fcm'])
     const messString:any = JSON.parse(message.data['data_fcm'])
     const channelId = await notifee.createChannel({
       id:'default',
       name:'EzEntry Notifications',
       importance:AndroidImportance.HIGH,
-      sound:'not_ez_sound',
+      sound:'old_ring_bell',
     })
     let dataString=""
     if(messString.VisitTranNoOfVisitors!=undefined){
@@ -88,7 +89,7 @@ const onMessageGetter = async (message:any)=>{
           channelId,
           color:Color.blueRecColor,
           largeIcon:require('./assets/cus_icon_color.png'),
-          sound:'bel_ring_tone',
+          sound:'old_ring_bell',
           style:{
             type:AndroidStyle.BIGPICTURE,picture:`data:image/png;base64,${img}`
           },
@@ -120,10 +121,12 @@ const onMessageGetter = async (message:any)=>{
       // Check if the user pressed the "Mark as read" action
       if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
         const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
        AsyncStorage.setItem('FCM_STATUS','ACCEPTED')
     //call the api to get update  api
     let payload={
       VisitorMasterCode:dataKey,
+      VisitTranId:dataKey2,
       VisitTranVisitStatus:'A'
     }
     try {
@@ -137,12 +140,11 @@ const onMessageGetter = async (message:any)=>{
     }
           console.log("event pressed ",pressAction.id);
       }else if(type === EventType.ACTION_PRESS && pressAction.id === 'Deny'){
-          await notifee.cancelNotification(notification.id);
           const dataKey = await AsyncStorage.getItem('FCM_Data_key')
-          const getUpdateKey =  await AsyncStorage.getItem('FCM_STATUS')
-        if(getUpdateKey=='ACCEPTED'){
+          const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
           let payload={
             VisitorMasterCode:dataKey,
+            VisitTranId:dataKey2,
             VisitTranVisitStatus:'R'
           }
           try {
@@ -154,20 +156,19 @@ const onMessageGetter = async (message:any)=>{
           } catch (error) {
             console.log("error while updating visitor status")
           }
-        }
+          await notifee.cancelNotification(notification.id);
       }
   })
 }
 
 const App = () => {
-  const navigationRef:any = createRef();
   useEffect(() => {
     notifee.requestPermission()
     onRegisterMessaging();
     const messageSetile =  messaging().onMessage(onMessageGetter)
-    return ()=>{
+    return () => {
       messageSetile()
-    }
+    };
   }, [])
   return (
      <NavigationContainer>
@@ -189,6 +190,7 @@ const App = () => {
         <Stack.Screen name='Admin' options={{ headerShown: false }} component={AdminScreen}></Stack.Screen>
         <Stack.Screen name='Activity'  component={ActivityScreen}></Stack.Screen>
         <Stack.Screen name='Settings'component={SettingScreen}></Stack.Screen>
+        <Stack.Screen name='Popup' component={NotificationPop}></Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );
