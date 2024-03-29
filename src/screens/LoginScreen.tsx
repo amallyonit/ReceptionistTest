@@ -72,6 +72,8 @@ const LoginScreen = ({navigation}:any) =>{
         <View style={styles.container}>
         <Image source={receLogo} style={styles.image} />
         <Text style={styles.title}>EzEntry</Text>
+        <View>
+        </View>
         <View style={styles.inputView}>
             <TextInput style={styles.input} autoComplete="off" placeholderTextColor={Color.blackRecColor} placeholder='User ID' value={userId} onChangeText={setUserId} autoCorrect={false} autoCapitalize='none' />
         </View>
@@ -112,14 +114,16 @@ const styles = StyleSheet.create({
     sectionStyle: {
       flexDirection: 'row',
       justifyContent: 'center',
+      paddingHorizontal:20,
       alignItems: 'center',
       borderBottomWidth: 1,
       flex:1,
       borderColor: '#000',
-      height: 40,
-      borderRadius: 5,
+      height: 45,
+      borderRadius: 0,
       margin: 10,
-      marginHorizontal:Dimensions.get('window').width > 756 ? Dimensions.get('window').height * 0.04: Dimensions.get('window').height * 0.07
+      backgroundColor:Color.lightRecBlue,
+      marginHorizontal:Dimensions.get('window').width > 756 ? Dimensions.get('window').height * 0.03: Dimensions.get('window').height * 0.07
     },
     imageStyle: {
       color:Color.blackRecColor,
@@ -166,10 +170,11 @@ const styles = StyleSheet.create({
     input : {
       height : 50,
       paddingHorizontal : 20,
-      borderColor : "black",
+      borderColor :Color.blackRecColor,
+      backgroundColor:Color.lightRecBlue,
       color:'#464646',
       borderBottomWidth:1,
-      borderRadius: 50
+      borderRadius: 0
     },
     rememberView : {
       width : "100%",

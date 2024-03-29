@@ -24,7 +24,7 @@ const ViewHistoryScreen = ({ navigation }: any) => {
     const [isLoader,setIsLoader] = useState(false)
     const [userToken,setUserToken] = useState<UserPayload>({userid:'',token:''})
     useEffect(()=>{
-        getVisiorNumbers()
+        // getVisiorNumbers()
     },[])
 
     const [query, setQuery] = useState('');
@@ -96,14 +96,16 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                     <View style={styles.uploadBox}>
                     <View style={{width:'100%'}}>
                     <TextInput
-                        style={{ height: 40,color:Color.blackRecColor, borderBottomColor:query==""? Color.redRecColor:Color.blackRecColor, borderBottomWidth: 1, marginHorizontal:20 }}
+                        style={{ height: 40,color:Color.blackRecColor, borderBottomColor:Color.blackRecColor, borderBottomWidth: 1, marginHorizontal:20 }}
                         value={query}
+                        onPressIn={()=>{getVisiorNumbers()}}
                         onChangeText={handleInputChange}
+                        autoComplete="off"
+                        keyboardType="numeric"
                         placeholder="Type Phone number..."
                         placeholderTextColor={Color.blackRecColor}
                     />
-                    {query==""&&(<Text style={{color:Color.redRecColor,paddingHorizontal:30}}>Please Enter the Mobile no!</Text>)}
-                    <FlatList
+                     <FlatList
                         data={filteredSuggestions}
                         renderItem={({ item }:any) => (
                         <Pressable  onPress={() => handleSelectSuggestion(item)}>
@@ -112,7 +114,7 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                         )}
                         keyExtractor={(item, index) => index.toString()}
                         style={{maxHeight:200,marginTop:40,marginHorizontal:20,position:'absolute',zIndex:1,backgroundColor:'#fff',
-                        width:Dimensions.get('window').width > 756?560:290}}
+                        width:Dimensions.get('window').width > 756?560:280}}
                     />
                     </View>
                         <View style={styles.inputView}>

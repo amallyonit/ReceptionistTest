@@ -19,7 +19,7 @@ const NotificationPop = ():JSX.Element =>{
         statusBarTranslucent={true}
         visible={isModalVisible}
         onRequestClose={() => {
-            Alert.alert('User Cancelled!');
+            console.log("pressed")
         }}>
         <View style={styles.centeredView}>
             <View style={styles.modalView}>

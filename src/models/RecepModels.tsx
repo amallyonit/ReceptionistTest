@@ -41,6 +41,9 @@ export interface ViewNotification{
     VisitTranMeetingWith: any
     VisitTranVisitStatus: any
     VisitTranPurpose: any
+    VisitTranNoOfVisitors: any
+    VisitTranId: any
+    VisitorCode: any
 }
 
 export interface DeliveryData {

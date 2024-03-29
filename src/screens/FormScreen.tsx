@@ -40,7 +40,6 @@ const FormScreen = ({ route, navigation }: any) => {
     const [meet, setMeetWith] = useState("")
     useEffect(() => {
         navigation.setOptions({ headerTitle: data.appBarTitle})
-        getVisiorNumbers()
         setMobile('')
         try {
             AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN).then((response: any) => {
@@ -243,18 +242,18 @@ const FormScreen = ({ route, navigation }: any) => {
         <SafeAreaView>
             <View>
                 <View style={styles.container}>
-                    <View style={{marginTop:Dimensions.get('window').width > 756 ? 10:10,width:'100%',overflow:'scroll'}}>
+                    <View style={{marginTop:Dimensions.get('window').width > 756 ? 15:10,width:'100%',overflow:'scroll'}}>
                     <View style={{width:'100%'}}>
                     <TextInput
-                        style={{ height: 40,color:Color.blackRecColor, borderBottomColor:Color.blackRecColor, borderBottomWidth: 1, marginHorizontal:20 }}
+                        style={[styles.input,{marginHorizontal:Dimensions.get('window').width > 756?30:0}]}
                         value={query}
                         keyboardType="numeric"
                         maxLength={10}
+                        onPressIn={()=>{getVisiorNumbers()}}
                         onChangeText={handleInputChange}
                         placeholder="Type Phone number..."
                         placeholderTextColor={Color.blackRecColor}
                     />
-                    {query==""&&(<Text style={{color:Color.redRecColor,paddingHorizontal:30}}>Please Enter the Mobile no!</Text>)}
                     <FlatList
                         data={filteredSuggestions}
                         renderItem={({ item }:any) => (
@@ -273,19 +272,16 @@ const FormScreen = ({ route, navigation }: any) => {
                             onChangeText={name => setVisitorname(name)}
                             style={styles.input} placeholderTextColor={Color.blackRecColor}
                             placeholder='Name of Vistor' autoCapitalize='none' />
-                            {visiorname==""&&(<Text style={{color:Color.redRecColor,paddingHorizontal:30}}>Please Enter the Visitorname!</Text>)}                 
                         <TextInput
                             value={place}
                             onChangeText={plcs => setPlace(plcs)}
                             style={[styles.input]} placeholderTextColor={Color.blackRecColor}
                             placeholder='From / Company name / place' autoCapitalize='none' />
-                            {place==""&&(<Text style={{color:Color.redRecColor,paddingHorizontal:30}}>Please Enter the From place!</Text>)}            
                         <TextInput
                             value={purpose}
                             onChangeText={purp => setPurpose(purp)}
                             style={[styles.input]} placeholderTextColor={Color.blackRecColor}
                             placeholder='Purpose of Visit' autoCapitalize='none' />
-                            {purpose==""&&(<Text style={{color:Color.redRecColor,paddingHorizontal:30}}>Please Enter the Purpose of visitor!</Text>)}                 
                         <Dropdown
                             style={[styles.dropdown]}
                             placeholderStyle={styles.placeholderStyle}
@@ -307,8 +303,8 @@ const FormScreen = ({ route, navigation }: any) => {
                                 getUsersByLocationName(typeFormData.locationCode)
                                 console.log("value ", typeFormData.locationCode)
                             }}
-                        />{usrLcton==""&&(<Text style={{color:Color.redRecColor,paddingHorizontal:30}}>Please select locations</Text>)}                 
-                           <Dropdown
+                        />
+                        <Dropdown
                             style={[styles.dropdown]}
                             placeholderStyle={styles.placeholderStyle}
                             selectedTextStyle={styles.selectedTextStyle}
@@ -328,7 +324,6 @@ const FormScreen = ({ route, navigation }: any) => {
                                 setUDevToken({MeetingUserCode:item.UserCode,MeetingDevToken:item.UserDeviceToken})
                             }}
                         />
-                        {meet==""&&(<Text style={{color:Color.redRecColor,paddingHorizontal:30}}>Please Select Meeting person!</Text>)}                 
                         <TextInput
                             value={visitors}
                             onChangeText={(vistno:any) => setVisitors(vistno)}
@@ -503,10 +498,14 @@ const styles = StyleSheet.create({
     },
     input: {
         height: Dimensions.get('window').width > 756 ? 50:40,
-        paddingHorizontal: 20,
+        paddingHorizontal: 10,
         borderBottomWidth: 1,
-        borderRadius: 50,
-        color:Color.blackRecColor
+        borderTopRightRadius:11,
+        borderTopLeftRadius:11,
+        color:Color.blackRecColor,
+        backgroundColor:Color.lightNewGrey,
+        marginHorizontal:20,
+        marginBottom:Dimensions.get('window').width > 756 ? 10:2
     },
     remarkInputView: {
         marginTop: Dimensions.get('window').width > 756 ? 160:150,
@@ -528,6 +527,10 @@ const styles = StyleSheet.create({
         borderBottomColor: Color.blackRecColor,
         borderBottomWidth: 1,
         marginHorizontal: 20,
+        backgroundColor:Color.lightNewGrey,
+        borderTopRightRadius:11,
+        borderTopLeftRadius:11,
+        marginBottom:Dimensions.get('window').width > 756 ?5:0
     },
     icon: {
         marginRight: 5,
