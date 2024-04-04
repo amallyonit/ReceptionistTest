@@ -4,12 +4,14 @@
 import {Alert, AppRegistry} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
-import notifee, { AndroidImportance,AndroidStyle, EventType} from '@notifee/react-native';
+import notifee, { AndroidBadgeIconType, AndroidImportance,AndroidStyle, EventType} from '@notifee/react-native';
 import messaging from "@react-native-firebase/messaging"
 import { GetPhoneNumberDetails,UpdateVisitStatus } from './src/requests/recHomeRequest';
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Color from './src/theme/Color';  
 
-messaging().setBackgroundMessageHandler(async(message)=>{
+
+messaging().getInitialNotification(async (message)=>{
   AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
   let img =""
   const channelId = await notifee.createChannel({
@@ -17,6 +19,8 @@ messaging().setBackgroundMessageHandler(async(message)=>{
     name:'EzEntry Notifications',
     importance:AndroidImportance.HIGH,
     sound:'old_ring_bell',
+    lightColor:Color.blueRecColor,
+    lights:true,
   })
   let messageString = JSON.parse(message.data['data_fcm'])
   let dataString=""
@@ -42,6 +46,7 @@ messaging().setBackgroundMessageHandler(async(message)=>{
       android:{ 
         ongoing:true,
         loopSound:true,
+        badgeIconType:AndroidBadgeIconType.LARGE,
         smallIcon:'cus_icon_color',
         channelId,
         largeIcon:require('./assets/cus_icon_color.png'),
@@ -56,6 +61,7 @@ messaging().setBackgroundMessageHandler(async(message)=>{
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Accept',
+              launchActivity:'default'
             },
           },
           {
@@ -63,16 +69,87 @@ messaging().setBackgroundMessageHandler(async(message)=>{
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Deny',
+              launchActivity:'default'
             },
           },
         ],
-        fullScreenAction:{
-          id:'default'
-        },
       }
     })
   }
 })
+
+messaging().setBackgroundMessageHandler(async(message)=>{
+  AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
+  let img =""
+  const channelId = await notifee.createChannel({
+    id:'default',
+    name:'EzEntry Notifications',
+    importance:AndroidImportance.HIGH,
+    sound:'old_ring_bell',
+    lightColor:Color.blueRecColor,
+    lights:true,
+  })
+  let messageString = JSON.parse(message.data['data_fcm'])
+  let dataString=""
+  if(messageString.VisitTranNoOfVisitors!=undefined){
+    dataString = `${messageString.VisitorName} ${" and "} ${messageString.VisitTranNoOfVisitors} ${" is waiting at Main Gate From "} ${messageString.VisitTranVisitorFrom} ${" "}${messageString.VisitTranPurpose}`;
+  }else{
+    dataString = `${messageString.VisitorName} ${" and "} ${" is waiting at Main Gate From "} ${messageString.VisitTranVisitorFrom} ${" "}${messageString.VisitTranPurpose}`;
+  }
+  if(messageString.VisitorMobileNo!=""){
+    let payload = {
+      VisitorMobileNo:messageString.VisitorMobileNo
+  }
+    await GetPhoneNumberDetails(payload).then((response)=>{
+      img = response.data.Data[0].VisitorImage
+    }).catch((error)=>{
+      console.log("error ",error)
+    })
+  }
+  if(img!=''){
+    await notifee.displayNotification({
+      title:'<p style="color:#99c2ff"><b>Persons are Watiting...</span></p></b></p>',
+      body:dataString,
+      ios:{
+        criticalVolume:1.0,
+        critical:true,
+        sound:'old_ring_bell',
+      },
+      android:{ 
+        ongoing:true,
+        loopSound:true,
+        badgeIconType:AndroidBadgeIconType.LARGE,
+        smallIcon:'cus_icon_color',
+        channelId,
+        largeIcon:require('./assets/cus_icon_color.png'),
+        sound:'old_ring_bell',
+        style:{
+          type:AndroidStyle.BIGPICTURE,
+          picture:`data:image/png;base64,${img}`
+        },
+        actions: [
+          {
+            title: 'Accept',
+            icon: 'https://my-cdn.com/icons/reply.png',
+            pressAction: {
+              id: 'Accept',
+              launchActivity:'default'
+            },
+          },
+          {
+            title: 'Deny',
+            icon: 'https://my-cdn.com/icons/reply.png',
+            pressAction: {
+              id: 'Deny',
+              launchActivity:'default'
+            },
+          },
+        ],
+      }
+    })
+  }
+})
+
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   const { notification, pressAction } = detail;
   // Check if the user pressed the "Mark as read" action

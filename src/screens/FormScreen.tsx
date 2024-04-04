@@ -22,9 +22,9 @@ const FormScreen = ({ route, navigation }: any) => {
     const [usrLcton, setUsrLcton] = useState("")
     const [userslst, setUserlist] = useState([])
     const [phonenos, setPhonenos] = useState([])
-    const [vistCode,setVisitCode]= useState("")
-    const [visitStatus,setVisitStatus] = useState('B_STATUS')
-    const [uDevToken,setUDevToken] = useState<{MeetingUserCode:'',MeetingDevToken:''}>({MeetingUserCode:'',MeetingDevToken:''})
+    const [vistCode, setVisitCode] = useState("")
+    const [visitStatus, setVisitStatus] = useState('B_STATUS')
+    const [uDevToken, setUDevToken] = useState<{ MeetingUserCode: '', MeetingDevToken: '' }>({ MeetingUserCode: '', MeetingDevToken: '' })
     const [location, setLocations] = useState<UserLoginLocation[]>([])
     const [usertoken, setUserToken] = useState<UserPayload>({ token: '', userid: '' })
     const [isModalVisible, setIsModalVisible] = useState(false);
@@ -38,38 +38,34 @@ const FormScreen = ({ route, navigation }: any) => {
     const [visitors, setVisitors] = useState("1")
     const [remarks, setRemarks] = useState("")
     const [meet, setMeetWith] = useState("")
+    const [viewUser, setViewUser] = useState(null)
     useEffect(() => {
-        navigation.setOptions({ headerTitle: data.appBarTitle})
+        navigation.setOptions({ headerTitle: data.appBarTitle })
         setMobile('')
-        try {
-            AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN).then((response: any) => {
-                let items = JSON.parse(response)
-                if (items.Status) {
-                    setLocations(items.Data[1])
-                    typeFormData.locationCode = items.Data[0][0].UserCode
-                    let tokenPay: UserPayload = {
-                        userid: items.Data[0][0].UserCode,
-                        token: items.Token
-                    }
-                    setUserToken(tokenPay)
-                } else {
-                    setLocations([])
-                }
-            }).catch((error: any) => {
-                console.log("error response ", error)
-            })
-        } catch (error) {
-            console.log("error ", error)
-        }
+        setUsrLcton('')
+        getUserData()
     }, [])
     const data: InfoFormProps = route.params["propData"]
+
+    const getUserData = async () => {
+        setUsrLcton('')
+        const data: any = await AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN)
+        const vals = JSON.parse(data)
+        console.log("data ", vals.Status)
+        setViewUser(vals.Data[0][0])
+        if(vals.Status){
+            setLocations(vals.Data[1])
+            setUsrLcton(location[0]?.LocationCode)
+        }
+        console.log(" dat ",location,usrLcton)
+      }
     const getUsersByLocationName = async (code: any) => {
         let payload = {
             UserLocationCode: code
         }
         try {
-           await GetUsersByLocation(JSON.stringify(payload))?.then((response:any) => {
-                console.log("response ", response.data)
+            await GetUsersByLocation(JSON.stringify(payload))?.then((response: any) => {
+                // console.log("response ", response.data)
                 setUserlist(response.data.Data)
             }).catch((error: any) => {
                 console.log("error ", error)
@@ -86,7 +82,7 @@ const FormScreen = ({ route, navigation }: any) => {
         }
 
         try {
-           await GetAllRevisitorsData(JSON.stringify(payload))?.then((response:any) => {
+            await GetAllRevisitorsData(JSON.stringify(payload))?.then((response: any) => {
                 console.log(response)
                 if (response.data.Status) {
                     setPhonenos(response.data.Data)
@@ -100,25 +96,26 @@ const FormScreen = ({ route, navigation }: any) => {
         }
     }
 
-    const getDetailsByPhoneno=async (value:any)=>{
+    const getDetailsByPhoneno = async (value: any) => {
         let payload = {
-            VisitorMobileNo:mobile!=''?mobile:value
+            VisitorMobileNo: mobile != '' ? mobile : value
         }
-        console.log("mobile no ",payload)
+        console.log("mobile no ", payload)
         try {
-           await GetPhoneNumberDetails(payload)?.then((response:any)=>{
-                if(response.data.Status){
+            await GetPhoneNumberDetails(payload)?.then((response: any) => {
+                console.log("data resp ",response.data.Data)
+                if (response.data.Status) {
                     setBase64(response.data.Data[0].VisitorImage)
                     setPlace(response.data.Data[0].VisitTranVisitorFrom)
                     setVisitorname(response.data.Data[0].VisitorName)
                     setVisitCode(response.data.Data[0].VisitorCode)
                 }
-            }).catch((error)=>{
-                console.log("error ",error)
+            }).catch((error) => {
+                console.log("error ", error)
                 setIsLoaderTrue(false)
             })
         } catch (error) {
-            console.log("error ",error)
+            console.log("error ", error)
         }
     }
 
@@ -159,12 +156,14 @@ const FormScreen = ({ route, navigation }: any) => {
         setVisitors("1")
         setRemarks("")
         setMeetWith("")
-        typeFormData.locationCode=""
-        setUDevToken({MeetingUserCode:'',MeetingDevToken:''})
+        setUsrLcton("")
+        setQuery("")
+        typeFormData.locationCode = ""
+        setUDevToken({ MeetingUserCode: '', MeetingDevToken: '' })
     }
 
     const onSendRequest = async () => {
-        if(query!="" && meet!="" && place!=""){
+        if (query != "" && meet != "" && place != "" && purpose != "") {
             setIsLoaderTrue(true)
             let payload = {
                 VisitorName: visiorname,
@@ -174,7 +173,7 @@ const FormScreen = ({ route, navigation }: any) => {
                 VisitTranMasterCode: '',
                 VisitTranCategory: data.category,
                 VisitTranVisitorFrom: place,
-                VisitTranNoOfVisitors:visitors,
+                VisitTranNoOfVisitors: visitors,
                 VisitTranPurpose: purpose,
                 VisitTranMeetingWith: meet,
                 VisitTranCheckinTime: '',
@@ -182,8 +181,8 @@ const FormScreen = ({ route, navigation }: any) => {
                 VisitTranVisitType: data.type,
                 VisitTranVisitStatus: '',
                 VisitTranRemarks: remarks,
-                MeetingUserCode:uDevToken.MeetingUserCode,
-                MeetingDevToken:uDevToken.MeetingDevToken,
+                MeetingUserCode: uDevToken.MeetingUserCode,
+                MeetingDevToken: uDevToken.MeetingDevToken,
             }
             try {
                 await PostVisitorData(payload)?.then((response: any) => {
@@ -191,9 +190,9 @@ const FormScreen = ({ route, navigation }: any) => {
                     if (response.data.Status) {
                         setIsModalVisible(true)
                         setIsLoaderTrue(false)
-                        if(response.data.VStatus=='R_STATUS'){
+                        if (response.data.VStatus == 'R_STATUS') {
                             setVisitStatus('R_STATUS')
-                        }else if(response.data.VStatus=='S_STATUS'){
+                        } else if (response.data.VStatus == 'S_STATUS') {
                             setVisitStatus('S_STATUS')
                             resetVisitForm()
                         }
@@ -206,167 +205,167 @@ const FormScreen = ({ route, navigation }: any) => {
                     console.log("error ", error)
                 })
             } catch (error) {
-                
-            }
-        }else{
 
+            }
+        } else {
+            
         }
     }
     const [query, setQuery] = useState('');
     const [filteredSuggestions, setFilteredSuggestions] = useState([]);
-  
-    const handleInputChange = (text:any) => {
+
+    const handleInputChange = (text: any) => {
         console.log("ping ")
-      setQuery(text);
-      filterSuggestions(text);
-      if(filteredSuggestions.length==0){
-        setVisitorname(""),
-        setPlace("")
-        setBase64("")
-      }
+        setQuery(text);
+        filterSuggestions(text);
+        if (filteredSuggestions.length == 0) {
+            setVisitorname(""),
+                setPlace("")
+            setBase64("")
+        }
     };
-  
-    const filterSuggestions = (text:any) => {
-      const filtered = phonenos.filter((item:any) =>
-        item.VisitorMobileNo.toLowerCase().includes(text.toLowerCase())
-      );
-      setFilteredSuggestions(filtered);
+
+    const filterSuggestions = (text: any) => {
+        const filtered = phonenos.filter((item: any) =>
+            item.VisitorMobileNo.toLowerCase().includes(text.toLowerCase())
+        );
+        setFilteredSuggestions(filtered);
     };
-  
-    const handleSelectSuggestion = (item:any) => {
-      setQuery(item.VisitorMobileNo);
-      setFilteredSuggestions([]);
-      getDetailsByPhoneno(item.VisitorMobileNo)
+
+    const handleSelectSuggestion = (item: any) => {
+        setQuery(item.VisitorMobileNo);
+        setFilteredSuggestions([]);
+        getDetailsByPhoneno(item.VisitorMobileNo)
     };
     return (
         <SafeAreaView>
             <View>
                 <View style={styles.container}>
-                    <View style={{marginTop:Dimensions.get('window').width > 756 ? 15:10,width:'100%',overflow:'scroll'}}>
-                    <View style={{width:'100%'}}>
-                    <TextInput
-                        style={[styles.input,{marginHorizontal:Dimensions.get('window').width > 756?30:0}]}
-                        value={query}
-                        keyboardType="numeric"
-                        maxLength={10}
-                        onPressIn={()=>{getVisiorNumbers()}}
-                        onChangeText={handleInputChange}
-                        placeholder="Type Phone number..."
-                        placeholderTextColor={Color.blackRecColor}
-                    />
-                    <FlatList
-                        data={filteredSuggestions}
-                        renderItem={({ item }:any) => (
-                        <Pressable  onPress={() => handleSelectSuggestion(item)}>
-                            <Text style={{ padding: 15,width:'100%',color:Color.blackRecColor,borderBottomColor:Color.lightGreyRecColor,borderBottomWidth:1 }}>{item.VisitorMobileNo}</Text>
-                        </Pressable>
-                        )}
-                        keyExtractor={(item, index) => index.toString()}
-                        style={{maxHeight:200,marginTop:40,marginHorizontal:20,position:'absolute',zIndex:1,backgroundColor:'#fff',
-                        width:Dimensions.get('window').width > 756?754:352}}
-                    />
-                    </View>
-                    <View style={styles.inputView1}>
-                        <TextInput
-                            value={visiorname}
-                            onChangeText={name => setVisitorname(name)}
-                            style={styles.input} placeholderTextColor={Color.blackRecColor}
-                            placeholder='Name of Vistor' autoCapitalize='none' />
-                        <TextInput
-                            value={place}
-                            onChangeText={plcs => setPlace(plcs)}
-                            style={[styles.input]} placeholderTextColor={Color.blackRecColor}
-                            placeholder='From / Company name / place' autoCapitalize='none' />
-                        <TextInput
-                            value={purpose}
-                            onChangeText={purp => setPurpose(purp)}
-                            style={[styles.input]} placeholderTextColor={Color.blackRecColor}
-                            placeholder='Purpose of Visit' autoCapitalize='none' />
-                        <Dropdown
-                            style={[styles.dropdown]}
-                            placeholderStyle={styles.placeholderStyle}
-                            selectedTextStyle={styles.selectedTextStyle}
-                            inputSearchStyle={styles.inputSearchStyle}
-                            iconStyle={styles.iconStyle}
-                            data={location}
-                            itemTextStyle={{ color: Color.blackRecColor }}
-                            search
-                            maxHeight={300}
-                            labelField="LocationName"
-                            valueField="LocationCode"
-                            placeholder="Company name"
-                            searchPlaceholder="Search...locations"
-                            value={typeFormData.locationCode}
-                            onChange={(item) => {
-                                setUsrLcton(item.LocationCode)
-                                typeFormData.locationCode = item.LocationCode
-                                getUsersByLocationName(typeFormData.locationCode)
-                                console.log("value ", typeFormData.locationCode)
-                            }}
-                        />
-                        <Dropdown
-                            style={[styles.dropdown]}
-                            placeholderStyle={styles.placeholderStyle}
-                            selectedTextStyle={styles.selectedTextStyle}
-                            inputSearchStyle={styles.inputSearchStyle}
-                            iconStyle={styles.iconStyle}
-                            data={userslst}
-                            itemTextStyle={{ color: Color.blackRecColor }}
-                            search
-                            maxHeight={300}
-                            labelField="UserName"
-                            valueField="UserCode"
-                            placeholder="Meeting with"
-                            searchPlaceholder="Search...locations"
-                            value={meet}
-                            onChange={(item: any) => {
-                                setMeetWith(item.UserCode)
-                                setUDevToken({MeetingUserCode:item.UserCode,MeetingDevToken:item.UserDeviceToken})
-                            }}
-                        />
-                        <TextInput
-                            value={visitors}
-                            onChangeText={(vistno:any) => setVisitors(vistno)}
-                            keyboardType="numeric" placeholderTextColor={Color.blackRecColor}
-                            style={[styles.input]} placeholder='No of Visitors' autoCapitalize='none' />
-                    </View>
-                    <View style={styles.boxRow}>
-                        <View style={styles.uploadBox}>
-                            {imageBase != "" ? <Image
-                                source={{ uri:`data:image/png;base64,${imageBase}` }}
-                                style={styles.imageSize}></Image> : <Image
-                                    source={camLogo}
-                                    style={styles.imageSize}></Image>}
-                        </View>
-                        <View style={styles.uploadBox}>
-                            <Pressable android_ripple={{ color: Color.lightRecBlue }} onPress={onSendRequest} style={styles.outlineButton}>
-                                <Text style={styles.buttonText} >Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
-                            </Pressable>
-                            <View style={styles.statusView}>
-                                {(visitStatus =='R_STATUS')?(
-                                    <Text style={styles.statusRText}>Status <Icon name="check-circle" size={18} color={Color.redRecColor}></Icon></Text>
-                                ):(visitStatus =='S_STATUS')?(
-                                    <Text style={styles.statusSText}>Status <Icon name="check-circle" size={18} color={Color.greenRecColor}></Icon></Text>
-                                ):(
-                                    <Text style={styles.statusText}>Status <Icon name="check-circle" size={18} color={Color.blackRecColor}></Icon></Text>
+                    <View style={{ marginTop: Dimensions.get('window').width > 756 ? 15 : 20, width: '100%', overflow: 'scroll' }}>
+                        <View style={{ width: '100%' }}>
+                            <TextInput
+                                style={[styles.input, { borderBottomColor:query==''?Color.redRecColor:Color.darkRecGray, marginHorizontal: Dimensions.get('window').width > 756 ? 30 : 30 }]}
+                                value={query}
+                                keyboardType="numeric"
+                                maxLength={10}
+                                onPressIn={() => { getVisiorNumbers() }}
+                                onChangeText={handleInputChange}
+                                placeholder="Type Phone number..."
+                                placeholderTextColor={Color.blackRecColor}
+                            />
+                            <FlatList
+                                data={filteredSuggestions}
+                                renderItem={({ item }: any) => (
+                                    <Pressable onPress={() => handleSelectSuggestion(item)}>
+                                        <Text style={{ padding: 15, width: '100%', color: Color.blackRecColor, borderBottomColor: Color.lightGreyRecColor, borderBottomWidth: 1 }}>{item.VisitorMobileNo}</Text>
+                                    </Pressable>
                                 )}
-                             </View>
+                                keyExtractor={(item, index) => index.toString()}
+                                style={{
+                                    maxHeight: 200, marginTop: 40, marginHorizontal: 20, position: 'absolute', zIndex: 1, backgroundColor: '#fff',
+                                    width: Dimensions.get('window').width > 756 ? 754 : 350
+                                }}
+                            />
                         </View>
-                    </View>
-                    <View style={styles.remarkInputView}>
-                        <Text
-                            onPress={handleCameraLaunch}
-                            style={{ marginRight: 'auto', marginLeft: 10, textAlign: 'center', color: 'blue', borderBottomWidth: 1, borderBottomColor: 'blue' }}>Take Photo</Text>
-                    </View>
-                    <View style={styles.remarkInputView1}>
-                        <TextInput
-                            value={remarks}
-                            multiline={true}
-                            numberOfLines={10}
-                            onChangeText={rems => setRemarks(rems)}
-                            placeholderTextColor={Color.blackRecColor} placeholder="Remarks"
-                            style={styles.remarkInput}></TextInput>
-                    </View>
+                        <View style={styles.inputView1}>
+                            <TextInput
+                                value={visiorname}
+                                onChangeText={name => setVisitorname(name)}
+                                style={[styles.input,{borderBottomColor:visiorname==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
+                                placeholder='Name of Vistor' autoCapitalize='none' />
+                            <TextInput
+                                value={place}
+                                onChangeText={plcs => setPlace(plcs)}
+                                style={[styles.input,{borderBottomColor:place==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
+                                placeholder='From / Company name / place' autoCapitalize='none' />
+                            <TextInput
+                                value={purpose}
+                                onChangeText={purp => setPurpose(purp)}
+                                style={[styles.input,{borderBottomColor:purpose==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
+                                placeholder='Purpose of Visit' autoCapitalize='none' />
+                            <Dropdown
+                                style={[styles.dropdown,{borderBottomColor:usrLcton==''?Color.redRecColor:Color.darkRecGray}]}
+                                placeholderStyle={styles.placeholderStyle}
+                                selectedTextStyle={styles.selectedTextStyle}
+                                inputSearchStyle={styles.inputSearchStyle}
+                                iconStyle={styles.iconStyle}
+                                data={location}
+                                itemTextStyle={{ color: Color.blackRecColor }}
+                                search
+                                maxHeight={300}
+                                labelField="LocationName"
+                                valueField="LocationCode"
+                                placeholder="Company name"
+                                searchPlaceholder="Search...locations"
+                                value={usrLcton}
+                                onChange={(item) => {
+                                    setUsrLcton(item.LocationCode)
+                                    getUsersByLocationName(typeFormData.locationCode)
+                                }}
+                            />
+                            <Dropdown
+                                style={[styles.dropdown,{borderBottomColor:meet==''?Color.redRecColor:Color.darkRecGray}]}
+                                placeholderStyle={styles.placeholderStyle}
+                                selectedTextStyle={styles.selectedTextStyle}
+                                inputSearchStyle={styles.inputSearchStyle}
+                                iconStyle={styles.iconStyle}
+                                data={userslst}
+                                itemTextStyle={{ color: Color.blackRecColor }}
+                                search
+                                maxHeight={300}
+                                labelField="UserName"
+                                valueField="UserCode"
+                                placeholder="Meeting with"
+                                searchPlaceholder="Search...locations"
+                                value={meet}
+                                onChange={(item: any) => {
+                                    setMeetWith(item.UserCode)
+                                    setUDevToken({ MeetingUserCode: item.UserCode, MeetingDevToken: item.UserDeviceToken })
+                                }}
+                            />
+                            <TextInput
+                                value={visitors}
+                                onChangeText={(vistno: any) => setVisitors(vistno)}
+                                keyboardType="numeric" placeholderTextColor={Color.blackRecColor}
+                                style={[styles.input]} placeholder='No of Visitors' autoCapitalize='none' />
+                        </View>
+                        <View style={styles.boxRow}>
+                            <View style={styles.uploadBox}>
+                                {imageBase != "" ? <Image
+                                    source={{ uri: `data:image/png;base64,${imageBase}` }}
+                                    style={styles.imageSize}></Image> : <Image
+                                        source={camLogo}
+                                        style={styles.imageSize}></Image>}
+                            </View>
+                            <View style={styles.uploadBox}>
+                                <Pressable android_ripple={{ color: Color.lightRecBlue }} onPress={onSendRequest} style={styles.outlineButton}>
+                                    <Text style={styles.buttonText} >Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
+                                </Pressable>
+                                <View style={styles.statusView}>
+                                    {(visitStatus == 'R_STATUS') ? (
+                                        <Text style={styles.statusRText}>Status <Icon name="check-circle" size={18} color={Color.redRecColor}></Icon></Text>
+                                    ) : (visitStatus == 'S_STATUS') ? (
+                                        <Text style={styles.statusSText}>Status <Icon name="check-circle" size={18} color={Color.greenRecColor}></Icon></Text>
+                                    ) : (
+                                        <Text style={styles.statusText}>Status <Icon name="check-circle" size={18} color={Color.blackRecColor}></Icon></Text>
+                                    )}
+                                </View>
+                            </View>
+                        </View>
+                        <View style={styles.remarkInputView}>
+                            <Text
+                                onPress={handleCameraLaunch}
+                                style={{ marginRight: 'auto', marginLeft: 10, textAlign: 'center', color: 'blue', borderBottomWidth: 1, borderBottomColor: 'blue' }}>Take Photo</Text>
+                        </View>
+                        <View style={styles.remarkInputView1}>
+                            <TextInput
+                                value={remarks}
+                                multiline={true}
+                                numberOfLines={10}
+                                onChangeText={rems => setRemarks(rems)}
+                                placeholderTextColor={Color.blackRecColor} placeholder="Remarks"
+                                style={styles.remarkInput}></TextInput>
+                        </View>
                     </View>
                 </View>
                 <Modal
@@ -381,19 +380,19 @@ const FormScreen = ({ route, navigation }: any) => {
                     <View style={styles.centeredView}>
                         <View style={styles.modalView}>
                             <Text style={styles.modalText}>
-                            {(visitStatus =='S_STATUS')?(
-                                <Text style={{color:Color.greenRecColor}}>Your Request Accepted</Text>
-                            ):(
-                                <Text style={{color:Color.redRecColor}}>Your Request Denied</Text>
-                            )}
+                                {(visitStatus == 'S_STATUS') ? (
+                                    <Text style={{ color: Color.greenRecColor }}>Your Request Accepted</Text>
+                                ) : (
+                                    <Text style={{ color: Color.redRecColor }}>Your Request Denied</Text>
+                                )}
                             </Text>
                             <Pressable
                                 style={styles.button}
                                 onPress={() => setIsModalVisible(!isModalVisible)}>
-                                {(visitStatus =='S_STATUS')?(
-                                <MaterialCommunityIcons name="check-circle-outline" style={styles.buttoonIconSe} size={Dimensions.get('window').width > 756?100:50} color={Color.greenRecColor}></MaterialCommunityIcons>
-                                ):(
-                                <MaterialCommunityIcons name="close-circle-outline" style={styles.buttoonIconSe1}  color={Color.redRecColor} size={Dimensions.get('window').width > 756?100:50} />
+                                {(visitStatus == 'S_STATUS') ? (
+                                    <MaterialCommunityIcons name="check-circle-outline" style={styles.buttoonIconSe} size={Dimensions.get('window').width > 756 ? 100 : 50} color={Color.greenRecColor}></MaterialCommunityIcons>
+                                ) : (
+                                    <MaterialCommunityIcons name="close-circle-outline" style={styles.buttoonIconSe1} color={Color.redRecColor} size={Dimensions.get('window').width > 756 ? 100 : 50} />
                                 )}
                             </Pressable>
                         </View>
@@ -405,7 +404,7 @@ const FormScreen = ({ route, navigation }: any) => {
                     statusBarTranslucent={true}
                     visible={isLoaderTrue}
                     onRequestClose={() => {
-                    setIsLoaderTrue(!isLoaderTrue);
+                        setIsLoaderTrue(!isLoaderTrue);
                     }}>
                     <View style={styles.centeredView}>
                         <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>
@@ -423,7 +422,7 @@ const styles = StyleSheet.create({
     autocompleteContainer: {
         backgroundColor: '#ffffff',
         borderWidth: 0,
-      },
+    },
     statusView: {
         marginLeft: 'auto',
         marginRight: 28,
@@ -445,7 +444,7 @@ const styles = StyleSheet.create({
     },
     imageSize: {
         marginTop: 10,
-        width: Dimensions.get('window').width > 756? 200:150,
+        width: Dimensions.get('window').width > 756 ? 200 : 150,
         height: 150
     },
     buttonText: {
@@ -483,32 +482,33 @@ const styles = StyleSheet.create({
         width: '50%',
     },
     inputView: {
-        marginTop:30,
+        marginTop: 30,
         gap: 3,
         width: "100%",
         paddingHorizontal: 10,
         marginBottom: 5,
     },
     inputView1: {
-        marginTop:0,
+        marginTop: 0,
         gap: 3,
         width: "100%",
         paddingHorizontal: 10,
         marginBottom: 5,
     },
     input: {
-        height: Dimensions.get('window').width > 756 ? 50:40,
+        height: Dimensions.get('window').width > 756 ? 50 : 40,
         paddingHorizontal: 10,
-        borderBottomWidth: 1,
-        borderTopRightRadius:11,
-        borderTopLeftRadius:11,
-        color:Color.blackRecColor,
-        backgroundColor:Color.lightNewGrey,
-        marginHorizontal:20,
-        marginBottom:Dimensions.get('window').width > 756 ? 10:2
+        borderBottomWidth: 1.5,
+        borderBottomColor: Color.darkRecGray,
+        borderTopRightRadius: 11,
+        borderTopLeftRadius: 11,
+        color: Color.blackRecColor,
+        backgroundColor: Color.lightNewGrey,
+        marginHorizontal: 20,
+        marginBottom: Dimensions.get('window').width > 756 ? 10 : 8
     },
     remarkInputView: {
-        marginTop: Dimensions.get('window').width > 756 ? 160:150,
+        marginTop: Dimensions.get('window').width > 756 ? 160 : 150,
         width: '100%',
         padding: 20,
     },
@@ -517,20 +517,24 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     remarkInput: {
-        backgroundColor: Color.lightGreyRecColor,
+        backgroundColor: Color.lightNewGrey,
+        borderBottomColor: Color.darkRecGray,
+        borderBottomWidth: 1.5,
+        borderTopRightRadius: 11,
+        borderTopLeftRadius: 11,
         color: Color.blackRecColor,
         textAlignVertical: 'top',
-        height: Dimensions.get('window').width > 756 ?300:137,
+        height: Dimensions.get('window').width > 756 ? 300 : 137,
     },
     dropdown: {
-        height: 50,
-        borderBottomColor: Color.blackRecColor,
-        borderBottomWidth: 1,
+        height: Dimensions.get('window').width > 756 ? 50 : 40,
+        borderBottomColor: Color.darkRecGray,
+        borderBottomWidth: 1.5,
         marginHorizontal: 20,
-        backgroundColor:Color.lightNewGrey,
-        borderTopRightRadius:11,
-        borderTopLeftRadius:11,
-        marginBottom:Dimensions.get('window').width > 756 ?5:0
+        backgroundColor: Color.lightNewGrey,
+        borderTopRightRadius: 11,
+        borderTopLeftRadius: 11,
+        marginBottom: Dimensions.get('window').width > 756 ? 5 : 8
     },
     icon: {
         marginRight: 5,
@@ -550,13 +554,19 @@ const styles = StyleSheet.create({
     inputSearchStyle: {
         height: 40,
         fontSize: 16,
-        color:Color.blackRecColor
+        color: Color.blackRecColor
     },
     centeredView: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 22,
+    },
+    centeredViews: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 50,
     },
     modalView: {
         margin: 10,
@@ -565,8 +575,8 @@ const styles = StyleSheet.create({
         padding: 35,
         alignItems: 'center',
     },
-    buttoonIconSe:{
-        borderRadius:100,borderColor:Color.greenRecColor,
+    buttoonIconSe: {
+        borderRadius: 100, borderColor: Color.greenRecColor,
         shadowColor: Color.greenRecColor,
         shadowOffset: {
             width: 0,
@@ -576,8 +586,8 @@ const styles = StyleSheet.create({
         shadowRadius: 20,
         elevation: 0.1
     },
-    buttoonIconSe1:{
-        borderRadius:100,borderColor:Color.redRecColor,
+    buttoonIconSe1: {
+        borderRadius: 100, borderColor: Color.redRecColor,
         shadowColor: Color.redRecColor,
         shadowOffset: {
             width: 0,

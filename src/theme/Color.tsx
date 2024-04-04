@@ -9,5 +9,6 @@ export default {
     lightRecBlue:'#e6f0ff',
     redRecColor:'#ff1a1a',
     darkRecGray:'#A9A9A9',
-    darkGrayLight:'#A9A9A9'
+    darkGrayLight:'#A9A9A9',
+    orangRecLight:'#FFA500'
 }

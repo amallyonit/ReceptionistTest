@@ -38,7 +38,7 @@ const LoginScreen = ({navigation}:any) =>{
       console.log("payload ",payload)
       try {
         await PostUserLogin(payload)?.then(async (response:any)=>{
-          console.log("resposne ",response)
+          console.log("resposne login",response.data.Data[1])
           if(response?.data.Status){
             setIsLoader(false)
             AsyncStorage.removeItem('LOGIN')
@@ -116,14 +116,16 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       paddingHorizontal:20,
       alignItems: 'center',
-      borderBottomWidth: 1,
+      borderBottomWidth: 1.5,
       flex:1,
-      borderColor: '#000',
+      borderBottomColor:Color.darkRecGray,
+      borderTopRightRadius:11,
+      borderTopLeftRadius:11,
       height: 45,
       borderRadius: 0,
       margin: 10,
-      backgroundColor:Color.lightRecBlue,
-      marginHorizontal:Dimensions.get('window').width > 756 ? Dimensions.get('window').height * 0.03: Dimensions.get('window').height * 0.07
+      backgroundColor:Color.lightNewGrey,
+      marginHorizontal:Dimensions.get('window').width > 756 ? Dimensions.get('window').height * 0.03: Dimensions.get('window').height * 0.049
     },
     imageStyle: {
       color:Color.blackRecColor,
@@ -159,22 +161,24 @@ const styles = StyleSheet.create({
       fontSize : 32,
       fontFamily:Fonts.recFontFamily.titleRecFont,
       textAlign: "center",
-      color : '#99c2ff'
+      color : '#99c2ff',
+      marginBottom:10
     },
     inputView : {
       gap : 5,
       width : "100%",
       paddingHorizontal : 40,
-      marginBottom:5
+      marginBottom:5,
     },
     input : {
-      height : 50,
+      height : 45,
       paddingHorizontal : 20,
-      borderColor :Color.blackRecColor,
-      backgroundColor:Color.lightRecBlue,
-      color:'#464646',
-      borderBottomWidth:1,
-      borderRadius: 0
+      borderColor :Color.darkRecGray,
+      backgroundColor:Color.lightNewGrey,
+      color:Color.blackRecColor,
+      borderBottomWidth:1.5,
+      borderTopRightRadius:11,
+      borderTopLeftRadius:11,
     },
     rememberView : {
       width : "100%",
@@ -189,7 +193,6 @@ const styles = StyleSheet.create({
       gap : 1,
       justifyContent : "center",
       alignItems : "center"
-      
     },
     button : {
       backgroundColor : "#2D8517",
@@ -206,9 +209,9 @@ const styles = StyleSheet.create({
       fontWeight : "bold"
     }, 
     buttonView :{
-      marginTop:30,
+      marginTop:20,
       width :"100%",
-      paddingHorizontal : 60
+      paddingHorizontal : 40
     },
     optionsText : {
       textAlign : "center",

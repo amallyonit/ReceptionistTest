@@ -1,11 +1,11 @@
 import React, { Children, ReactElement, useEffect, useState } from "react"
-import { Alert, BackHandler, Button, Dimensions, Image, Modal, Pressable, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Alert, BackHandler, Dimensions, Image, Modal, Pressable, RefreshControl, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Color from "../theme/Color"
 import { UserPayload, ViewNotification } from "../models/RecepModels"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import { GetNotificationByUserCode } from "../requests/recAdminRequest"
-import { Avatar, Badge, Card, Dialog, ListItem,Icon } from "react-native-elements"
+import { Avatar, Badge, Card, Dialog, ListItem,Icon,Button } from "react-native-elements"
 import NotificationPop from "../components/RecNotification"
 import Fonts from "../theme/Fonts"
 import { UpdateVisitStatus } from "../requests/recHomeRequest"
@@ -54,7 +54,6 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
   const getNotifications = async () => {
     try {
       const vals = await AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN)
-      console.log("vals ", vals)
       const dataVal = JSON.parse(vals!)
       console.log("data vals ", dataVal.Data[0][0].UserCode)
 
@@ -113,6 +112,18 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
     <SafeAreaView style={styles.safecontainer}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.container}>
+          <View style={{flex:1,flexDirection:'row',marginTop:30,marginBottom:30,justifyContent:'center',alignItems:'center',marginHorizontal:30}}>
+            <View style={{width:'50%',borderRadius:20,padding:5,paddingBottom:10,elevation:5,backgroundColor:Color.whiteRecColor}}>
+              <Icon color={Color.greenRecColor} size={Dimensions.get('window').width > 756?60: 30} name="check-circle"></Icon>
+              <Text style={{textAlign:'center',color:Color.greenRecColor}}>Approved</Text>
+              <Button buttonStyle={{backgroundColor:Color.greenRecColor,borderRadius:10,borderColor:Color.greenRecColor}} title={String(viewNots.filter((item)=>item.VisitTranVisitStatus=='A').length)}></Button>
+            </View>
+            <View style={{width:'50%',marginLeft:10,borderRadius:20,padding:5,paddingBottom:10,elevation:5,backgroundColor:Color.whiteRecColor}}>
+              <Icon color={Color.redRecColor} size={Dimensions.get('window').width > 756?60: 30} name="cancel"></Icon>
+              <Text style={{textAlign:'center',color:Color.redRecColor}}>Rejected</Text>
+              <Button buttonStyle={{backgroundColor:Color.redRecColor,borderRadius:10,borderColor:Color.whiteRecColor,borderWidth:1}} title={String(viewNots.filter((item)=>item.VisitTranVisitStatus!='A').length)}></Button>
+            </View>
+          </View>
           <View style={{ width: '95%' }}>
             <ListItem.Accordion containerStyle={{backgroundColor:Color.lightRecBlue}}
               content={
@@ -138,6 +149,7 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
               {viewNots.map((l, i) => (
                 <ListItem key={i} bottomDivider onPress={()=>{
                   setConfirm(true)
+                  console.log("l ",l)
                   setViewDeNot(l)
                 }}>
                   <Avatar avatarStyle={{ borderRadius: 50, borderWidth: 3, borderColor: Color.lightRecBlue }} size={100} title={l.VisitorName} source={{ uri: `data:image/png;base64,${l.VisitorImage}` }} />
@@ -173,13 +185,25 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
          <View style={styles.centeredView}>
              <View style={styles.modalView}>
              <Icon style={styles.iconStyles} color={Color.whiteRecColor} size={40} name="notifications-none" />
-                 <Text style={styles.modalTitleStyle}>You've got a Delivery at the main gate</Text>
+                 <Text style={styles.modalTitleStyle}>
+                 {viewDeNot?.VisitTranNoOfVisitors!=undefined ?(
+    viewDeNot?.VisitorName +" and " + viewDeNot?.VisitTranNoOfVisitors + " is waiting at Main Gate From " + viewDeNot?.VisitTranVisitorFrom +" for "+viewDeNot?.VisitTranPurpose
+  ):(
+    viewDeNot?.VisitorName+" and "+" is waiting at Main Gate From "+viewDeNot?.VisitTranVisitorFrom + " for " +viewDeNot?.VisitTranPurpose
+)}
+                 </Text>
                  <View style={styles.hairline}></View>
                  <View style={styles.modalContentStyle}>
                      <View style={{width:'30%'}}>
-                      <Image
-                                 source={{ uri:`data:image/png;base64,${viewDeNot?.VisitorImage}` }}
-                                 style={{height:70,width:70,borderRadius:100}}></Image>
+                      {viewDeNot?.VisitorImage!=undefined || viewDeNot?.VisitorImage!=''?
+                      (                      <Image
+                        source={{ uri:`data:image/png;base64,${viewDeNot?.VisitorImage}` }}
+                        style={{height:70,width:70,borderRadius:100}}></Image>):(
+                          <Image
+                        source={camLogo}
+                        style={{height:70,width:70,borderRadius:100}}></Image>)
+  
+                      }
                      </View>
                      <View style={{width:'70%',flexDirection:'row',justifyContent:'flex-start',alignItems:'center'}}>
                          <Text style={{fontSize:18,color:Color.blackRecColor}}>{viewDeNot?.VisitorName}</Text>

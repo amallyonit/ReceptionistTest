@@ -4,6 +4,7 @@ export const RecpImgArray: PathStore[] = [
     { name: 'Service', path: '../../assets/recscreen/SERVICE.png' },
     { name: 'Contractor', path: '../../assets/recscreen/CONTRACTOR.png' },
     { name: 'Interview', path: '../../assets/recscreen/INTERVIEW.png' },
+    { name: 'Courier', path: '../../assets/recscreen/MEETING.png' },
     { name: 'Delivery / Pickup', path: '../../assets/recscreen/DELIVERY.png' }
 ]
 
@@ -68,6 +69,7 @@ export interface UserLDData{
     UserMobileNo: any
     UserName: any
     UserPassword:any
+    LocationPremise: any
     UserType: any
 }
 export interface UserLoginLocation {

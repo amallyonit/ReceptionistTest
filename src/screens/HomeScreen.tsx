@@ -4,7 +4,7 @@ import { Alert, BackHandler, Dimensions, Image, Pressable, SafeAreaView, StyleSh
 import Fonts from "../theme/Fonts"
 import Color from "../theme/Color"
 import LinearGradient from "react-native-linear-gradient"
-import { InfoFormProps, RecpImgArray, UserPayload } from "../models/RecepModels"
+import { InfoFormProps, RecpImgArray, UserLDData, UserPayload } from "../models/RecepModels"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
@@ -24,8 +24,9 @@ const HomeScreen = ({ route,navigation }: any) => {
         appBarTitle:'',
         category:0
     }
-    const [usertoken, setUserToken] = useState<UserPayload>({ token: '', userid: '' })
+    const [viewUser, setViewUser] = useState<UserLDData>()
     useEffect(() => {
+        getUserData()
         let propData:InfoFormProps = {
             type:'',
             appBarTitle:'',
@@ -50,6 +51,14 @@ const HomeScreen = ({ route,navigation }: any) => {
       
           return () => backHandler.remove();
       }, []);
+
+      const getUserData = async () => {
+        setViewUser({UserCode:'',UserDeviceToken:'',UserMobileNo:'',UserName:'',UserPassword:'',UserType:'',LocationPremise:''})
+        const data: any = await AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN)
+        const vals = JSON.parse(data)
+        console.log("data ", vals.Data[0][0])
+        setViewUser(vals.Data[0][0])
+      }
 
     const checkFormScreen=(type:any)=>{
         
@@ -99,6 +108,15 @@ const HomeScreen = ({ route,navigation }: any) => {
                 navigation.navigate('Form',{propData})
                 navigation.setOptions({ headerTitle: propData.appBarTitle})
                 break;
+            case 'Courier':
+                propData = {
+                    appBarTitle:'Courier',
+                    type:type,
+                    category:5
+                }
+                navigation.navigate('Courier',{propData})
+                navigation.setOptions({ headerTitle: propData.appBarTitle})
+                break;
             case 'DELIVERYPICK':
                     propData = {
                         appBarTitle:'Delivery / Pickup',
@@ -122,6 +140,7 @@ const HomeScreen = ({ route,navigation }: any) => {
         <SafeAreaView>
             <View style={styles.container}>
             <Image source={receLogo} style={styles.image} />
+            <Text style={{color:Color.blueRecColor,fontSize:16,fontWeight:'500',textAlign:'right',marginLeft:'auto',marginTop:-20,}}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text>
             <Text style={styles.title}>EzEntry</Text>
             <View style={styles.cardGroupContainer}>
                 <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor,Color.lightRecBlue]} style={styles.cardGroup}>
@@ -133,14 +152,6 @@ const HomeScreen = ({ route,navigation }: any) => {
                     </TouchableOpacity>
                 </LinearGradient>
                 <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
-                    <TouchableOpacity onPress={()=>checkFormScreen('VISIT')} style={{ alignItems: 'center' }}>
-                        <Image source={receVisitLog} style={styles.imageSet} />
-                        <Text style={styles.buttonText}>
-                            {RecpImgArray[1].name}
-                        </Text>
-                    </TouchableOpacity>
-                </LinearGradient>
-                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('SERVICE')} style={{ alignItems: 'center' }}>
                         <Image source={receServeLog} style={styles.imageSet} />
                         <Text style={styles.buttonText}>
@@ -148,8 +159,6 @@ const HomeScreen = ({ route,navigation }: any) => {
                         </Text>
                     </TouchableOpacity>
                 </LinearGradient>
-            </View>
-            <View style={styles.cardGroupContainer}>
                 <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('CONTRACTOR')} style={{ alignItems: 'center' }}>
                         <Image source={receContrLog} style={styles.imageSet} />
@@ -158,6 +167,8 @@ const HomeScreen = ({ route,navigation }: any) => {
                         </Text>
                     </TouchableOpacity>
                 </LinearGradient>
+            </View>
+            <View style={styles.cardGroupContainer}>
                 <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('INTERVIEW')} style={{ alignItems: 'center' }}>
                         <Image source={receInterLog} style={styles.imageSet} />
@@ -167,10 +178,18 @@ const HomeScreen = ({ route,navigation }: any) => {
                     </TouchableOpacity>
                 </LinearGradient>
                 <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
+                    <TouchableOpacity onPress={()=>checkFormScreen('Courier')} style={{ alignItems: 'center' }}>
+                        <Image source={receVisitLog} style={styles.imageSet} />
+                        <Text style={styles.buttonText}>
+                            {RecpImgArray[5].name}
+                        </Text>
+                    </TouchableOpacity>
+                </LinearGradient>
+                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
                     <TouchableOpacity onPress={()=>checkFormScreen('DELIVERYPICK')} style={{ alignItems: 'center' }}>
                         <Image source={receDelLog} style={styles.imageSet} />
                         <Text style={styles.buttonText}>
-                            {RecpImgArray[5].name}
+                            {RecpImgArray[6].name}
                         </Text>
                     </TouchableOpacity>
                 </LinearGradient>

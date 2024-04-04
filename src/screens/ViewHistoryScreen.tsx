@@ -1,6 +1,6 @@
 "use strict"
 import React, { useEffect, useState } from "react"
-import { Dimensions, FlatList, Image, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
+import { ActivityIndicator, Dimensions, FlatList, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import Fonts from "../theme/Fonts"
@@ -71,16 +71,20 @@ const ViewHistoryScreen = ({ navigation }: any) => {
     };
 
     const getDetailsByPhoneno=async (value:any)=>{
+        setIsLoader(true)
         let payload = {
-            VisitorMobileNo:query!=""?query:value
+            VisitorMobileNo:query=="" || query==undefined?value:query
         }
         console.log("payload ",payload)
         try {
            await GetPhoneNumberDetails(payload)?.then((response:any)=>{
                 if(response.data.Status){
-                    console.log("response ",response.data.Data[0])
+                    console.log("response ",response.data.Data[0]) 
+                    setViewLog({VisitorImage:'',VisitorMobileNo:'',VisitorName:'',VisitTranVisitorFrom:''})   
+                    setName('')
                     setViewLog(response.data.Data[0])
                     setName(response.data.Data[0].VisitorName)
+                    setIsLoader(false)
                 }
             }).catch((error:any)=>{
                 console.log("error ",error)
@@ -122,9 +126,21 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                         </View>
                     </View>
                     <View style={styles.uploadBox1}>
-                        <Image source={viewLog.VisitorImage!=""? {uri: `data:image/png;base64,${viewLog.VisitorImage}`}: camLogo} style={styles.imageSize}></Image>
+                        <Image source={viewLog.VisitorImage!="" ? {uri: `data:image/png;base64,${viewLog.VisitorImage}`}: camLogo} style={styles.imageSize}></Image>
                     </View>
                 </View>
+                <Modal
+                    animationType="fade"
+                    transparent={false}
+                    statusBarTranslucent={true}
+                    visible={isLoader}
+                    onRequestClose={() => {
+                        setIsLoader(!isLoader);
+                    }}>
+                    <View style={styles.centeredView}>
+                        <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>
+                    </View>
+                </Modal>
             </View>
             </SafeAreaView>
     )
@@ -133,6 +149,12 @@ const ViewHistoryScreen = ({ navigation }: any) => {
 const styles = StyleSheet.create({
     container: {
         alignItems: "center",
+    },
+    centeredView: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 22,
     },
     navContainer:{ 
         width: '100%',

@@ -22,6 +22,7 @@ import SplashEzEntryScreen from './src/screens/SplashEzEntryScreen';
 import AdminScreen from './src/screens/AdminScreen';
 import SettingScreen from './src/screens/SettingsScreen';
 import { GetPhoneNumberDetails, UpdateVisitStatus } from './src/requests/recHomeRequest';
+import CourierScreen from './src/screens/CourierScreen';
 
 
 const Stack = createNativeStackNavigator()
@@ -99,6 +100,7 @@ const onMessageGetter = async (message:any)=>{
               icon: 'https://my-cdn.com/icons/reply.png',
               pressAction: {
                 id: 'Accept',
+                launchActivity:'default'
               },
             },
             {
@@ -106,12 +108,10 @@ const onMessageGetter = async (message:any)=>{
               icon: 'https://my-cdn.com/icons/reply.png',
               pressAction: {
                 id: 'Deny',
+                launchActivity:'default'
               },
             },
           ],
-          fullScreenAction:{
-            id:'default'
-          },
         }
       })
     }
@@ -163,9 +163,12 @@ const onMessageGetter = async (message:any)=>{
 
 const App = () => {
   useEffect(() => {
-    notifee.requestPermission()
+    notifee.requestPermission({
+      criticalAlert:true
+    })
     onRegisterMessaging();
-    const messageSetile =  messaging().onMessage(onMessageGetter)
+    messaging().onNotificationOpenedApp(onMessageGetter)
+    const messageSetile = messaging().onMessage(onMessageGetter)
     return () => {
       messageSetile()
     };
@@ -186,6 +189,7 @@ const App = () => {
         <Stack.Screen name='Home' options={{ headerShown: false }} component={HomeScreen}></Stack.Screen>
         <Stack.Screen name='Form' component={FormScreen}></Stack.Screen>
         <Stack.Screen name='PickDel' options={{ headerTitle: 'Delivery / Pickup' }} component={FormDeliveryScreen}></Stack.Screen>
+        <Stack.Screen name='Courier' component={CourierScreen}></Stack.Screen>
         <Stack.Screen name='History' options={{ headerTitle: 'View History' }} component={ViewHistoryScreen}></Stack.Screen>
         <Stack.Screen name='Admin' options={{ headerShown: false }} component={AdminScreen}></Stack.Screen>
         <Stack.Screen name='Activity'  component={ActivityScreen}></Stack.Screen>
