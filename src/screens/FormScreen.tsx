@@ -11,6 +11,7 @@ import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
 import { LinearProgress, Overlay } from "react-native-elements"
+import { KeyboardAvoidingView } from "react-native"
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
@@ -40,6 +41,7 @@ const FormScreen = ({ route, navigation }: any) => {
     const [remarks, setRemarks] = useState("")
     const [meet, setMeetWith] = useState("")
     const [viewUser, setViewUser] = useState<UserLDData>()
+    const [noData,setNoData]=useState(false)
     useEffect(() => {
         navigation.setOptions({ headerTitle: data.appBarTitle })
         setMobile('')
@@ -104,7 +106,8 @@ const FormScreen = ({ route, navigation }: any) => {
 
     const getDetailsByPhoneno = async (value: any) => {
         let payload = {
-            VisitorMobileNo: mobile != '' ? mobile : value
+            VisitorMobileNo: mobile != '' ? mobile : value,
+            CurData:""
         }
         console.log("mobile no ", payload)
         try {
@@ -375,6 +378,7 @@ const FormScreen = ({ route, navigation }: any) => {
                                 style={{ marginRight: 'auto', marginLeft: 10, textAlign: 'center', color: 'blue', borderBottomWidth: 1, borderBottomColor: 'blue' }}>Take Photo</Text>
                         </View>
                         <View style={styles.remarkInputView1}>
+                            <KeyboardAvoidingView keyboardVerticalOffset={-1200} behavior="padding">
                             <TextInput
                                 value={remarks}
                                 multiline={true}
@@ -382,6 +386,7 @@ const FormScreen = ({ route, navigation }: any) => {
                                 onChangeText={rems => setRemarks(rems)}
                                 placeholderTextColor={Color.blackRecColor} placeholder="Remarks"
                                 style={styles.remarkInput}></TextInput>
+                            </KeyboardAvoidingView>
                         </View>
                     </View>
                 </View>
@@ -391,7 +396,6 @@ const FormScreen = ({ route, navigation }: any) => {
                     statusBarTranslucent={true}
                     visible={isModalVisible}
                     onRequestClose={() => {
-                        Alert.alert('Modal has been closed.');
                         setIsModalVisible(!isModalVisible);
                     }}>
                     <View style={styles.centeredView}>
@@ -415,7 +419,7 @@ const FormScreen = ({ route, navigation }: any) => {
                         </View>
                     </View>
                 </Modal>
-                <Overlay isVisible={isLoaderTrue} statusBarTranslucent={true}  overlayStyle={{backgroundColor:'white',borderRadius:20}}  onBackdropPress={()=>{setIsLoaderTrue(false)}}>
+                <Overlay isVisible={isLoaderTrue} statusBarTranslucent={true}  overlayStyle={{backgroundColor:'white',borderRadius:20}}  onBackdropPress={()=>{setIsLoaderTrue(true)}}>
                     <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>   
                 </Overlay>
             </View>

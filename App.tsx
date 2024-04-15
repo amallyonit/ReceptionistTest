@@ -108,9 +108,9 @@ const onMessageGetter = async (message:any)=>{
               },  
               input: {
                 allowFreeFormInput: false,
-                choices: ['Not Available', 'Wait for 15 mins','On meeting'],
+                choices: ['Not Available', 'Wait for 15 mins'],
                 placeholder: 'Reply to reception...',
-              },
+              }, 
             },
             {
               title: 'Deny',
@@ -131,17 +131,29 @@ const onMessageGetter = async (message:any)=>{
     notifee.onForegroundEvent(async ({ type, detail }) => {
       console.log("event pressed ",detail,type)
       const { notification, pressAction }:any = detail;
-      // Check if the user pressed the "Mark as read" action
-      if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
+      if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept' || detail.input!='') {
         const dataKey = await AsyncStorage.getItem('FCM_Data_key')
         const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
        AsyncStorage.setItem('FCM_STATUS','ACCEPTED')
     //call the api to get update  api
-    let payload={
+    let payload ={
       VisitorMasterCode:dataKey,
       VisitTranId:dataKey2,
       VisitTranVisitStatus:'A',
       VisitTranReason:detail.input
+    }
+    switch (detail.input) {
+      case 'Not Available':
+        payload.VisitTranVisitStatus='R'
+        break;
+      case 'Wait for 15 mins':
+        payload.VisitTranVisitStatus='A'
+        break;
+      case 'Wait for 15 mins':
+        payload.VisitTranVisitStatus='R'
+        break;
+      default:
+        break;
     }
     try {
       await UpdateVisitStatus(payload).then((response)=>{
@@ -154,7 +166,7 @@ const onMessageGetter = async (message:any)=>{
     }
     console.log("event pressed ",pressAction.id);
     await notifee.cancelNotification(notification.id);
-      }else if(type === EventType.ACTION_PRESS && pressAction.id === 'Deny'){
+      }else if(type === EventType.ACTION_PRESS && pressAction.id === 'Deny' || detail.input!=""){
           const dataKey = await AsyncStorage.getItem('FCM_Data_key')
           const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
           let payload={

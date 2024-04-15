@@ -44,6 +44,7 @@ export interface ViewNotification{
     VisitTranPurpose: any
     VisitTranNoOfVisitors: any
     VisitTranCheckinTime: string
+    VisitTranReason: any
     VisitTranId: any
     VisitorCode: any
 }

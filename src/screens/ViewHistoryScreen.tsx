@@ -3,7 +3,7 @@ import  React,{ useEffect, useState } from "react"
 import { ActivityIndicator, Dimensions, FlatList, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
-import { ListItem } from "react-native-elements"
+import { ListItem, Overlay } from "react-native-elements"
 import { ViewNotification } from "../models/RecepModels"
 import { GetAllRevisitorsData, GetPhoneNumberDetails } from "../requests/recHomeRequest"
 
@@ -17,8 +17,10 @@ const ViewHistoryScreen = ({ navigation }: any) => {
     const [viewLog, setViewLog] = useState<ViewNotification>()
     const [isLoader, setIsLoader] = useState(false)
     const [totalView, setTotalView] = useState<ViewNotification[]>([])
+    const [noReData,setNoReData]=useState(false)
     useEffect(() => {
         // getVisiorNumbers()
+        getTodayNotifications()
         setTotalView([])
         setViewLog(undefined)
     }, [])
@@ -47,6 +49,7 @@ const ViewHistoryScreen = ({ navigation }: any) => {
 
     const handleInputChange = (text: any) => {
         console.log("input phone ", text);
+        
         setQuery(text);
         filterSuggestions(text);
     };
@@ -65,10 +68,13 @@ const ViewHistoryScreen = ({ navigation }: any) => {
         getDetailsByPhoneno(item.VisitorMobileNo)
     };
 
-    const getDetailsByPhoneno = async (value: any) => {
+    const getDetailsByPhoneno = async (value: any,type?:any) => {
         setIsLoader(true)
+        let currentData =  new Date().toISOString().split('T',1)[0].split('-')
+        let formatDate =  currentData[2]+'/'+currentData[1]+'/'+currentData[0]
         let payload = {
-            VisitorMobileNo: parseInt(query)==10 ? query : value
+            VisitorMobileNo: parseInt(query)==10 ? query : value,
+            CurData:formatDate
         }
         console.log("payload ", payload)
         try {
@@ -76,12 +82,16 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                 if (response.data.Status) {
                     console.log("response data", response.data.Data.length)
                     const notData = JSON.parse(response.data.Data)
-                    console.log("not data ",notData)
-                    setViewLog(undefined)
-                    setName('')
-                    setTotalView(notData[0])
-                    setViewLog(notData[0][0])
-                    setName(notData[0][0].VisitorName)
+                    console.log("not data ",notData[0][0])
+                    if(notData!=undefined){
+                        setViewLog(undefined)
+                        setName('')
+                        setTotalView(notData[0])
+                        setViewLog(notData[0][0])
+                        setName(notData[0][0].VisitorName)
+                    }else{
+                        setNoReData(true)
+                    }
                     setIsLoader(false)
                 }
             }).catch((error: any) => {
@@ -92,6 +102,39 @@ const ViewHistoryScreen = ({ navigation }: any) => {
             console.log("error ", error)
         }
     }
+
+    const getTodayNotifications = async () => {
+        setIsLoader(true)
+        let currentData =  new Date().toISOString().split('T',1)[0].split('-')
+        let formatDate =  currentData[2]+'/'+currentData[1]+'/'+currentData[0]
+        let payload = {
+            VisitorMobileNo: "",
+            CurData:formatDate
+        }
+        console.log("payload ", payload)
+        try {
+            await GetPhoneNumberDetails(payload)?.then(async (response: any) => {
+                if (response.data.Status) {
+                    console.log("response data", response.data.Data.length)
+                    const notData = JSON.parse(response.data.Data)
+                    console.log("not data ",notData[0][0])
+                    if(notData!=undefined){
+                        setViewLog(undefined)
+                        setName('')
+                        setTotalView(notData[0])
+                        setViewLog(notData[0][0])
+                    }
+                    setIsLoader(false)
+                }
+            }).catch((error: any) => {
+                console.log("error ", error)
+                setIsLoader(false)
+            })
+        } catch (error) {
+            console.log("error ", error)
+        }
+    }
+
     return (
         <SafeAreaView>
             <View style={styles.container}>
@@ -131,18 +174,12 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                         <Image source={viewLog?.VisitorImage != "" && viewLog?.VisitorImage!=undefined ? { uri: `data:image/png;base64,${viewLog.VisitorImage}` } : camLogo} style={styles.imageSize}></Image>
                     </View>
                 </View>
-                <Modal
-                    animationType="fade"
-                    transparent={false}
-                    statusBarTranslucent={true}
-                    visible={isLoader}
-                    onRequestClose={() => {
-                        setIsLoader(!isLoader);
-                    }}>
-                    <View style={styles.centeredView}>
-                        <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>
-                    </View>
-                </Modal>
+                <Overlay isVisible={isLoader} statusBarTranslucent={true}  overlayStyle={{backgroundColor:'white',borderRadius:20}}  onBackdropPress={()=>{setIsLoader(true)}}>
+                    <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>   
+                </Overlay>
+                {noReData && <View style={{ width: '80%', padding: 10, borderWidth: 5, borderColor: Color.lightGreyRecColor }}>
+            <Text style={{ textAlign: 'center', color: Color.blackRecColor }}>No Notification Today</Text>
+          </View>}
             </View>
             <ScrollView style={{marginTop:Dimensions.get('window').height * 0.15}}>
             <View style={{width:Dimensions.get('window').width >756? '96%':'92%',marginHorizontal:15}}>
@@ -155,6 +192,7 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                       <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Mobile No: {l.VisitorMobileNo}</ListItem.Subtitle>
                       <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Purpose: {l.VisitTranPurpose}</ListItem.Subtitle>
                       <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Date: {l.VisitTranCheckinTime.split('T')[1].split('.',1) + " " + (parseInt(l.VisitTranCheckinTime.split('T')[1].split(':')[0].toString()) > 12 ? 'PM':'AM')} - {new Date(l.VisitTranCheckinTime).toDateString()}</ListItem.Subtitle>
+                      <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Reason: {l.VisitTranReason}</ListItem.Subtitle>
                       <ListItem.Subtitle style={{ color: Color.blackRecColor, marginLeft: 'auto', top: Dimensions.get('window').width > 756 ? -50 : -30 }}>
                         {l.VisitTranVisitStatus == 'R' || l.VisitTranVisitStatus == '' ? (
                           <Icon color={Color.redRecColor} size={Dimensions.get('window').width > 756 ? 60 : 30} name="cancel"></Icon>
