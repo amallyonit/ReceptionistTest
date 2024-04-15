@@ -8,6 +8,10 @@ import { InfoFormProps, RecpImgArray, UserLDData, UserPayload } from "../models/
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
+import { Avatar, ListItem, Overlay } from "react-native-elements"
+import { color } from "react-native-elements/dist/helpers"
+import { colorsDark } from "react-native-elements/dist/config"
+
 
 const receLogo = require('../../assets/recimages/Frame.png')
 const receMeetLog = require('../../assets/recscreen/MEETING.png')
@@ -16,205 +20,234 @@ const receServeLog = require('../../assets/recscreen/SERVICE.png')
 const receContrLog = require('../../assets/recscreen/CONTRACTOR.png')
 const receInterLog = require('../../assets/recscreen/INTERVIEW.png')
 const receDelLog = require('../../assets/recscreen/DELIVERY.png')
-const receBottomLogo = require('../../assets/recimages/Group.png') 
+const receBottomLogo = require('../../assets/recimages/Group.png')
 
-const HomeScreen = ({ route,navigation }: any) => {
-    let propData:InfoFormProps = {
-        type:'',
-        appBarTitle:'',
-        category:0
+const HomeScreen = ({ route, navigation }: any) => {
+    let propData: InfoFormProps = {
+        type: '',
+        appBarTitle: '',
+        category: 0
     }
     const [viewUser, setViewUser] = useState<UserLDData>()
+    const [preApp,setPreApp] = useState(false)
+    const [checkot,setCheckout] = useState(false)
     useEffect(() => {
         getUserData()
-        let propData:InfoFormProps = {
-            type:'',
-            appBarTitle:'',
-            category:0
+        let propData: InfoFormProps = {
+            type: '',
+            appBarTitle: '',
+            category: 0
         }
         const backAction = () => {
             Alert.alert("Hold on!", "Are you sure you want to go back?", [
-              {
-                text: "Cancel",
-                onPress: () => null,
-                style: "cancel"
-              },
-              { text: "YES", onPress: () => BackHandler.exitApp() }
+                {
+                    text: "Cancel",
+                    onPress: () => null,
+                    style: "cancel"
+                },
+                { text: "YES", onPress: () => BackHandler.exitApp() }
             ]);
             return true;
-          };
-      
-          const backHandler = BackHandler.addEventListener(
+        };
+
+        const backHandler = BackHandler.addEventListener(
             "hardwareBackPress",
             backAction
-          );
-      
-          return () => backHandler.remove();
-      }, []);
+        );
 
-      const getUserData = async () => {
-        setViewUser({UserCode:'',UserDeviceToken:'',UserMobileNo:'',UserName:'',UserPassword:'',UserType:'',LocationPremise:''})
+        return () => backHandler.remove();
+    }, []);
+
+    const getUserData = async () => {
+        setViewUser({ UserCode: '', UserDeviceToken: '', UserMobileNo: '', UserName: '', UserPassword: '', UserType: '', LocationPremise: '' })
         const data: any = await AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN)
         const vals = JSON.parse(data)
         console.log("data ", vals.Data[0][0])
         setViewUser(vals.Data[0][0])
-      }
+    }
 
-    const checkFormScreen=(type:any)=>{
-        
+    const checkFormScreen = (type: any) => {
+
         switch (type) {
             case 'MEETING':
                 propData = {
-                    appBarTitle:'Meeting',
-                    type:type,
-                    category:1
+                    appBarTitle: 'Meeting',
+                    type: type,
+                    category: 1
                 }
-                navigation.navigate('Form',{propData})
-                navigation.setOptions({ headerTitle: propData.appBarTitle})
+                navigation.navigate('Form', { propData })
+                navigation.setOptions({ headerTitle: propData.appBarTitle })
                 break;
             case 'VISIT':
                 propData = {
-                    appBarTitle:'Visit',
-                    type:type,
-                    category:2
+                    appBarTitle: 'Visit',
+                    type: type,
+                    category: 2
                 }
-                navigation.navigate('Form',{propData})
-                navigation.setOptions({ headerTitle: propData.appBarTitle})
+                navigation.navigate('Form', { propData })
+                navigation.setOptions({ headerTitle: propData.appBarTitle })
                 break;
             case 'SERVICE':
                 propData = {
-                    appBarTitle:'Service',
-                    type:type,
-                    category:3
+                    appBarTitle: 'Service',
+                    type: type,
+                    category: 3
                 }
-                navigation.navigate('Form',{propData})
-                navigation.setOptions({ headerTitle: propData.appBarTitle})
+                navigation.navigate('Form', { propData })
+                navigation.setOptions({ headerTitle: propData.appBarTitle })
                 break;
             case 'CONTRACTOR':
                 propData = {
-                    appBarTitle:'Contractor',
-                    type:type,
-                    category:4
+                    appBarTitle: 'Contractor',
+                    type: type,
+                    category: 4
                 }
-                navigation.navigate('Form',{propData})
-                navigation.setOptions({ headerTitle: propData.appBarTitle})
+                navigation.navigate('Form', { propData })
+                navigation.setOptions({ headerTitle: propData.appBarTitle })
                 break;
             case 'INTERVIEW':
                 propData = {
-                    appBarTitle:'Interview',
-                    type:type,
-                    category:5
+                    appBarTitle: 'Interview',
+                    type: type,
+                    category: 5
                 }
-                navigation.navigate('Form',{propData})
-                navigation.setOptions({ headerTitle: propData.appBarTitle})
+                navigation.navigate('Form', { propData })
+                navigation.setOptions({ headerTitle: propData.appBarTitle })
                 break;
             case 'Courier':
                 propData = {
-                    appBarTitle:'Courier',
-                    type:type,
-                    category:5
+                    appBarTitle: 'Courier',
+                    type: type,
+                    category: 5
                 }
-                navigation.navigate('Courier',{propData})
-                navigation.setOptions({ headerTitle: propData.appBarTitle})
+                navigation.navigate('Courier', { propData })
+                navigation.setOptions({ headerTitle: propData.appBarTitle })
                 break;
             case 'DELIVERYPICK':
-                    propData = {
-                        appBarTitle:'Delivery / Pickup',
-                        type:type,
-                        category:6
-                    }
-                    navigation.navigate('PickDel',{propData})
-                    navigation.setOptions({ headerTitle: propData.appBarTitle})
-                    break;
+                propData = {
+                    appBarTitle: 'Delivery / Pickup',
+                    type: type,
+                    category: 6
+                }
+                navigation.navigate('PickDel', { propData })
+                navigation.setOptions({ headerTitle: propData.appBarTitle })
+                break;
             default:
                 break;
         }
     }
 
-    const logoutApp = ()=>{
+    const logoutApp = () => {
         navigation.navigate('Login')
         AsyncStorage.removeItem(MiscStoreKeys.EZ_LOGIN)
+        AsyncStorage.removeItem('CON_STATUS')
     }
 
     return (
         <SafeAreaView>
             <View style={styles.container}>
-            <Image source={receLogo} style={styles.image} />
-            <Text style={{color:Color.blueRecColor,fontSize:16,fontWeight:'500',textAlign:'right',marginLeft:'auto',marginTop:-20,}}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text>
-            <Text style={styles.title}>EzEntry</Text>
-            <View style={styles.cardGroupContainer}>
-                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor,Color.lightRecBlue]} style={styles.cardGroup}>
-                    <TouchableOpacity onPress={()=>checkFormScreen('MEETING')} style={{ alignItems: 'center' }}>
-                        <Image source={receMeetLog} style={styles.imageSet} />
-                        <Text style={styles.buttonText}>
-                            {RecpImgArray[0].name}
-                        </Text>
-                    </TouchableOpacity>
-                </LinearGradient>
-                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
-                    <TouchableOpacity onPress={()=>checkFormScreen('SERVICE')} style={{ alignItems: 'center' }}>
-                        <Image source={receServeLog} style={styles.imageSet} />
-                        <Text style={styles.buttonText}>
-                            {RecpImgArray[2].name}
-                        </Text>
-                    </TouchableOpacity>
-                </LinearGradient>
-                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
-                    <TouchableOpacity onPress={()=>checkFormScreen('CONTRACTOR')} style={{ alignItems: 'center' }}>
-                        <Image source={receContrLog} style={styles.imageSet} />
-                        <Text style={styles.buttonText}>
-                            {RecpImgArray[3].name}
-                        </Text>
-                    </TouchableOpacity>
-                </LinearGradient>
-            </View>
-            <View style={styles.cardGroupContainer}>
-                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
-                    <TouchableOpacity onPress={()=>checkFormScreen('INTERVIEW')} style={{ alignItems: 'center' }}>
-                        <Image source={receInterLog} style={styles.imageSet} />
-                        <Text style={styles.buttonText}>
-                            {RecpImgArray[4].name}
-                        </Text>
-                    </TouchableOpacity>
-                </LinearGradient>
-                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
-                    <TouchableOpacity onPress={()=>checkFormScreen('Courier')} style={{ alignItems: 'center' }}>
-                        <Image source={receVisitLog} style={styles.imageSet} />
-                        <Text style={styles.buttonText}>
-                            {RecpImgArray[5].name}
-                        </Text>
-                    </TouchableOpacity>
-                </LinearGradient>
-                <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
-                    <TouchableOpacity onPress={()=>checkFormScreen('DELIVERYPICK')} style={{ alignItems: 'center' }}>
-                        <Image source={receDelLog} style={styles.imageSet} />
-                        <Text style={styles.buttonText}>
-                            {RecpImgArray[6].name}
-                        </Text>
-                    </TouchableOpacity>
-                </LinearGradient>
-            </View>
-            <View style={styles.boxRow}>
-                <Pressable style={styles.uploadBox}>
-                    <Pressable style={styles.cusButton}>
-                        <Text style={styles.cusText}>Pre Approved <Icon name="check-circle-outline" size={Dimensions.get('window').fontScale * 16}></Icon></Text>
+                <Image source={receLogo} style={styles.image} />
+                <Text style={styles.title}>EzEntry</Text>
+                <View style={{marginTop:3, width: '98%', height: 20, alignItems: 'center', position: 'relative', borderRadius: 5, backgroundColor: Color.blueRecColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
+                    <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500',textAlignVertical:'center'}}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text>
+                </View>
+                <View style={styles.cardGroupContainer}>
+                    <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
+                        <TouchableOpacity onPress={() => checkFormScreen('MEETING')} style={{ alignItems: 'center' }}>
+                            <Image source={receMeetLog} style={styles.imageSet} />
+                            <Text style={styles.buttonText}>
+                                {RecpImgArray[0].name}
+                            </Text>
+                        </TouchableOpacity>
+                    </LinearGradient>
+                    <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
+                        <TouchableOpacity onPress={() => checkFormScreen('SERVICE')} style={{ alignItems: 'center' }}>
+                            <Image source={receServeLog} style={styles.imageSet} />
+                            <Text style={styles.buttonText}>
+                                {RecpImgArray[2].name}
+                            </Text>
+                        </TouchableOpacity>
+                    </LinearGradient>
+                    <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
+                        <TouchableOpacity onPress={() => checkFormScreen('CONTRACTOR')} style={{ alignItems: 'center' }}>
+                            <Image source={receContrLog} style={styles.imageSet} />
+                            <Text style={styles.buttonText}>
+                                {RecpImgArray[3].name}
+                            </Text>
+                        </TouchableOpacity>
+                    </LinearGradient>
+                </View>
+                <View style={styles.cardGroupContainer}>
+                    <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
+                        <TouchableOpacity onPress={() => checkFormScreen('INTERVIEW')} style={{ alignItems: 'center' }}>
+                            <Image source={receInterLog} style={styles.imageSet} />
+                            <Text style={styles.buttonText}>
+                                {RecpImgArray[4].name}
+                            </Text>
+                        </TouchableOpacity>
+                    </LinearGradient>
+                    <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
+                        <TouchableOpacity onPress={() => checkFormScreen('Courier')} style={{ alignItems: 'center' }}>
+                            <Image source={receVisitLog} style={styles.imageSet} />
+                            <Text style={styles.buttonText}>
+                                {RecpImgArray[5].name}
+                            </Text>
+                        </TouchableOpacity>
+                    </LinearGradient>
+                    <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
+                        <TouchableOpacity onPress={() => checkFormScreen('DELIVERYPICK')} style={{ alignItems: 'center' }}>
+                            <Image source={receDelLog} style={styles.imageSet} />
+                            <Text style={styles.buttonText}>
+                                {RecpImgArray[6].name}
+                            </Text>
+                        </TouchableOpacity>
+                    </LinearGradient>
+                </View>
+                <View style={styles.boxRow}>
+                    <Pressable style={styles.uploadBox}>
+                        <Pressable style={styles.cusButton} onPress={()=>{setPreApp(true)}}>
+                            <Text style={styles.cusText}>Pre Approved <Icon name="check-circle-outline" size={Dimensions.get('window').fontScale * 16}></Icon></Text>
+                        </Pressable>
                     </Pressable>
-                </Pressable>
-                <Pressable style={styles.uploadBox}>
-                    <Pressable style={styles.cusButton}>
-                        <Text style={styles.cusText}>Check Out <Icon name="location-exit" size={Dimensions.get('window').fontScale * 16}></Icon>
-                        </Text>
+                    <Pressable style={styles.uploadBox}>
+                        <Pressable style={styles.cusButton} onPress={()=>{setCheckout(true)}}>
+                            <Text style={styles.cusText}>Check Out <Icon name="location-exit" size={Dimensions.get('window').fontScale * 16}></Icon>
+                            </Text>
+                        </Pressable>
                     </Pressable>
-                </Pressable>
+                </View>
+                <View style={styles.boxRow}>
+                    <Pressable style={styles.viewSec}>
+                        <Icon style={{ marginRight: 'auto', fontSize: 16, borderBottomWidth: 1, borderBottomColor: Color.blueRecColor }} name="logout" onPress={logoutApp} color={Color.blueRecColor}>Logout</Icon>
+                        <Icon onPress={() => { navigation.navigate('History') }} style={{ marginLeft: 'auto', fontSize: 16, borderBottomWidth: 1, borderBottomColor: Color.blueRecColor }} name="history" color={Color.blueRecColor}>View History</Icon>
+                    </Pressable>
+                </View>
+                <Image source={receBottomLogo} style={styles.bottomLogo} />
             </View>
-            <View style={styles.boxRow}>
-                <Pressable style={styles.viewSec}>
-                <Icon style={{marginRight:'auto',fontSize:16,borderBottomWidth:1,borderBottomColor:Color.blueRecColor}} name="logout" onPress={logoutApp} color={Color.blueRecColor}>Logout</Icon>
-                <Icon onPress={()=>{navigation.navigate('History')}} style={{marginLeft:'auto',fontSize:16,borderBottomWidth:1,borderBottomColor:Color.blueRecColor}} name="history" color={Color.blueRecColor}>View History</Icon>
-                </Pressable>
-            </View>
-            <Image source={receBottomLogo} style={styles.bottomLogo} />
-        </View>
+            <Overlay isVisible={preApp}  overlayStyle={{width:'80%',borderRadius:20,backgroundColor:Color.lightRecBlue,}}  onBackdropPress={()=>{setPreApp(false)}}>
+                <Icon name="close" onPress={()=>{setPreApp(false)}} color={Color.darkRecGray} style={{textAlign:'right'}} size={40}></Icon>
+                <ListItem bottomDivider>
+                    <ListItem.Content>
+                    <ListItem.Title>Name: Amal</ListItem.Title>
+                    <ListItem.Subtitle>Reason: For service</ListItem.Subtitle>
+                    </ListItem.Content>
+                </ListItem>
+                <ListItem bottomDivider>
+                    <ListItem.Content>
+                    <ListItem.Title>Name: Amal</ListItem.Title>
+                    <ListItem.Subtitle>Reason: For service</ListItem.Subtitle>
+                    </ListItem.Content>
+                </ListItem>
+                <ListItem bottomDivider>
+                    <ListItem.Content>
+                    <ListItem.Title>Name: Amal</ListItem.Title>
+                    <ListItem.Subtitle>Reason: For service</ListItem.Subtitle>
+                    </ListItem.Content>
+                </ListItem>
+            </Overlay>
+            <Overlay isVisible={checkot} overlayStyle={{width:'80%',borderRadius:20,backgroundColor:Color.lightRecBlue,}}  onBackdropPress={()=>{setCheckout(false)}}>
+                <Icon name="close" onPress={()=>{setCheckout(false)}} color={Color.darkRecGray} style={{textAlign:'right'}} size={40}></Icon>
+            </Overlay>
         </SafeAreaView>
     )
 }
@@ -224,32 +257,32 @@ const cardWidth = (Dimensions.get('window').width - cardGap * 3) / 3;
 
 const styles = StyleSheet.create({
     container: {
-        paddingTop:Dimensions.get('window').height * 0.06,
+        paddingTop: Dimensions.get('window').height * 0.06,
         alignItems: "center",
-        paddingHorizontal: 28
+        paddingHorizontal: 28,
     },
     image: {
         height: 160,
-        width: 300,
-        resizeMode: 'contain'
+        width: 300, 
+        resizeMode: 'contain',
     },
     imageSet: {
         width: Dimensions.get('window').width * 0.2,
         height: (Dimensions.get('window').height * 1) / 10,
-        resizeMode:'contain'
+        resizeMode: 'contain'
     },
-    viewSec:{
-        flex:1,
-        flexDirection:'row',
-        justifyContent:'flex-end'
+    viewSec: {
+        flex: 1,
+        flexDirection: 'row',
+        justifyContent: 'flex-end'
     },
-    ViewText:{
-        textAlign:'right',
-        marginRight:5,
-        borderBottomWidth:1,
-        width:120,
-        color:Color.blueRecColor,
-        borderBottomColor:Color.blueRecColor,
+    ViewText: {
+        textAlign: 'right',
+        marginRight: 5,
+        borderBottomWidth: 1,
+        width: 120,
+        color: Color.blueRecColor,
+        borderBottomColor: Color.blueRecColor,
     },
     cusButton: {
         alignItems: 'center',
@@ -265,16 +298,16 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.32,
         shadowRadius: 5.46,
         elevation: 9,
-      },
-      cusText: {
+    },
+    cusText: {
         fontSize: Dimensions.get('window').fontScale * 15,
         lineHeight: 21,
         fontWeight: '600',
         letterSpacing: 0.20,
         color: Color.blackRecColor,
-      },
+    },
     bottomLogo: {
-        marginTop:Dimensions.get('window').height * 0.02,
+        marginTop: Dimensions.get('window').height * 0.02,
         height: 60,
         width: 60,
         resizeMode: 'contain'
@@ -283,7 +316,7 @@ const styles = StyleSheet.create({
         fontSize: 32,
         fontFamily: Fonts.recFontFamily.titleRecFont,
         textAlign: "center",
-        fontWeight:'normal',
+        fontWeight: 'normal',
         color: Color.blueRecColor
     },
     button: {
@@ -292,27 +325,28 @@ const styles = StyleSheet.create({
         height: 40
     },
     cardGroupContainer: {
+        marginTop:-8,
         flexDirection: 'row',
         justifyContent: 'space-evenly',
         gap: 5
     },
-    boxRow:{
-        marginTop:Dimensions.get('window').height * 0.024,
-        flexDirection:'row',
-        width : "100%",
-        gap:10
+    boxRow: {
+        marginTop: Dimensions.get('window').height * 0.024,
+        flexDirection: 'row',
+        width: "100%",
+        gap: 10
     },
-    uploadBox:{
-        width:'50%',
+    uploadBox: {
+        width: '50%',
     },
-    buttonRow:{
-        justifyContent:'center'
+    buttonRow: {
+        justifyContent: 'center'
     },
     buttonText: {
         color: Color.blackRecColor,
         fontSize: 14,
         fontWeight: "bold",
-        textAlign:'center',
+        textAlign: 'center',
     },
     cardGroup: {
         marginTop: cardGap,

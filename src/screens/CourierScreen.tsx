@@ -3,78 +3,178 @@ import React, { useEffect, useState } from "react"
 import { ActivityIndicator, Alert, Dimensions, FlatList, GestureResponderEvent, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
-import { InfoFormProps, UserLoginLocation, UserPayload } from "../models/RecepModels";
-import { CheckBox } from "react-native-elements"
+import { InfoFormProps, UserLDData, UserLoginLocation, UserPayload } from "../models/RecepModels";
+import { CheckBox, ListItem } from "react-native-elements"
+import { MiscStoreKeys } from "../constants/RecStorageKeys"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 const CourierScreen = ({ route, navigation }: any) => {
-    const [fromP,setFromPlace] =  useState("")
-    const [toPla,setToPlace] = useState("")
-    const [doc,setDoc] = useState("")
-    const [name,setName]  = useState("")
-    const [hadTo,setHandTo] = useState("")
-    const [hadOn,setHandOn] = useState("")
-    const [inout,setInOut] = useState(0)
+    const [fromP, setFromPlace] = useState("")
+    const [toPla, setToPlace] = useState("")
+    const [doc, setDoc] = useState("")
+    const [name, setName] = useState("")
+    const [hadTo, setHandTo] = useState("")
+    const [hadOn, setHandOn] = useState("")
+    const [inout, setInOut] = useState(0)
+    const [viewUser, setViewUser] = useState<UserLDData>()
     useEffect(() => {
+        getUserData()
         navigation.setOptions({ headerTitle: data.appBarTitle })
     }, [])
     const data: InfoFormProps = route.params["propData"]
+    const getUserData = async () => {
+        setViewUser({ UserCode: '', UserDeviceToken: '', UserMobileNo: '', UserName: '', UserPassword: '', UserType: '', LocationPremise: '' })
+        const data: any = await AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN)
+        const vals = JSON.parse(data)
+        console.log("data ", vals.Data[0][0])
+        setViewUser(vals.Data[0][0])
+    }
+
+    const [query, setQuery] = useState('');
+    const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+    const [courName,setCourName] =  useState([])
+
+    const handleInputChange = (text: any) => {
+        AsyncStorage.setItem('CON_STATUS',JSON.stringify({EMP_STAT:'EMPTY'}))
+        setQuery(text);
+        filterSuggestions(text);
+    };
+
+    const filterSuggestions = (text: any) => {
+        const filtered = courName.filter((item: any) =>
+            item.VisitorMobileNo.toLowerCase().includes(text.toLowerCase())
+        );
+        setFilteredSuggestions(filtered);
+    };
+
+    const handleSelectSuggestion = (item: any) => {
+        setQuery(item.VisitorMobileNo);
+        setFilteredSuggestions([]);
+    };
+
     return (
         <SafeAreaView>
             <View>
                 <View style={styles.container}>
-                    <View style={{ marginTop: Dimensions.get('window').width > 756 ? 15 : 20, width: '100%', overflow: 'scroll' }}>
+                    <View style={{ marginTop: Dimensions.get('window').width > 756 ? 10 : 3.6, width: Dimensions.get('window').width > 756 ? '92%' : '85%', height: 20, alignItems: 'center', position: 'absolute', borderRadius: 5, backgroundColor: Color.blueRecColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
+                        <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500', textAlign: 'center' }}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text>
+                    </View>
+                    <View style={{ marginTop: Dimensions.get('window').width > 756 ? 25 : 20, width: '100%', overflow: 'scroll' }}>
                         <View style={styles.inputView1}>
-                           <View style={{flex:1,flexDirection:'row',marginHorizontal:12}}>
-                            <CheckBox
-                            title={'In'}
-                            checked={inout === 0}
-                            onPress={() => setInOut(0)}
-                            checkedIcon="dot-circle-o"
-                            uncheckedIcon="circle-o"
-                            containerStyle={{backgroundColor:'transparent'}}
-                            />
-                            <CheckBox
-                            title={'Out'}
-                            checked={inout === 1}
-                            onPress={() => setInOut(1)}
-                            checkedIcon="dot-circle-o"
-                            uncheckedIcon="circle-o"
-                            containerStyle={{backgroundColor:'transparent'}}
-                            />
-                           </View>
+                            <View style={{ flex: 1, flexDirection: 'row', marginHorizontal: 12 }}>
+                                <CheckBox
+                                    title={'In'}
+                                    checked={inout === 0}
+                                    onPress={() => setInOut(0)}
+                                    checkedIcon="dot-circle-o"
+                                    uncheckedIcon="circle-o"
+                                    containerStyle={{ backgroundColor: 'transparent' }}
+                                />
+                                <CheckBox
+                                    title={'Out'}
+                                    checked={inout === 1}
+                                    onPress={() => setInOut(1)}
+                                    checkedIcon="dot-circle-o"
+                                    uncheckedIcon="circle-o"
+                                    containerStyle={{ backgroundColor: 'transparent' }}
+                                />
+                            </View>
                             <TextInput
                                 value={fromP}
                                 onChangeText={name => setFromPlace(name)}
-                                style={[styles.input,{borderBottomColor:fromP==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
+                                style={[styles.input, { borderBottomColor: fromP == '' ? Color.redRecColor : Color.darkRecGray }]} placeholderTextColor={Color.blackRecColor}
                                 placeholder='From / Place' autoCapitalize='none' />
-                                <TextInput
+                            <TextInput
                                 value={toPla}
                                 onChangeText={name => setToPlace(name)}
-                                style={[styles.input,{borderBottomColor:toPla==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
+                                style={[styles.input, { borderBottomColor: toPla == '' ? Color.redRecColor : Color.darkRecGray }]} placeholderTextColor={Color.blackRecColor}
                                 placeholder='To Place' autoCapitalize='none' />
-                           <TextInput
+                            <TextInput
                                 value={doc}
                                 onChangeText={name => setDoc(name)}
-                                style={[styles.input,{borderBottomColor:doc==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
+                                style={[styles.input, { borderBottomColor: doc == '' ? Color.redRecColor : Color.darkRecGray }]} placeholderTextColor={Color.blackRecColor}
                                 placeholder='Docket no' autoCapitalize='none' />
-                           <TextInput
+                            <TextInput
                                 value={name}
                                 onChangeText={name => setName(name)}
-                                style={[styles.input,{borderBottomColor:name==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
+                                style={[styles.input, { borderBottomColor: name == '' ? Color.redRecColor : Color.darkRecGray }]} placeholderTextColor={Color.blackRecColor}
                                 placeholder='Courier name' autoCapitalize='none' />
-                           <TextInput
+                            <TextInput
                                 value={hadOn}
                                 onChangeText={name => setHandOn(name)}
-                                style={[styles.input,{borderBottomColor:hadOn==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
+                                style={[styles.input, { borderBottomColor: hadOn == '' ? Color.redRecColor : Color.darkRecGray }]} placeholderTextColor={Color.blackRecColor}
                                 placeholder='Handedover on' autoCapitalize='none' />
-                           <TextInput
+                            <TextInput
                                 value={hadTo}
                                 onChangeText={name => setHandTo(name)}
-                                style={[styles.input,{borderBottomColor:hadTo==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
+                                style={[styles.input, { borderBottomColor: hadTo == '' ? Color.redRecColor : Color.darkRecGray }]} placeholderTextColor={Color.blackRecColor}
                                 placeholder='Handedover To' autoCapitalize='none' />
                             <Pressable android_ripple={{ color: Color.lightRecBlue }} style={styles.outlineButton}>
                                 <Text style={styles.buttonText} >Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon></Text>
                             </Pressable>
+                            <View style={{ width: '100%',marginTop:3 }}>
+                            <TextInput
+                                style={[styles.input, { marginHorizontal: Dimensions.get('window').width > 756 ? 30 : 20 }]}
+                                value={query}
+                                keyboardType="numeric"
+                                maxLength={10}
+                                onPressIn={() => { }}
+                                onChangeText={handleInputChange}
+                                placeholder="Type Phone number..."
+                                placeholderTextColor={Color.blackRecColor}
+                            />
+                            <FlatList
+                                data={filteredSuggestions}
+                                renderItem={({ item }: any) => (
+                                    <Pressable onPress={() => handleSelectSuggestion(item)}>
+                                        <Text style={{ padding: 15, width: '100%', color: Color.blackRecColor, borderBottomColor: Color.lightGreyRecColor, borderBottomWidth: 1 }}>{item.VisitorMobileNo}</Text>
+                                    </Pressable>
+                                )}
+                                keyExtractor={(item, index) => index.toString()}
+                                style={{
+                                    maxHeight: 200, marginTop: 40, marginHorizontal: 20, position: 'absolute', zIndex: 1, backgroundColor: '#fff',
+                                    width: Dimensions.get('window').width > 756 ? 754 : 350
+                                }}
+                            />
+                        </View>
+                            <ScrollView style={{height:Dimensions.get('window').width > 756 ? 550:250,marginHorizontal:Dimensions.get('window').width > 756? 28:15,marginTop:1}}>
+                                <ListItem containerStyle={{ backgroundColor: Color.whiteRecColor }} bottomDivider>
+                                    <ListItem.Content>
+                                        <ListItem.Title>Courier Name: c1</ListItem.Title>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor, }}>Place: Hsr</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Mobile No: 9656214124</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>item: i1</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Date: {new Date().toDateString()}</ListItem.Subtitle>
+                                    </ListItem.Content>
+                                </ListItem>
+                                <ListItem containerStyle={{ backgroundColor: Color.whiteRecColor }} bottomDivider>
+                                    <ListItem.Content>
+                                        <ListItem.Title>Courier Name: c1</ListItem.Title>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor, }}>Place: Hsr</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Mobile No: 9656214124</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>item: i1</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Date: {new Date().toDateString()}</ListItem.Subtitle>
+                                    </ListItem.Content>
+                                </ListItem>
+                                <ListItem containerStyle={{ backgroundColor: Color.whiteRecColor }} bottomDivider>
+                                    <ListItem.Content>
+                                        <ListItem.Title>Courier Name: c1</ListItem.Title>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor, }}>Place: Hsr</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Mobile No: 9656214124</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>item: i1</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Date: {new Date().toDateString()}</ListItem.Subtitle>
+                                    </ListItem.Content>
+                                </ListItem>
+                                <ListItem containerStyle={{ backgroundColor: Color.whiteRecColor }} bottomDivider>
+                                    <ListItem.Content>
+                                        <ListItem.Title>Courier Name: c1</ListItem.Title>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor, }}>Place: Hsr</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Mobile No: 9656214124</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>item: i1</ListItem.Subtitle>
+                                        <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Date: {new Date().toDateString()}</ListItem.Subtitle>
+                                    </ListItem.Content>
+                                </ListItem>
+                            </ScrollView>
                         </View>
                     </View>
                 </View>
@@ -122,7 +222,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     outlineButton: {
-        marginHorizontal:Dimensions.get('window').height * 0.02,       
+        marginHorizontal: Dimensions.get('window').height * 0.02,
         marginLeft: 'auto',
         marginTop: 10,
         height: 35,

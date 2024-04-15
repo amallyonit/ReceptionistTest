@@ -1,19 +1,26 @@
 "use strict"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Dimensions, Image, Pressable, SafeAreaView, StyleSheet, Text, TextInput, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import Fonts from "../theme/Fonts"
-import { DelpickData, InfoFormProps } from "../models/RecepModels"
+import { DelpickData, InfoFormProps, UserLDData } from "../models/RecepModels"
 import { ListItem } from "react-native-elements"
 import LinearGradient from "react-native-linear-gradient"
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { MiscStoreKeys } from "../constants/RecStorageKeys"
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
 const FormDeliveryScreen = ({route,navigation}:any) => {
     const data:InfoFormProps=route.params['propData']
     let dataList = DelpickData
     const [date, setDate] = useState(new Date(1598051730000));
+    const [viewUser, setViewUser] = useState<UserLDData>()
+
+    useEffect(()=>{
+        getUserData()
+    },[])
     const onChange = (event:any, selectedDate:any) => {
       const currentDate = selectedDate;
       setDate(currentDate);
@@ -31,12 +38,21 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
         showMode('date');
       };
   
-
+      const getUserData = async () => {
+        setViewUser({ UserCode: '', UserDeviceToken: '', UserMobileNo: '', UserName: '', UserPassword: '', UserType: '', LocationPremise: '' })
+        const data: any = await AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN)
+        const vals = JSON.parse(data)
+        console.log("data ", vals.Data[0][0])
+        setViewUser(vals.Data[0][0])
+    }
 
     return (
         <SafeAreaView>
-                    <View style={styles.container}>        
-        <View style={styles.boxRow}>
+        <View style={styles.container}>    
+            <View style={{marginTop:Dimensions.get('window').width >756? 10: 3.6,width:Dimensions.get('window').width >756? '96%':'85%',height:20,alignItems:'center',position:'absolute',borderRadius:5,backgroundColor:Color.blueRecColor,borderColor:Color.blueRecColor,borderWidth:1}}>
+                <Text style={{color:Color.whiteRecColor,fontSize:16,fontWeight:'500',textAlign:'center'}}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text>   
+            </View>    
+            <View style={styles.boxRow}>
                 <Pressable style={styles.uploadBox}>
                     <Pressable style={styles.cusButton}>
                         <Text style={{color:Color.blackRecColor,padding:10,textAlign:'center',fontSize:18}}>
@@ -111,6 +127,7 @@ const FormDeliveryScreen = ({route,navigation}:any) => {
 
 const styles = StyleSheet.create({
     container: {
+        alignItems:'center',
         width: '100%',
         height: 60,
     },

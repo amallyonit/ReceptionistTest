@@ -13,7 +13,7 @@ import Fonts from './src/theme/Fonts';
 import messaging from "@react-native-firebase/messaging"
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createRef, useEffect, useState } from 'react';
-import { NotificationData } from './src/models/RecepModels';
+import { NotificationData, ViewNotification } from './src/models/RecepModels';
 import { RegisterMessageToken } from './src/requests/recNotifiRequest';
 import notifee, { AndroidImportance, AndroidStyle, EventType } from '@notifee/react-native';
 import { PermissionsAndroid } from 'react-native';
@@ -52,7 +52,7 @@ const onRegisterMessaging = async () => {
 }
 
 const onMessageGetter = async (message:any)=>{
-    let img =""
+    let img:ViewNotification|null=null
     AsyncStorage.setItem('FCM_Data_key',message.data['mastercode'])
     AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
     console.log("message ",message.data['data_fcm'])
@@ -74,12 +74,14 @@ const onMessageGetter = async (message:any)=>{
         VisitorMobileNo:messString.VisitorMobileNo
     }
       await GetPhoneNumberDetails(payload).then((response:any)=>{
-        img = response.data.Data[0].VisitorImage
+        const data  = JSON.parse(response.data.Data)
+        img=data[0][0]
+        console.log("image ",response)
       }).catch((error)=>{
         console.log("error ",error)
       })
     }
-    if(img!=""){
+    if(img!.VisitorImage!=""){
       await notifee.displayNotification({
         title:'EzEntry Notification',
         body:dataString,
@@ -92,7 +94,8 @@ const onMessageGetter = async (message:any)=>{
           largeIcon:require('./assets/cus_icon_color.png'),
           sound:'old_ring_bell',
           style:{
-            type:AndroidStyle.BIGPICTURE,picture:`data:image/png;base64,${img}`
+            type:AndroidStyle.BIGPICTURE,
+            picture:`data:image/png;base64,${img!.VisitorImage}`
           },
           actions: [
             {
@@ -100,7 +103,13 @@ const onMessageGetter = async (message:any)=>{
               icon: 'https://my-cdn.com/icons/reply.png',
               pressAction: {
                 id: 'Accept',
-                launchActivity:'default'
+                launchActivity:'default',
+                mainComponent:'App'
+              },  
+              input: {
+                allowFreeFormInput: false,
+                choices: ['Not Available', 'Wait for 15 mins','On meeting'],
+                placeholder: 'Reply to reception...',
               },
             },
             {
@@ -108,10 +117,14 @@ const onMessageGetter = async (message:any)=>{
               icon: 'https://my-cdn.com/icons/reply.png',
               pressAction: {
                 id: 'Deny',
-                launchActivity:'default'
+                launchActivity:'default',
+                mainComponent:'App'
               },
             },
           ],
+          fullScreenAction:{
+            id:'default'
+          }
         }
       })
     }
@@ -127,7 +140,8 @@ const onMessageGetter = async (message:any)=>{
     let payload={
       VisitorMasterCode:dataKey,
       VisitTranId:dataKey2,
-      VisitTranVisitStatus:'A'
+      VisitTranVisitStatus:'A',
+      VisitTranReason:detail.input
     }
     try {
       await UpdateVisitStatus(payload).then((response)=>{
@@ -138,14 +152,16 @@ const onMessageGetter = async (message:any)=>{
     } catch (error) {
       console.log("error while updating visitor status")
     }
-          console.log("event pressed ",pressAction.id);
+    console.log("event pressed ",pressAction.id);
+    await notifee.cancelNotification(notification.id);
       }else if(type === EventType.ACTION_PRESS && pressAction.id === 'Deny'){
           const dataKey = await AsyncStorage.getItem('FCM_Data_key')
           const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
           let payload={
             VisitorMasterCode:dataKey,
             VisitTranId:dataKey2,
-            VisitTranVisitStatus:'R'
+            VisitTranVisitStatus:'R',
+            VisitTranReason:detail.input
           }
           try {
             await UpdateVisitStatus(payload).then((response)=>{

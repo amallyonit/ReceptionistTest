@@ -44,6 +44,7 @@ const LoginScreen = ({navigation}:any) =>{
             AsyncStorage.removeItem('LOGIN')
             StoreValue(MiscStoreKeys.EZ_LOGIN,response.data)
             AsyncStorage.setItem('FCM_STATUS','')
+            AsyncStorage.setItem('CON_STATUS',JSON.stringify({EMP_STAT:'EMPTY'}))
             let userLocations = response.data.Data[1]
             if(response.data.Data[0][0].UserType=='U'){
               navigation.navigate('Admin')

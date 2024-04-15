@@ -13,7 +13,7 @@ import Color from './src/theme/Color';
 
 messaging().getInitialNotification(async (message)=>{
   AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
-  let img =""
+  let img;
   const channelId = await notifee.createChannel({
     id:'default',
     name:'EzEntry Notifications',
@@ -34,12 +34,12 @@ messaging().getInitialNotification(async (message)=>{
       VisitorMobileNo:messageString.VisitorMobileNo
   }
     await GetPhoneNumberDetails(payload).then((response)=>{
-      img = response.data.Data[0].VisitorImage
+      img = JSON.parse(response.data.Data)
     }).catch((error)=>{
       console.log("error ",error)
     })
   }
-  if(img!=''){
+  if(img[0][0].VisitorImage!=''){
     await notifee.displayNotification({
       title:'<p style="color:#99c2ff"><b>Persons are Watiting...</span></p></b></p>',
       body:dataString,
@@ -61,7 +61,8 @@ messaging().getInitialNotification(async (message)=>{
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Accept',
-              launchActivity:'default'
+              launchActivity:'default',
+              mainComponent:'App'
             },
           },
           {
@@ -69,7 +70,8 @@ messaging().getInitialNotification(async (message)=>{
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Deny',
-              launchActivity:'default'
+              launchActivity:'default',
+              mainComponent:'App'
             },
           },
         ],
@@ -80,7 +82,7 @@ messaging().getInitialNotification(async (message)=>{
 
 messaging().setBackgroundMessageHandler(async(message)=>{
   AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
-  let img =""
+  let img;
   const channelId = await notifee.createChannel({
     id:'default',
     name:'EzEntry Notifications',
@@ -101,12 +103,12 @@ messaging().setBackgroundMessageHandler(async(message)=>{
       VisitorMobileNo:messageString.VisitorMobileNo
   }
     await GetPhoneNumberDetails(payload).then((response)=>{
-      img = response.data.Data[0].VisitorImage
+      img = JSON.parse(response.data.Data)
     }).catch((error)=>{
       console.log("error ",error)
     })
   }
-  if(img!=''){
+  if(img[0][0].VisitorImage!=''){
     await notifee.displayNotification({
       title:'<p style="color:#99c2ff"><b>Persons are Watiting...</span></p></b></p>',
       body:dataString,
@@ -125,7 +127,7 @@ messaging().setBackgroundMessageHandler(async(message)=>{
         sound:'old_ring_bell',
         style:{
           type:AndroidStyle.BIGPICTURE,
-          picture:`data:image/png;base64,${img}`
+          picture:`data:image/png;base64,${img[0][0].VisitorImage}`
         },
         actions: [
           {
@@ -133,7 +135,8 @@ messaging().setBackgroundMessageHandler(async(message)=>{
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Accept',
-              launchActivity:'default'
+              launchActivity:'default',
+              mainComponent:'App'
             },
           },
           {
@@ -141,10 +144,14 @@ messaging().setBackgroundMessageHandler(async(message)=>{
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Deny',
-              launchActivity:'default'
+              launchActivity:'default',
+              mainComponent:'App'
             },
           },
         ],
+        fullScreenAction:{
+          id:'default'
+        }
       }
     })
   }

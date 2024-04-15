@@ -1,15 +1,16 @@
 "use strict"
-import React, { useEffect, useState } from "react"
+import  React,{ useEffect, useState } from "react"
 import { ActivityIndicator, Alert, Dimensions, FlatList, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
-import { InfoFormProps, UserLoginLocation, UserPayload } from "../models/RecepModels";
+import { InfoFormProps, UserLDData, UserLoginLocation, UserPayload } from "../models/RecepModels";
 import { Dropdown } from "react-native-element-dropdown";
 import { launchCamera, CameraOptions } from 'react-native-image-picker';
 import { GetAllRevisitorsData, GetPhoneNumberDetails, GetUsersByLocation, PostVisitorData } from "../requests/recHomeRequest"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
+import { LinearProgress, Overlay } from "react-native-elements"
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
@@ -38,25 +39,31 @@ const FormScreen = ({ route, navigation }: any) => {
     const [visitors, setVisitors] = useState("1")
     const [remarks, setRemarks] = useState("")
     const [meet, setMeetWith] = useState("")
-    const [viewUser, setViewUser] = useState(null)
+    const [viewUser, setViewUser] = useState<UserLDData>()
     useEffect(() => {
         navigation.setOptions({ headerTitle: data.appBarTitle })
         setMobile('')
-        setUsrLcton('')
         getUserData()
+        getUserDatasDet()
     }, [])
     const data: InfoFormProps = route.params["propData"]
+
+    const getUserDatasDet = async () => {
+        setViewUser({UserCode:'',UserDeviceToken:'',UserMobileNo:'',UserName:'',UserPassword:'',UserType:'',LocationPremise:''})
+        const data: any = await AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN)
+        const vals = JSON.parse(data)
+        console.log("data ", vals.Data[0][0])
+        setViewUser(vals.Data[0][0])
+      }
 
     const getUserData = async () => {
         setUsrLcton('')
         const data: any = await AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN)
         const vals = JSON.parse(data)
-        console.log("data ", vals.Status)
-        setViewUser(vals.Data[0][0])
-        if(vals.Status){
-            setLocations(vals.Data[1])
-            setUsrLcton(location[0]?.LocationCode)
-        }
+        console.log("data ",data)
+        setLocations(vals.Data[1])
+        setUsrLcton(location[0]?.LocationCode)
+        getUsersByLocationName(usrLcton==undefined || usrLcton==''?'BPJ001':usrLcton)
         console.log(" dat ",location,usrLcton)
       }
     const getUsersByLocationName = async (code: any) => {
@@ -65,7 +72,6 @@ const FormScreen = ({ route, navigation }: any) => {
         }
         try {
             await GetUsersByLocation(JSON.stringify(payload))?.then((response: any) => {
-                // console.log("response ", response.data)
                 setUserlist(response.data.Data)
             }).catch((error: any) => {
                 console.log("error ", error)
@@ -103,12 +109,13 @@ const FormScreen = ({ route, navigation }: any) => {
         console.log("mobile no ", payload)
         try {
             await GetPhoneNumberDetails(payload)?.then((response: any) => {
-                console.log("data resp ",response.data.Data)
+                console.log("data resp ",response.data)
                 if (response.data.Status) {
-                    setBase64(response.data.Data[0].VisitorImage)
-                    setPlace(response.data.Data[0].VisitTranVisitorFrom)
-                    setVisitorname(response.data.Data[0].VisitorName)
-                    setVisitCode(response.data.Data[0].VisitorCode)
+                    const notData = JSON.parse(response.data.Data)
+                    setBase64(notData[0][0].VisitorImage)
+                    setPlace(notData[0][0].VisitTranVisitorFrom)
+                    setVisitorname(notData[0][0].VisitorName)
+                    setVisitCode(notData[0][0].VisitorCode)
                 }
             }).catch((error) => {
                 console.log("error ", error)
@@ -163,6 +170,10 @@ const FormScreen = ({ route, navigation }: any) => {
     }
 
     const onSendRequest = async () => {
+        const vistTrnid = await AsyncStorage.getItem('CON_STATUS')
+        console.log("cist sts ",vistTrnid)
+        const VisitCheckStatus = JSON.parse(vistTrnid!)
+        console.log("visit id",VisitCheckStatus.EMP_STAT)
         if (query != "" && meet != "" && place != "" && purpose != "") {
             setIsLoaderTrue(true)
             let payload = {
@@ -183,17 +194,19 @@ const FormScreen = ({ route, navigation }: any) => {
                 VisitTranRemarks: remarks,
                 MeetingUserCode: uDevToken.MeetingUserCode,
                 MeetingDevToken: uDevToken.MeetingDevToken,
-            }
+                VisitCheckStatus:VisitCheckStatus.EMP_STAT
+            } 
             try {
                 await PostVisitorData(payload)?.then((response: any) => {
-                    console.log("response visitor", response)
                     if (response.data.Status) {
                         setIsModalVisible(true)
                         setIsLoaderTrue(false)
                         if (response.data.VStatus == 'R_STATUS') {
+                            AsyncStorage.setItem('CON_STATUS',JSON.stringify({EMP_STAT:response.data.FaileRe}))
                             setVisitStatus('R_STATUS')
                         } else if (response.data.VStatus == 'S_STATUS') {
                             setVisitStatus('S_STATUS')
+                            navigation.navigate('Home')
                             resetVisitForm()
                         }
                     } else {
@@ -203,6 +216,7 @@ const FormScreen = ({ route, navigation }: any) => {
                     }
                 }).catch((error) => {
                     console.log("error ", error)
+                    setIsLoaderTrue(false)
                 })
             } catch (error) {
 
@@ -215,7 +229,7 @@ const FormScreen = ({ route, navigation }: any) => {
     const [filteredSuggestions, setFilteredSuggestions] = useState([]);
 
     const handleInputChange = (text: any) => {
-        console.log("ping ")
+        AsyncStorage.setItem('CON_STATUS',JSON.stringify({EMP_STAT:'EMPTY'}))
         setQuery(text);
         filterSuggestions(text);
         if (filteredSuggestions.length == 0) {
@@ -241,14 +255,17 @@ const FormScreen = ({ route, navigation }: any) => {
         <SafeAreaView>
             <View>
                 <View style={styles.container}>
-                    <View style={{ marginTop: Dimensions.get('window').width > 756 ? 15 : 20, width: '100%', overflow: 'scroll' }}>
+                <View style={{marginTop:Dimensions.get('window').width >756? 10: 3.6,width:Dimensions.get('window').width >756? '92%':'85%',height:20,alignItems:'center',position:'absolute',borderRadius:5,backgroundColor:Color.blueRecColor,borderColor:Color.blueRecColor,borderWidth:1}}>
+                        <Text style={{color:Color.whiteRecColor,fontSize:16,fontWeight:'500',textAlign:'center'}}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text>   
+                </View>
+                    <View style={{ marginTop: Dimensions.get('window').width > 756 ? 40 : 28, width: '100%', overflow: 'scroll' }}>
                         <View style={{ width: '100%' }}>
                             <TextInput
                                 style={[styles.input, { borderBottomColor:query==''?Color.redRecColor:Color.darkRecGray, marginHorizontal: Dimensions.get('window').width > 756 ? 30 : 30 }]}
                                 value={query}
                                 keyboardType="numeric"
                                 maxLength={10}
-                                onPressIn={() => { getVisiorNumbers() }}
+                                onPressIn={() => { getVisiorNumbers();AsyncStorage.setItem('CON_STATUS',JSON.stringify({EMP_STAT:'EMPTY'})) }}
                                 onChangeText={handleInputChange}
                                 placeholder="Type Phone number..."
                                 placeholderTextColor={Color.blackRecColor}
@@ -272,7 +289,7 @@ const FormScreen = ({ route, navigation }: any) => {
                                 value={visiorname}
                                 onChangeText={name => setVisitorname(name)}
                                 style={[styles.input,{borderBottomColor:visiorname==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
-                                placeholder='Name of Vistor' autoCapitalize='none' />
+                                placeholder="Name of Vistor" autoCapitalize='none' />
                             <TextInput
                                 value={place}
                                 onChangeText={plcs => setPlace(plcs)}
@@ -297,10 +314,10 @@ const FormScreen = ({ route, navigation }: any) => {
                                 valueField="LocationCode"
                                 placeholder="Company name"
                                 searchPlaceholder="Search...locations"
-                                value={usrLcton}
+                                value={usrLcton==undefined || usrLcton==''?'BPJ001':usrLcton}
                                 onChange={(item) => {
                                     setUsrLcton(item.LocationCode)
-                                    getUsersByLocationName(typeFormData.locationCode)
+                                    getUsersByLocationName(usrLcton==undefined || usrLcton==''?'BPJ001':usrLcton)
                                 }}
                             />
                             <Dropdown
@@ -398,18 +415,9 @@ const FormScreen = ({ route, navigation }: any) => {
                         </View>
                     </View>
                 </Modal>
-                <Modal
-                    animationType="fade"
-                    transparent={false}
-                    statusBarTranslucent={true}
-                    visible={isLoaderTrue}
-                    onRequestClose={() => {
-                        setIsLoaderTrue(!isLoaderTrue);
-                    }}>
-                    <View style={styles.centeredView}>
-                        <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>
-                    </View>
-                </Modal>
+                <Overlay isVisible={isLoaderTrue} statusBarTranslucent={true}  overlayStyle={{backgroundColor:'white',borderRadius:20}}  onBackdropPress={()=>{setIsLoaderTrue(false)}}>
+                    <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>   
+                </Overlay>
             </View>
         </SafeAreaView>
     )
