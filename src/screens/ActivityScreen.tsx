@@ -1,7 +1,7 @@
 import React, { ReactElement, useEffect, useState } from "react"
 import { Alert, BackHandler, Dimensions, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import Color from "../theme/Color"
-import { ViewNotification } from "../models/RecepModels"
+import { UserLDData, ViewNotification } from "../models/RecepModels"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import { GetNotificationByUserCode } from "../requests/recAdminRequest"
@@ -21,10 +21,12 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
   const [confirm, setConfirm] = useState(false)
   const [counter, setCounter] = useState(0);
   const [isLoad, setIsLoader] = useState(false)
+  const [viewUser, setViewUser] = useState<UserLDData>()
 
   useEffect(() => {
     getNotifications()
     setConfirm(false)
+    getUserDatasDet()
     const backAction = () => {
       Alert.alert("Hold on!", "Are you sure you want to go back?", [
         {
@@ -64,6 +66,14 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
     } catch (error) {
       console.log("error ", error)
     }
+  }
+
+  const getUserDatasDet = async () => {
+    setViewUser({UserCode:'',UserDeviceToken:'',UserMobileNo:'',UserName:'',UserPassword:'',UserType:'',LocationPremise:''})
+    const data: any = await AsyncStorage.getItem(MiscStoreKeys.EZ_LOGIN)
+    const vals = JSON.parse(data)
+    console.log("data ", vals.Data[0][0])
+    setViewUser(vals.Data[0][0])
   }
 
   const generateNotfis = (data: any) => {
@@ -134,7 +144,9 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
                     <ListItem.Subtitle style={{ color: Color.blackRecColor, }}>Place: {l.VisitTranVisitorFrom}</ListItem.Subtitle>
                     <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Mobile No: {l.VisitorMobileNo}</ListItem.Subtitle>
                     <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Purpose: {l.VisitTranPurpose}</ListItem.Subtitle>
-                    <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Date:{l.VisitTranCheckinTime.split('T')[1].split('.', 1)} - {new Date(l.VisitTranCheckinTime).toDateString()}</ListItem.Subtitle>
+                    <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Date: {l.VisitTranCheckinTime.split('T')[1].split('.',1) + " " + (parseInt(l.VisitTranCheckinTime.split('T')[1].split(':')[0].toString()) >= 12 ? 'PM':'AM')} - {new Date(l.VisitTranCheckinTime).toDateString()}</ListItem.Subtitle>
+                    <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Reason: {l.VisitTranReason}</ListItem.Subtitle>
+                    <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Remarks: {l.VisitTranRemarks}</ListItem.Subtitle>
                     <ListItem.Subtitle style={{ color: Color.blackRecColor, marginLeft: 'auto', top: Dimensions.get('window').width > 756 ? -50 : -30 }}>
                       {l.VisitTranVisitStatus == 'R' || l.VisitTranVisitStatus == '' ? (
                         <Icon color={Color.redRecColor} size={Dimensions.get('window').width > 756 ? 60 : 30} name="cancel"></Icon>
@@ -167,9 +179,9 @@ const ActivityScreen = ({ route, navigation }: any): ReactElement => {
               <Icon style={styles.iconStyles} color={Color.whiteRecColor} size={40} name="notifications-none" />
               <Text style={styles.modalTitleStyle}>
                 {viewDeNot?.VisitTranNoOfVisitors != undefined ? (
-                  viewDeNot?.VisitorName + " and " + viewDeNot?.VisitTranNoOfVisitors + " is waiting at Main Gate From " + viewDeNot?.VisitTranVisitorFrom + " for " + viewDeNot?.VisitTranPurpose
+                  viewDeNot?.VisitorName + " and " + viewDeNot?.VisitTranNoOfVisitors + " is waiting at "+ viewUser?.LocationPremise +" From " + viewDeNot?.VisitTranVisitorFrom + " for " + viewDeNot?.VisitTranPurpose
                 ) : (
-                  viewDeNot?.VisitorName + " and " + " is waiting at Main Gate From " + viewDeNot?.VisitTranVisitorFrom + " for " + viewDeNot?.VisitTranPurpose
+                  viewDeNot?.VisitorName + " and " + " is waiting at "+ viewUser?.LocationPremise +" From " + viewDeNot?.VisitTranVisitorFrom + " for " + viewDeNot?.VisitTranPurpose
                 )}
               </Text>
               <View style={styles.hairline}></View>

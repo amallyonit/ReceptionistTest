@@ -34,165 +34,167 @@ const onRegisterMessaging = async () => {
     await messaging().registerDeviceForRemoteMessages()
     const token = await messaging().getToken()
     //store the token into the table with unique user code
-    let data:NotificationData={
-      NotificationDeviceToken:token,
-      NotificationCreatedAt:new Date(),
-      NotificationsData:''
+    let data: NotificationData = {
+      NotificationDeviceToken: token,
+      NotificationCreatedAt: new Date(),
+      NotificationsData: ''
     }
     try {
-      await RegisterMessageToken(data)?.then((reponse)=>{
-      }).catch((error:any)=>{
-        console.log("error ",error)
+      await RegisterMessageToken(data)?.then((reponse) => {
+      }).catch((error: any) => {
+        console.log("error ", error)
       })
     } catch (error) {
-      console.log("error ",error)
+      console.log("error ", error)
     }
     await AsyncStorage.setItem('FCM_Token', token)
   }
 }
 
-const onMessageGetter = async (message:any)=>{
-    let img:ViewNotification|null=null
-    AsyncStorage.setItem('FCM_Data_key',message.data['mastercode'])
-    AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
-    console.log("message ",message.data['data_fcm'])
-    const messString:any = JSON.parse(message.data['data_fcm'])
-    const channelId = await notifee.createChannel({
-      id:'default',
-      name:'EzEntry Notifications',
-      importance:AndroidImportance.HIGH,
-      sound:'old_ring_bell',
+const onMessageGetter = async (message: any) => {
+  let img: ViewNotification | null = null
+  AsyncStorage.setItem('FCM_Data_key', message.data['mastercode'])
+  AsyncStorage.setItem('FCM_TRAN_key', message.data['trancode'])
+  console.log("message ", message.data['data_fcm'])
+  const messString: any = JSON.parse(message.data['data_fcm'])
+  const channelId = await notifee.createChannel({
+    id: 'default',
+    name: 'EzEntry Notifications',
+    importance: AndroidImportance.HIGH,
+    sound: 'old_ring_bell',
+  })
+  let dataString = ""
+  if (messString.VisitTranNoOfVisitors != undefined) {
+    dataString = `${messString.VisitorName} ${" and "} ${messString.VisitTranNoOfVisitors} ${" is waiting at "} ${messString.VisiPersonLocation} ${' From '} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
+  } else {
+    dataString = `${messString.VisitorName} ${" and "} ${" is waiting at "} ${messString.VisiPersonLocation} ${' From '} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
+  }
+  if (messString.VisitorMobileNo != "") {
+    let payload = {
+      VisitorMobileNo: messString.VisitorMobileNo
+    }
+    await GetPhoneNumberDetails(payload).then((response: any) => {
+      const data = JSON.parse(response.data.Data)
+      img = data[0][0]
+      console.log("image ", response)
+    }).catch((error) => {
+      console.log("error ", error)
     })
-    let dataString=""
-    if(messString.VisitTranNoOfVisitors!=undefined){
-      dataString = `${messString.VisitorName} ${" and "} ${messString.VisitTranNoOfVisitors} ${" is waiting at Main Gate From "} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
-    }else{
-      dataString = `${messString.VisitorName} ${" and "} ${" is waiting at Main Gate From "} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
-    }
-    if(messString.VisitorMobileNo!=""){
-      let payload = {
-        VisitorMobileNo:messString.VisitorMobileNo
-    }
-      await GetPhoneNumberDetails(payload).then((response:any)=>{
-        const data  = JSON.parse(response.data.Data)
-        img=data[0][0]
-        console.log("image ",response)
-      }).catch((error)=>{
-        console.log("error ",error)
-      })
-    }
-    if(img!.VisitorImage!=""){
-      await notifee.displayNotification({
-        title:'EzEntry Notification',
-        body:dataString,
-         android:{ 
-          ongoing:true,
-          loopSound:true,
-          smallIcon:'cus_icon_color',
-          channelId,
-          color:Color.blueRecColor,
-          largeIcon:require('./assets/cus_icon_color.png'),
-          sound:'old_ring_bell',
-          style:{
-            type:AndroidStyle.BIGPICTURE,
-            picture:`data:image/png;base64,${img!.VisitorImage}`
+  }
+  if (img!.VisitorImage != "") {
+    await notifee.displayNotification({
+      title: 'EzEntry Notification',
+      body: dataString,
+      android: {
+        ongoing: true,
+        loopSound:true,
+        smallIcon: 'cus_icon_color',
+        channelId,
+        color: Color.blueRecColor,
+        largeIcon: require('./assets/cus_icon_color.png'),
+        sound: 'old_ring_bell',
+        style: {
+          type: AndroidStyle.BIGPICTURE,
+          picture: `data:image/png;base64,${img!.VisitorImage}`
+        },
+        actions: [
+          {
+            title: 'Accept',
+            icon: 'https://my-cdn.com/icons/reply.png',
+            pressAction: {
+              id: 'Accept',
+              mainComponent: 'App'
+            },
           },
-          actions: [
-            {
-              title: 'Accept',
-              icon: 'https://my-cdn.com/icons/reply.png',
-              pressAction: {
-                id: 'Accept',
-                launchActivity:'default',
-                mainComponent:'App'
-              },  
-              input: {
-                allowFreeFormInput: false,
-                choices: ['Not Available', 'Wait for 15 mins'],
-                placeholder: 'Reply to reception...',
-              }, 
+          {
+            title: 'Deny',
+            icon: 'https://my-cdn.com/icons/reply.png',
+            pressAction: {
+              id: 'Deny',
+              mainComponent: 'App'
             },
-            {
-              title: 'Deny',
-              icon: 'https://my-cdn.com/icons/reply.png',
-              pressAction: {
-                id: 'Deny',
-                launchActivity:'default',
-                mainComponent:'App'
-              },
+          },
+          {
+            title: 'Replay',
+            pressAction: {
+              id: 'Replay',
             },
-          ],
-          fullScreenAction:{
-            id:'default'
+            input: true
           }
+        ],
+        fullScreenAction: {
+          id: 'default'
         }
-      })
-    }
-    notifee.onForegroundEvent(async ({ type, detail }) => {
-      console.log("event pressed ",detail,type)
-      const { notification, pressAction }:any = detail;
-      if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept' || detail.input!='') {
-        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
-        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
-       AsyncStorage.setItem('FCM_STATUS','ACCEPTED')
-    //call the api to get update  api
-    let payload ={
-      VisitorMasterCode:dataKey,
-      VisitTranId:dataKey2,
-      VisitTranVisitStatus:'A',
-      VisitTranReason:detail.input
-    }
-    switch (detail.input) {
-      case 'Not Available':
-        payload.VisitTranVisitStatus='R'
-        break;
-      case 'Wait for 15 mins':
-        payload.VisitTranVisitStatus='A'
-        break;
-      case 'Wait for 15 mins':
-        payload.VisitTranVisitStatus='R'
-        break;
-      default:
-        break;
-    }
-    try {
-      await UpdateVisitStatus(payload).then((response)=>{
-        console.log("update sucess",response)
-      }).catch((error)=>{
-        console.log("error ",error)
-      })
-    } catch (error) {
-      console.log("error while updating visitor status")
-    }
-    console.log("event pressed ",pressAction.id);
-    await notifee.cancelNotification(notification.id);
-      }else if(type === EventType.ACTION_PRESS && pressAction.id === 'Deny' || detail.input!=""){
-          const dataKey = await AsyncStorage.getItem('FCM_Data_key')
-          const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
-          let payload={
-            VisitorMasterCode:dataKey,
-            VisitTranId:dataKey2,
-            VisitTranVisitStatus:'R',
-            VisitTranReason:detail.input
-          }
-          try {
-            await UpdateVisitStatus(payload).then((response)=>{
-              console.log("update sucess",response)
-            }).catch((error)=>{
-              console.log("error ",error)
-            })
-          } catch (error) {
-            console.log("error while updating visitor status")
-          }
-          await notifee.cancelNotification(notification.id);
       }
+    })
+  }
+  notifee.onForegroundEvent(async ({ type, detail }) => {
+    const { notification, pressAction }: any = detail;
+    if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
+      const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+      const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+      AsyncStorage.setItem('FCM_STATUS', 'ACCEPTED')
+      let payload = {
+        VisitorMasterCode: dataKey,
+        VisitTranId: dataKey2,
+        VisitTranVisitStatus: 'A',
+        VisitTranReason: ''
+      }
+      try {
+        await UpdateVisitStatus(payload).then((response) => {
+          console.log("update sucess", response)
+        }).catch((error) => {
+          console.log("error ", error)
+        })
+      } catch (error) {
+        console.log("error while updating visitor status")
+      }
+    } else if (type === EventType.ACTION_PRESS && pressAction.id === 'Deny') {
+      const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+      const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+      let payload = {
+        VisitorMasterCode: dataKey,
+        VisitTranId: dataKey2,
+        VisitTranVisitStatus: 'R',
+        VisitTranReason: ''
+      }
+      try {
+        await UpdateVisitStatus(payload).then((response) => {
+          console.log("update sucess", response)
+        }).catch((error) => {
+          console.log("error ", error)
+        })
+      } catch (error) {
+        console.log("error while updating visitor status")
+      }
+      await notifee.cancelNotification(notification.id);
+    } else if (type === EventType.ACTION_PRESS && detail.pressAction?.id === 'Replay') {
+      const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+      const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+      let payload = {
+        VisitorMasterCode: dataKey,
+        VisitTranId: dataKey2,
+        VisitTranVisitStatus: 'R',
+        VisitTranReason: detail.input
+      }
+      try {
+        await UpdateVisitStatus(payload).then(async (response) => {
+          console.log("update sucess", response)
+        }).catch((error) => {
+          console.log("error ", error)
+        })
+      } catch (error) {
+        console.log("error while updating visitor status")
+      }
+      await notifee.cancelNotification(detail.notification?.id!);
+    }
   })
 }
 
 const App = () => {
   useEffect(() => {
     notifee.requestPermission({
-      criticalAlert:true
+      criticalAlert: true
     })
     onRegisterMessaging();
     messaging().onNotificationOpenedApp(onMessageGetter)
@@ -202,8 +204,8 @@ const App = () => {
     };
   }, [])
   return (
-     <NavigationContainer>
-      <Stack.Navigator  screenOptions={{
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{
         headerTintColor: Color.whiteRecColor,
         headerTitleAlign: 'center', headerTitleStyle: {
           color: Color.whiteRecColor,
@@ -220,8 +222,8 @@ const App = () => {
         <Stack.Screen name='Courier' component={CourierScreen}></Stack.Screen>
         <Stack.Screen name='History' options={{ headerTitle: 'View History' }} component={ViewHistoryScreen}></Stack.Screen>
         <Stack.Screen name='Admin' options={{ headerShown: false }} component={AdminScreen}></Stack.Screen>
-        <Stack.Screen name='Activity'  component={ActivityScreen}></Stack.Screen>
-        <Stack.Screen name='Settings'component={SettingScreen}></Stack.Screen>
+        <Stack.Screen name='Activity' component={ActivityScreen}></Stack.Screen>
+        <Stack.Screen name='Settings' component={SettingScreen}></Stack.Screen>
         <Stack.Screen name='Popup' component={NotificationPop}></Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

@@ -3,14 +3,14 @@ import  React,{ useEffect, useState } from "react"
 import { ActivityIndicator, Alert, Dimensions, FlatList, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
-import { InfoFormProps, UserLDData, UserLoginLocation, UserPayload } from "../models/RecepModels";
+import { InfoFormProps, UserLDData, UserLoginLocation, UserPayload, ViewNotification } from "../models/RecepModels";
 import { Dropdown } from "react-native-element-dropdown";
 import { launchCamera, CameraOptions } from 'react-native-image-picker';
 import { GetAllRevisitorsData, GetPhoneNumberDetails, GetUsersByLocation, PostVisitorData } from "../requests/recHomeRequest"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
-import { LinearProgress, Overlay } from "react-native-elements"
+import { LinearProgress, ListItem, Overlay } from "react-native-elements"
 import { KeyboardAvoidingView } from "react-native"
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")
@@ -41,7 +41,9 @@ const FormScreen = ({ route, navigation }: any) => {
     const [remarks, setRemarks] = useState("")
     const [meet, setMeetWith] = useState("")
     const [viewUser, setViewUser] = useState<UserLDData>()
-    const [noData,setNoData]=useState(false)
+    const [totalView, setTotalView] = useState<ViewNotification[]>([])
+    const [isitStatus,setisitStatus] = useState(false)
+    const [userLocFl,setUserLocFl]  =  useState("")
     useEffect(() => {
         navigation.setOptions({ headerTitle: data.appBarTitle })
         setMobile('')
@@ -197,19 +199,22 @@ const FormScreen = ({ route, navigation }: any) => {
                 VisitTranRemarks: remarks,
                 MeetingUserCode: uDevToken.MeetingUserCode,
                 MeetingDevToken: uDevToken.MeetingDevToken,
-                VisitCheckStatus:VisitCheckStatus.EMP_STAT
+                VisitCheckStatus:VisitCheckStatus.EMP_STAT,
+                VisiPersonLocation:userLocFl
             } 
             try {
                 await PostVisitorData(payload)?.then((response: any) => {
                     if (response.data.Status) {
                         setIsModalVisible(true)
-                        setIsLoaderTrue(false)
+                        setTimeout(() => {
+                            setIsLoaderTrue(false)
+                        }, 1000);
                         if (response.data.VStatus == 'R_STATUS') {
                             AsyncStorage.setItem('CON_STATUS',JSON.stringify({EMP_STAT:response.data.FaileRe}))
                             setVisitStatus('R_STATUS')
                         } else if (response.data.VStatus == 'S_STATUS') {
                             setVisitStatus('S_STATUS')
-                            navigation.navigate('Home')
+                            // navigation.navigate('Home')
                             resetVisitForm()
                         }
                     } else {
@@ -254,12 +259,39 @@ const FormScreen = ({ route, navigation }: any) => {
         setFilteredSuggestions([]);
         getDetailsByPhoneno(item.VisitorMobileNo)
     };
+
+    const getTodayNotifications = async () => {
+        let currentData =  new Date().toISOString().split('T',1)[0].split('-')
+        let formatDate =  currentData[2]+'/'+currentData[1]+'/'+currentData[0]
+        let payload = {
+            VisitorMobileNo: "",
+            CurData:formatDate
+        }
+        console.log("payload ", payload)
+        try {
+            await GetPhoneNumberDetails(payload)?.then(async (response: any) => {
+                if (response.data.Status) {
+                    console.log("response data", response.data.Data.length)
+                    const notData = JSON.parse(response.data.Data)
+                    console.log("not data ",notData[0][0])
+                    if(notData!=undefined){
+                        setTotalView(notData[0])
+                    }
+                }
+            }).catch((error: any) => {
+                console.log("error found ", error)
+
+            })
+        } catch (error) {
+            console.log("error found", error)
+        }
+    }
     return (
         <SafeAreaView>
             <View>
                 <View style={styles.container}>
                 <View style={{marginTop:Dimensions.get('window').width >756? 10: 3.6,width:Dimensions.get('window').width >756? '92%':'85%',height:20,alignItems:'center',position:'absolute',borderRadius:5,backgroundColor:Color.blueRecColor,borderColor:Color.blueRecColor,borderWidth:1}}>
-                        <Text style={{color:Color.whiteRecColor,fontSize:16,fontWeight:'500',textAlign:'center'}}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text>   
+                        <Text style={{color:Color.whiteRecColor,fontSize:16,fontWeight:'500',textAlign:'center'}}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text> 
                 </View>
                     <View style={{ marginTop: Dimensions.get('window').width > 756 ? 40 : 28, width: '100%', overflow: 'scroll' }}>
                         <View style={{ width: '100%' }}>
@@ -313,13 +345,15 @@ const FormScreen = ({ route, navigation }: any) => {
                                 itemTextStyle={{ color: Color.blackRecColor }}
                                 search
                                 maxHeight={300}
-                                labelField="LocationName"
+                                labelField="CompanyName"
                                 valueField="LocationCode"
                                 placeholder="Company name"
                                 searchPlaceholder="Search...locations"
                                 value={usrLcton==undefined || usrLcton==''?'BPJ001':usrLcton}
                                 onChange={(item) => {
                                     setUsrLcton(item.LocationCode)
+                                    console.log("user item ",item)
+                                    setUserLocFl(item.LocationName)
                                     getUsersByLocationName(usrLcton==undefined || usrLcton==''?'BPJ001':usrLcton)
                                 }}
                             />
@@ -363,12 +397,19 @@ const FormScreen = ({ route, navigation }: any) => {
                                 </Pressable>
                                 <View style={styles.statusView}>
                                     {(visitStatus == 'R_STATUS') ? (
-                                        <Text style={styles.statusRText}>Status <Icon name="check-circle" size={18} color={Color.redRecColor}></Icon></Text>
+                                        <Pressable onPress={()=>{setisitStatus(true);getTodayNotifications()}} style={{borderWidth:1,borderColor:Color.redRecColor,borderRadius:25,paddingTop:2,paddingBottom:2,paddingLeft:3,paddingRight:3}}>
+                                            <Text style={styles.statusRText}>Status <Icon name="check-circle" style={{elevation:10}} size={20} color={Color.redRecColor}></Icon>
+                                        </Text>
+                                        </Pressable>
                                     ) : (visitStatus == 'S_STATUS') ? (
-                                        <Text style={styles.statusSText}>Status <Icon name="check-circle" size={18} color={Color.greenRecColor}></Icon></Text>
+                                        <Pressable onPress={()=>{setisitStatus(true);getTodayNotifications()}} style={{borderWidth:1,borderColor:Color.greenRecColor,borderRadius:25,paddingTop:2,paddingBottom:2,paddingLeft:3,paddingRight:3}}>
+                                        <Text style={styles.statusSText}>Status <Icon name="check-circle" style={{elevation:10}} size={18} color={Color.greenRecColor}></Icon>
+                                        </Text>
+                                        </Pressable>
                                     ) : (
                                         <Text style={styles.statusText}>Status <Icon name="check-circle" size={18} color={Color.blackRecColor}></Icon></Text>
                                     )}
+                                    <Icon name="lock-reset" size={30} onPress={()=>resetVisitForm()} style={{textAlign:'right',marginTop:6,marginHorizontal: Dimensions.get('window').width > 756 ? 30 : 30 }} color={Color.blackRecColor}></Icon>
                                 </View>
                             </View>
                         </View>
@@ -390,38 +431,38 @@ const FormScreen = ({ route, navigation }: any) => {
                         </View>
                     </View>
                 </View>
-                <Modal
-                    animationType="fade"
-                    transparent={false}
-                    statusBarTranslucent={true}
-                    visible={isModalVisible}
-                    onRequestClose={() => {
-                        setIsModalVisible(!isModalVisible);
-                    }}>
-                    <View style={styles.centeredView}>
-                        <View style={styles.modalView}>
-                            <Text style={styles.modalText}>
-                                {(visitStatus == 'S_STATUS') ? (
-                                    <Text style={{ color: Color.greenRecColor }}>Your Request Accepted</Text>
-                                ) : (
-                                    <Text style={{ color: Color.redRecColor }}>Your Request Denied</Text>
-                                )}
-                            </Text>
-                            <Pressable
-                                style={styles.button}
-                                onPress={() => setIsModalVisible(!isModalVisible)}>
-                                {(visitStatus == 'S_STATUS') ? (
-                                    <MaterialCommunityIcons name="check-circle-outline" style={styles.buttoonIconSe} size={Dimensions.get('window').width > 756 ? 100 : 50} color={Color.greenRecColor}></MaterialCommunityIcons>
-                                ) : (
-                                    <MaterialCommunityIcons name="close-circle-outline" style={styles.buttoonIconSe1} color={Color.redRecColor} size={Dimensions.get('window').width > 756 ? 100 : 50} />
-                                )}
-                            </Pressable>
-                        </View>
-                    </View>
-                </Modal>
-                <Overlay isVisible={isLoaderTrue} statusBarTranslucent={true}  overlayStyle={{backgroundColor:'white',borderRadius:20}}  onBackdropPress={()=>{setIsLoaderTrue(true)}}>
+                <Overlay isVisible={isLoaderTrue} statusBarTranslucent={true}  overlayStyle={{backgroundColor:'white',borderRadius:20}}>
                     <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>   
                 </Overlay>
+                <Overlay isVisible={isitStatus} overlayStyle={{width:'80%',borderRadius:20,backgroundColor:Color.lightRecBlue,maxHeight:400}}>
+                <Icon name="close" onPress={()=>{setisitStatus(false)}} color={Color.darkRecGray} style={{textAlign:'right'}} size={40}></Icon>
+                <ScrollView>
+                    {totalView.length==0?                    <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>   :
+                                <View style={{width:Dimensions.get('window').width >756? '96%':'92%',marginHorizontal:10}}>
+                                {totalView.map((l, i) => (
+                                  <ListItem containerStyle={{backgroundColor:Color.whiteRecColor,borderRadius:20,padding:10,margin:1 }} key={i} bottomDivider onPress={() => {
+                                  }}>
+                                    <ListItem.Content>
+                                      <ListItem.Title>{l.VisitorName}</ListItem.Title>
+                                      <ListItem.Subtitle style={{ color: Color.blackRecColor, }}>Place: {l.VisitTranVisitorFrom}</ListItem.Subtitle>
+                                      <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Mobile No: {l.VisitorMobileNo}</ListItem.Subtitle>
+                                      <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Purpose: {l.VisitTranPurpose}</ListItem.Subtitle>
+                                      <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Date: {l.VisitTranCheckinTime.split('T')[1].split('.',1) + " " + (parseInt(l.VisitTranCheckinTime.split('T')[1].split(':')[0].toString()) > 12 ? 'PM':'AM')} - {new Date(l.VisitTranCheckinTime).toDateString()}</ListItem.Subtitle>
+                                      <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Reason: {l.VisitTranReason}</ListItem.Subtitle>
+                                      <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Remarks: {l.VisitTranRemarks}</ListItem.Subtitle>
+                                      <ListItem.Subtitle style={{ color: Color.blackRecColor, marginLeft: 'auto', top: Dimensions.get('window').width > 756 ? -50 : -30 }}>
+                                        {l.VisitTranVisitStatus == 'R' || l.VisitTranVisitStatus == '' ? (
+                                          <Icon color={Color.redRecColor} size={Dimensions.get('window').width > 756 ? 60 : 30} name="cancel"></Icon>
+                                        ) : (
+                                          <Icon color={Color.greenRecColor} size={Dimensions.get('window').width > 756 ? 60 : 30} name="check-circle"></Icon>
+                                        )}
+                                      </ListItem.Subtitle>
+                                    </ListItem.Content>
+                                  </ListItem>
+                                ))}
+                                </View>}
+            </ScrollView>
+            </Overlay>
             </View>
         </SafeAreaView>
     )

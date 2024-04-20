@@ -144,9 +144,11 @@ const HomeScreen = ({ route, navigation }: any) => {
     }
 
     return (
-        <SafeAreaView>
+        <SafeAreaView style={{backgroundColor:Color.whiteRecColor}}>
             <View style={styles.container}>
-                <Image source={receLogo} style={styles.image} />
+                <View style={styles.ImageBoxView}>
+                    <Image source={receLogo} style={styles.image} />
+                </View>
                 <Text style={styles.title}>EzEntry</Text>
                 <View style={{marginTop:3, width: '98%', height: 20, alignItems: 'center', position: 'relative', borderRadius: 5, backgroundColor: Color.blueRecColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
                     <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500',textAlignVertical:'center'}}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text>
@@ -223,8 +225,7 @@ const HomeScreen = ({ route, navigation }: any) => {
                     </Pressable>
                 </View>
                 <Image source={receBottomLogo} style={styles.bottomLogo} />
-            </View>
-            <Overlay isVisible={preApp}  overlayStyle={{width:'80%',borderRadius:20,backgroundColor:Color.lightRecBlue,}}  onBackdropPress={()=>{setPreApp(false)}}>
+                <Overlay isVisible={preApp}  overlayStyle={{width:'80%',borderRadius:20,backgroundColor:Color.lightRecBlue,}}  onBackdropPress={()=>{setPreApp(false)}}>
                 <Icon name="close" onPress={()=>{setPreApp(false)}} color={Color.darkRecGray} style={{textAlign:'right'}} size={40}></Icon>
                 <ListItem bottomDivider>
                     <ListItem.Content>
@@ -248,6 +249,7 @@ const HomeScreen = ({ route, navigation }: any) => {
             <Overlay isVisible={checkot} overlayStyle={{width:'80%',borderRadius:20,backgroundColor:Color.lightRecBlue,}}  onBackdropPress={()=>{setCheckout(false)}}>
                 <Icon name="close" onPress={()=>{setCheckout(false)}} color={Color.darkRecGray} style={{textAlign:'right'}} size={40}></Icon>
             </Overlay>
+            </View>
         </SafeAreaView>
     )
 }
@@ -260,11 +262,24 @@ const styles = StyleSheet.create({
         paddingTop: Dimensions.get('window').height * 0.06,
         alignItems: "center",
         paddingHorizontal: 28,
+        backgroundColor:Color.whiteRecColor
     },
     image: {
         height: 160,
         width: 300, 
         resizeMode: 'contain',
+    },
+    ImageBoxView:{
+        justifyContent:'center',
+        alignItems:'center',
+        shadowColor: Color.darkRecGray,
+        shadowOffset: {
+            width: 0,
+            height: 2,
+        },
+        shadowOpacity: 0.67,
+        shadowRadius: 0.46,
+        elevation: 0,
     },
     imageSet: {
         width: Dimensions.get('window').width * 0.2,

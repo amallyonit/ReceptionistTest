@@ -122,16 +122,16 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                         setViewLog(undefined)
                         setName('')
                         setTotalView(notData[0])
-                        setViewLog(notData[0][0])
                     }
                     setIsLoader(false)
                 }
             }).catch((error: any) => {
-                console.log("error ", error)
+                console.log("error found ", error)
                 setIsLoader(false)
             })
         } catch (error) {
-            console.log("error ", error)
+            console.log("error found", error)
+            setIsLoader(false)
         }
     }
 
@@ -177,9 +177,6 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                 <Overlay isVisible={isLoader} statusBarTranslucent={true}  overlayStyle={{backgroundColor:'white',borderRadius:20}}  onBackdropPress={()=>{setIsLoader(true)}}>
                     <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>   
                 </Overlay>
-                {noReData && <View style={{ width: '80%', padding: 10, borderWidth: 5, borderColor: Color.lightGreyRecColor }}>
-            <Text style={{ textAlign: 'center', color: Color.blackRecColor }}>No Notification Today</Text>
-          </View>}
             </View>
             <ScrollView style={{marginTop:Dimensions.get('window').height * 0.15}}>
             <View style={{width:Dimensions.get('window').width >756? '96%':'92%',marginHorizontal:15}}>
@@ -191,8 +188,9 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                       <ListItem.Subtitle style={{ color: Color.blackRecColor, }}>Place: {l.VisitTranVisitorFrom}</ListItem.Subtitle>
                       <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Mobile No: {l.VisitorMobileNo}</ListItem.Subtitle>
                       <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Purpose: {l.VisitTranPurpose}</ListItem.Subtitle>
-                      <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Date: {l.VisitTranCheckinTime.split('T')[1].split('.',1) + " " + (parseInt(l.VisitTranCheckinTime.split('T')[1].split(':')[0].toString()) > 12 ? 'PM':'AM')} - {new Date(l.VisitTranCheckinTime).toDateString()}</ListItem.Subtitle>
+                      <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Date: {l.VisitTranCheckinTime.split('T')[1].split('.',1) + " " + (parseInt(l.VisitTranCheckinTime.split('T')[1].split(':')[0].toString()) >= 12 ? 'PM':'AM')} - {new Date(l.VisitTranCheckinTime).toDateString()}</ListItem.Subtitle>
                       <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Reason: {l.VisitTranReason}</ListItem.Subtitle>
+                      <ListItem.Subtitle style={{ color: Color.blackRecColor }}>Remarks: {l.VisitTranRemarks}</ListItem.Subtitle>
                       <ListItem.Subtitle style={{ color: Color.blackRecColor, marginLeft: 'auto', top: Dimensions.get('window').width > 756 ? -50 : -30 }}>
                         {l.VisitTranVisitStatus == 'R' || l.VisitTranVisitStatus == '' ? (
                           <Icon color={Color.redRecColor} size={Dimensions.get('window').width > 756 ? 60 : 30} name="cancel"></Icon>
@@ -205,6 +203,9 @@ const ViewHistoryScreen = ({ navigation }: any) => {
                 ))}
                 </View>
             </ScrollView>
+            {viewLog==undefined && <View style={{ width: '93%', padding: 10, borderWidth: 5, borderColor: Color.lightGreyRecColor,marginHorizontal:20 }}>
+            <Text style={{ textAlign: 'center', color: Color.blackRecColor }}>No Notification Today</Text>
+          </View>}
         </SafeAreaView>
     )
 }

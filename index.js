@@ -74,6 +74,13 @@ messaging().getInitialNotification(async (message)=>{
               mainComponent:'App'
             },
           },
+          {
+            title: 'Replay',
+            pressAction: {
+              id: 'Replay',
+            },
+            input: true
+          }
         ],
       }
     })
@@ -94,9 +101,9 @@ messaging().setBackgroundMessageHandler(async(message)=>{
   let messageString = JSON.parse(message.data['data_fcm'])
   let dataString=""
   if(messageString.VisitTranNoOfVisitors!=undefined){
-    dataString = `${messageString.VisitorName} ${" and "} ${messageString.VisitTranNoOfVisitors} ${" is waiting at Main Gate From "} ${messageString.VisitTranVisitorFrom} ${" "}${messageString.VisitTranPurpose}`;
+    dataString = `${messageString.VisitorName} ${" and "} ${messageString.VisitTranNoOfVisitors} ${" is waiting at "} ${messageString.VisiPersonLocation} ${' From '} ${messageString.VisitTranVisitorFrom} ${" "}${messageString.VisitTranPurpose}`;
   }else{
-    dataString = `${messageString.VisitorName} ${" and "} ${" is waiting at Main Gate From "} ${messageString.VisitTranVisitorFrom} ${" "}${messageString.VisitTranPurpose}`;
+    dataString = `${messageString.VisitorName} ${" and "}  ${" is waiting at "} ${messageString.VisiPersonLocation} ${' From '} ${messageString.VisitTranVisitorFrom} ${" "}${messageString.VisitTranPurpose}`;
   }
   if(messageString.VisitorMobileNo!=""){
     let payload = {
@@ -135,7 +142,6 @@ messaging().setBackgroundMessageHandler(async(message)=>{
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Accept',
-              launchActivity:'default',
               mainComponent:'App'
             },
           },
@@ -144,10 +150,16 @@ messaging().setBackgroundMessageHandler(async(message)=>{
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Deny',
-              launchActivity:'default',
               mainComponent:'App'
             },
           },
+          {
+            title: 'Replay',
+            pressAction: {
+              id: 'Replay',
+            },
+            input: true
+          }
         ],
         fullScreenAction:{
           id:'default'
@@ -168,7 +180,8 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
     let payload={
       VisitorMasterCode:dataKey,
       VisitTranId:dataKey2,
-      VisitTranVisitStatus:'A'
+      VisitTranVisitStatus:'A',
+      VisitTranReason: ''
     }
     try {
       await UpdateVisitStatus(payload).then((response)=>{
@@ -187,7 +200,8 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
       let payload={
         VisitorMasterCode:dataKey,
         VisitTranId:dataKey2,
-        VisitTranVisitStatus:'R'
+        VisitTranVisitStatus:'R',
+        VisitTranReason: ''
       }
       try {
         await UpdateVisitStatus(payload).then((response)=>{
@@ -199,6 +213,25 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
         console.log("error while updating visitor status")
       }
     
+  } else if (type === EventType.ACTION_PRESS && detail.pressAction?.id === 'Replay') {
+    const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+    const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+    let payload = {
+      VisitorMasterCode: dataKey,
+      VisitTranId: dataKey2,
+      VisitTranVisitStatus: 'R',
+      VisitTranReason: detail.input
+    }
+    try {
+      await UpdateVisitStatus(payload).then(async (response) => {
+        console.log("update sucess", response)
+      }).catch((error) => {
+        console.log("error ", error)
+      })
+    } catch (error) {
+      console.log("error while updating visitor status")
+    }
+    await notifee.cancelNotification(detail.notification.id);
   }
 });
 

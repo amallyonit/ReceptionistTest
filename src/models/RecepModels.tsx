@@ -44,6 +44,7 @@ export interface ViewNotification{
     VisitTranPurpose: any
     VisitTranNoOfVisitors: any
     VisitTranCheckinTime: string
+    VisitTranRemarks: any
     VisitTranReason: any
     VisitTranId: any
     VisitorCode: any
@@ -81,6 +82,7 @@ export interface UserLoginLocation {
     LocationId: any
     LocationName: any
     LocationPremise: any
+    CompanyName: any
 }
 
 export interface NotificationData{
