@@ -87,6 +87,7 @@ const onMessageGetter = async (message: any) => {
       body: dataString,
       android: {
         ongoing: true,
+        autoCancel:false,
         loopSound:true,
         smallIcon: 'cus_icon_color',
         channelId,
@@ -103,6 +104,7 @@ const onMessageGetter = async (message: any) => {
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Accept',
+              launchActivity:'default',
               mainComponent: 'App'
             },
           },
@@ -111,6 +113,7 @@ const onMessageGetter = async (message: any) => {
             icon: 'https://my-cdn.com/icons/reply.png',
             pressAction: {
               id: 'Deny',
+              launchActivity:'default',
               mainComponent: 'App'
             },
           },
@@ -218,7 +221,7 @@ const App = () => {
         <Stack.Screen name='Login' options={{ headerShown: false }} component={LoginScreen}></Stack.Screen>
         <Stack.Screen name='Home' options={{ headerShown: false }} component={HomeScreen}></Stack.Screen>
         <Stack.Screen name='Form' component={FormScreen}></Stack.Screen>
-        <Stack.Screen name='PickDel' options={{ headerTitle: 'Delivery / Pickup' }} component={FormDeliveryScreen}></Stack.Screen>
+        <Stack.Screen name='PickDel' options={{ headerTitle: 'Inward / Outward' }} component={FormDeliveryScreen}></Stack.Screen>
         <Stack.Screen name='Courier' component={CourierScreen}></Stack.Screen>
         <Stack.Screen name='History' options={{ headerTitle: 'View History' }} component={ViewHistoryScreen}></Stack.Screen>
         <Stack.Screen name='Admin' options={{ headerShown: false }} component={AdminScreen}></Stack.Screen>

@@ -27,7 +27,7 @@ const AdminScreen = ()=> {
       tabBarActiveTintColor:Color.blueRecColor}} component={AdminDashScreen} />
       <Tab.Screen name="Activity" 
       options={{
-        headerShown:true,
+        headerShown:true, 
         headerTintColor:Color.blueRecColor,
       tabBarIcon: ({ color, size }:any) => (
         <MaterialCommunityIcons name="history" color={Color.blueRecColor} size={25} />

@@ -1,9 +1,9 @@
 "use strict"
 import React, { useEffect, useState } from "react"
-import { ActivityIndicator, Alert, Dimensions, FlatList, GestureResponderEvent, Image, Modal, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
+import { Dimensions, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native"
 import Color from "../theme/Color"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
-import { InfoFormProps, UserLDData, UserLoginLocation, UserPayload } from "../models/RecepModels";
+import { InfoFormProps, UserLDData} from "../models/RecepModels";
 import { CheckBox, ListItem } from "react-native-elements"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import AsyncStorage from "@react-native-async-storage/async-storage"

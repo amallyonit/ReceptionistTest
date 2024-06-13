@@ -125,7 +125,7 @@ const HomeScreen = ({ route, navigation }: any) => {
                 break;
             case 'DELIVERYPICK':
                 propData = {
-                    appBarTitle: 'Delivery / Pickup',
+                    appBarTitle: 'Inward / Outward',
                     type: type,
                     category: 6
                 }

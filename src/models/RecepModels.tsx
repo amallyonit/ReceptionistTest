@@ -5,12 +5,16 @@ export const RecpImgArray: PathStore[] = [
     { name: 'Contractor', path: '../../assets/recscreen/CONTRACTOR.png' },
     { name: 'Interview', path: '../../assets/recscreen/INTERVIEW.png' },
     { name: 'Courier', path: '../../assets/recscreen/MEETING.png' },
-    { name: 'Delivery / Pickup', path: '../../assets/recscreen/DELIVERY.png' }
+    { name: 'Inward / Outward', path: '../../assets/recscreen/DELIVERY.png' }
 ]
 
 export const DelpickData: DeliveryData[] = [
     { billnumber: 5566, date: new Date(), partyname: 'LyonIT' }
 ]
+export interface ItemDescription{  
+    itemDescription:string
+    itemQty:number
+}
 export interface PathStore {
     name: any
     path: any

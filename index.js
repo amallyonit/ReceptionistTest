@@ -46,6 +46,7 @@ messaging().getInitialNotification(async (message)=>{
       android:{ 
         ongoing:true,
         loopSound:true,
+        autoCancel:false,
         badgeIconType:AndroidBadgeIconType.LARGE,
         smallIcon:'cus_icon_color',
         channelId,
