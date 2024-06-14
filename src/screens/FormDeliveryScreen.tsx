@@ -8,17 +8,24 @@ import { DelpickData, InfoFormProps, ItemDescription, UserLDData } from "../mode
 import { CheckBox, ListItem } from "react-native-elements"
 import LinearGradient from "react-native-linear-gradient"
 import RNDateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import { launchCamera, CameraOptions } from 'react-native-image-picker';
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
 const FormDeliveryScreen = ({ route, navigation }: any) => {
+    let typeFormData = {
+        locationCode: '',
+        imageDatas: ''
+    }
     const data: InfoFormProps = route.params['propData']
     let dataList = DelpickData
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [imageBase, setBase64] = useState("")
     const [itemList, setItemList] = useState<ItemDescription[]>([])
     const [itemName, setitemName] = useState("")
     const [itemQty, setitemQty] = useState("")
-    const [date, setDate] = useState(new Date());
+    const [date, setDate] = useState(new Date());4
     const [intime, setInTime] = useState(new Date())
     const [outtime, setOutTime] = useState(new Date())
     const [vehino, setVehino] = useState("")
@@ -61,20 +68,52 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
         console.log("data ", vals.Data[0][0])
         setViewUser(vals.Data[0][0])
     }
+    const handleCameraLaunch = () => {
+        const option: CameraOptions = {
+            mediaType: 'photo',
+            includeBase64: true,
+            maxHeight: 500,
+            maxWidth: 500,
+            quality: 0.5
+        }
+
+        launchCamera(option, (response: any) => {
+            if (response.didCancel) {
+                console.log('User cancelled camera', response);
+            } else if (response.error) {
+                console.log('Camera Error: ', response.error);
+            } else {
+                let imageUri = response.uri || response.assets?.[0]?.uri;
+                typeFormData.imageDatas = response.assets?.[0]?.base64
+                setSelectedImage(imageUri);
+                setBase64(typeFormData.imageDatas)
+                console.log("form base", typeFormData.imageDatas);
+            }
+        });
+    }
 
     return (
         <SafeAreaView>
             <ScrollView contentContainerStyle={{ width: '100%', alignItems: 'center', paddingBottom: 10 }}>
                 <View style={{ marginTop: Dimensions.get('window').width > 756 ? 10 : 3.6, width: Dimensions.get('window').width > 756 ? '96%' : '85%', height: 20, alignItems: 'center', position: 'absolute', borderRadius: 5, backgroundColor: Color.blueRecColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
-                    <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500', textAlign: 'center' }}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text>
+                    <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500', textAlign: 'center' }}>{viewUser?.UserName} - {viewUser?.LocationPremise}</Text>
                 </View>
-                <View style={styles.boxRow}>
+                <View style={styles.inputView}>
+                    <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Vehicle No.' autoCapitalize='none' />
+                    <View style={{ flexDirection: 'row' }}>
+                        <TextInput placeholderTextColor={Color.blackRecColor} value={date.toLocaleTimeString()} onPressIn={showDatepicker} style={[styles.input, { width: '100%' }]} placeholder="InTime" />
+                    </View>
+                    <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Driver Mobile No.S' autoCapitalize='none' />
+                    <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Driver Name' autoCapitalize='none' />
+                    <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Transporter Name' autoCapitalize='none' />
+                    <View style={{justifyContent:'space-between',flexDirection:'row'}}>
                     <CheckBox
                         title={'Inward'}
                         checked={inout === 0}
                         onPress={() => setInOut(0)}
                         checkedIcon="dot-circle-o"
                         uncheckedIcon="circle-o"
+                        containerStyle={{backgroundColor:'transparent'}}
                     />
                     <CheckBox
                         title={'Outward'}
@@ -82,28 +121,12 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                         onPress={() => setInOut(1)}
                         checkedIcon="dot-circle-o"
                         uncheckedIcon="circle-o"
+                        containerStyle={{backgroundColor:'transparent'}}
                     />
                 </View>
-                <View style={styles.inputView}>
-                    <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Vehicle No.' autoCapitalize='none' />
-                    <View style={{ flexDirection: 'row' }}>
-                        <TextInput placeholderTextColor={Color.blackRecColor} value={date.toLocaleTimeString()} onPressIn={showDatepicker} style={[styles.input, { width: '50%' }]} placeholder="InTime" />
-                        <TextInput placeholderTextColor={Color.blackRecColor} value={date.toLocaleTimeString()} onPressIn={showDatepicker} style={[styles.input, { width: '50%' }]} placeholder="OutTime" />
-                    </View>
-                    <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Driver Mobile No.S' autoCapitalize='none' />
-                    <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Driver Name' autoCapitalize='none' />
-                    <TextInput placeholderTextColor={Color.blackRecColor} style={styles.input} placeholder='Transporter Name' autoCapitalize='none' />
                 </View>
                 <View style={styles.boxRow1}>
                     <View style={{ backgroundColor: Color.lightGreyRecColor, flex: 1, marginHorizontal: 22, flexDirection: "row", flexWrap: "wrap" }}>
-                    <View style={{width:'85%'}}></View>
-                        <View style={{width:'15%'}}>
-                        <Pressable style={[styles.cusButton1,{marginRight:5,marginTop:5}]}>
-                        <Text style={{ color: Color.blackRecColor, padding: 4, textAlign: 'center', fontSize: 18 }}>
-                           <Icon name="plus-circle-outline" size={20}></Icon>
-                        </Text>
-                    </Pressable>
-                        </View>
                         <TextInput placeholderTextColor={Color.blackRecColor} style={[styles.input, { width: '60%' }]} placeholder='Bill Number' autoCapitalize='none' />
                         <TextInput placeholderTextColor={Color.blackRecColor}
                             value={date.toLocaleTimeString()} onPressIn={showDatepicker}
@@ -144,7 +167,14 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                 </View>
                 <View style={styles.boxRow2}>
                     <View style={styles.uploadBox}>
-                        <Image source={camLogo} style={styles.imageSize}></Image>
+                    {imageBase != "" ? <Image
+                                    source={{ uri: `data:image/png;base64,${imageBase}` }}
+                                    style={styles.imageSize}></Image> : <Image
+                                        source={camLogo}
+                                        style={styles.imageSize}></Image>}
+                        <Text 
+                        onPress={handleCameraLaunch}
+                        style={{ marginRight: 'auto', marginLeft: 10, textAlign: 'center', color: 'blue', borderBottomWidth: 1, borderBottomColor: 'blue' }}>Take Photo</Text>
                     </View>
                     <View style={styles.uploadBox}></View>
                     <View style={styles.uploadBox}>
@@ -155,6 +185,11 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                             <Text style={styles.statusText}>Status <Icon name="check-circle" size={25} color={Color.blackRecColor}></Icon></Text>
                         </View>
                     </View>
+                </View>
+                <View style={styles.boxRow2}>
+                <View style={styles.outlineButton}>
+                            <Text style={styles.buttonText}>Check Out <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
+                        </View>
                 </View>
             </ScrollView>
         </SafeAreaView>

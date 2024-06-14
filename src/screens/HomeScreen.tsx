@@ -151,7 +151,7 @@ const HomeScreen = ({ route, navigation }: any) => {
                 </View>
                 <Text style={styles.title}>EzEntry</Text>
                 <View style={{marginTop:3, width: '98%', height: 20, alignItems: 'center', position: 'relative', borderRadius: 5, backgroundColor: Color.blueRecColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
-                    <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500',textAlignVertical:'center'}}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text>
+                    <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500',textAlignVertical:'center'}}>{viewUser?.UserName} - {viewUser?.LocationPremise}</Text>
                 </View>
                 <View style={styles.cardGroupContainer}>
                     <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>

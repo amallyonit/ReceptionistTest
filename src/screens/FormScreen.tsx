@@ -291,7 +291,7 @@ const FormScreen = ({ route, navigation }: any) => {
             <View>
                 <View style={styles.container}>
                 <View style={{marginTop:Dimensions.get('window').width >756? 10: 3.6,width:Dimensions.get('window').width >756? '92%':'85%',height:20,alignItems:'center',position:'absolute',borderRadius:5,backgroundColor:Color.blueRecColor,borderColor:Color.blueRecColor,borderWidth:1}}>
-                        <Text style={{color:Color.whiteRecColor,fontSize:16,fontWeight:'500',textAlign:'center'}}>{viewUser?.UserCode} - {viewUser?.LocationPremise}</Text> 
+                        <Text style={{color:Color.whiteRecColor,fontSize:16,fontWeight:'500',textAlign:'center'}}>{viewUser?.UserName} - {viewUser?.LocationPremise}</Text> 
                 </View>
                     <View style={{ marginTop: Dimensions.get('window').width > 756 ? 40 : 28, width: '100%', overflow: 'scroll' }}>
                         <View style={{ width: '100%' }}>
