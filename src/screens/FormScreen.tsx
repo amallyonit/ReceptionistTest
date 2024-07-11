@@ -336,7 +336,7 @@ const FormScreen = ({ route, navigation }: any) => {
                                 style={[styles.input,{borderBottomColor:purpose==''?Color.redRecColor:Color.darkRecGray}]} placeholderTextColor={Color.blackRecColor}
                                 placeholder='Purpose of Visit' autoCapitalize='none' />
                             <Dropdown
-                                style={[styles.dropdown,{borderBottomColor:usrLcton==''?Color.redRecColor:Color.darkRecGray}]}
+                                style={[styles.dropdown,{borderBottomColor:usrLcton==''?Color.redRecColor:Color.blackRecColor}]}
                                 placeholderStyle={styles.placeholderStyle}
                                 selectedTextStyle={styles.selectedTextStyle}
                                 inputSearchStyle={styles.inputSearchStyle}

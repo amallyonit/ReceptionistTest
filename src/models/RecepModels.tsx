@@ -11,9 +11,11 @@ export const RecpImgArray: PathStore[] = [
 export const DelpickData: DeliveryData[] = [
     { billnumber: 5566, date: new Date(), partyname: 'LyonIT' }
 ]
-export interface ItemDescription{  
-    itemDescription:string
-    itemQty:number
+export interface ItemDescription{ 
+	ProdMovDetBillNumber:string
+	ProdMovDetPartyName:string
+	ProdMovDetItems:string
+	ProdMovDetItemQty:number
 }
 export interface PathStore {
     name: any

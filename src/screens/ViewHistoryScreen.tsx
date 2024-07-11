@@ -140,7 +140,7 @@ const ViewHistoryScreen = ({ navigation }: any) => {
             <View style={styles.container}>
                 <View style={styles.boxRow}>
                     <View style={styles.uploadBox}>
-                        <View style={{ width: '100%' }}>
+                        <View  style={{ width: '100%' }}>
                             <TextInput
                                 style={{ height: 40,borderTopRightRadius:11,
                                     borderTopLeftRadius:11,backgroundColor:Color.lightGreyRecColor, color: Color.blackRecColor, borderBottomColor: Color.blackRecColor, borderBottomWidth: 1, marginHorizontal: 10 }}

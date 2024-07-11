@@ -16,16 +16,302 @@ import { createRef, useEffect, useState } from 'react';
 import { NotificationData, ViewNotification } from './src/models/RecepModels';
 import { RegisterMessageToken } from './src/requests/recNotifiRequest';
 import notifee, { AndroidImportance, AndroidStyle, EventType } from '@notifee/react-native';
-import { PermissionsAndroid } from 'react-native';
 import NotificationPop from './src/components/RecNotification';
 import SplashEzEntryScreen from './src/screens/SplashEzEntryScreen';
 import AdminScreen from './src/screens/AdminScreen';
 import SettingScreen from './src/screens/SettingsScreen';
 import { GetPhoneNumberDetails, UpdateVisitStatus } from './src/requests/recHomeRequest';
 import CourierScreen from './src/screens/CourierScreen';
+import { GetVehicleDetailByNumber } from './src/requests/recProdRequest';
 
 
 const Stack = createNativeStackNavigator()
+
+const receptionNotification = async (message:any) =>{
+  let img: ViewNotification | null = null
+  AsyncStorage.setItem('FCM_Data_key', message.data['mastercode'])
+  AsyncStorage.setItem('FCM_TRAN_key', message.data['trancode'])
+  console.log("message ", message)
+  const messString: any = JSON.parse(message.data['data_fcm'])
+  const channelId = await notifee.createChannel({
+    id: 'default',
+    name: 'EzEntry Notifications',
+    importance: AndroidImportance.HIGH,
+    sound: 'old_ring_bell',
+  })
+
+  if(messString!=''){
+    let dataString = ""
+    if (messString.VisitTranNoOfVisitors != undefined) {
+      dataString = `${messString.VisitorName} ${" and "} ${messString.VisitTranNoOfVisitors} ${" is waiting at "} ${messString.VisiPersonLocation} ${' From '} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
+    } else {
+      dataString = `${messString.VisitorName} ${" and "} ${" is waiting at "} ${messString.VisiPersonLocation} ${' From '} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
+    }
+    if (messString.VisitorMobileNo != "") {
+      let payload = {
+        VisitorMobileNo: messString.VisitorMobileNo
+      }
+      await GetPhoneNumberDetails(payload).then((response: any) => {
+        const data = JSON.parse(response.data.Data)
+        img = data[0][0]
+        // console.log("image ", response)
+      }).catch((error) => {
+        console.log("error ", error)
+      })
+    }
+    if (img!.VisitorImage != "") {
+      await notifee.displayNotification({
+        title: 'EzEntry Notification',
+        body: dataString,
+        android: {
+          ongoing: true,
+          autoCancel:false,
+          loopSound:true,
+          smallIcon: 'cus_icon_color',
+          channelId,
+          color: Color.blueRecColor,
+          largeIcon: require('./assets/cus_icon_color.png'),
+          sound: 'old_ring_bell',
+          style: {
+            type: AndroidStyle.BIGPICTURE,
+            picture: `data:image/png;base64,${img!.VisitorImage}`
+          },
+          actions: [
+            {
+              title: 'Accept',
+              icon: 'https://my-cdn.com/icons/reply.png',
+              pressAction: {
+                id: 'Accept',
+                launchActivity:'default',
+                mainComponent: 'App'
+              },
+            },
+            {
+              title: 'Deny',
+              icon: 'https://my-cdn.com/icons/reply.png',
+              pressAction: {
+                id: 'Deny',
+                launchActivity:'default',
+                mainComponent: 'App'
+              },
+            },
+            {
+              title: 'Replay',
+              pressAction: {
+                id: 'Replay',
+              },
+              input: true
+            }
+          ],
+          fullScreenAction: {
+            id: 'default'
+          }
+        }
+      })
+    }
+    notifee.onForegroundEvent(async ({ type, detail }) => {
+      const { notification, pressAction }: any = detail;
+      if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
+        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+        AsyncStorage.setItem('FCM_STATUS', 'ACCEPTED')
+        let payload = {
+          VisitorMasterCode: dataKey,
+          VisitTranId: dataKey2,
+          VisitTranVisitStatus: 'A',
+          VisitTranReason: ''
+        }
+        try {
+          await UpdateVisitStatus(payload).then((response) => {
+            console.log("update sucess", response)
+          }).catch((error) => {
+            console.log("error ", error)
+          })
+        } catch (error) {
+          console.log("error while updating visitor status")
+        }
+      } else if (type === EventType.ACTION_PRESS && pressAction.id === 'Deny') {
+        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+        let payload = {
+          VisitorMasterCode: dataKey,
+          VisitTranId: dataKey2,
+          VisitTranVisitStatus: 'R',
+          VisitTranReason: ''
+        }
+        try {
+          await UpdateVisitStatus(payload).then((response) => {
+            console.log("update sucess", response)
+          }).catch((error) => {
+            console.log("error ", error)
+          })
+        } catch (error) {
+          console.log("error while updating visitor status")
+        }
+        await notifee.cancelNotification(notification.id);
+      } else if (type === EventType.ACTION_PRESS && detail.pressAction?.id === 'Replay') {
+        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+        let payload = {
+          VisitorMasterCode: dataKey,
+          VisitTranId: dataKey2,
+          VisitTranVisitStatus: 'R',
+          VisitTranReason: detail.input
+        }
+        try {
+          await UpdateVisitStatus(payload).then(async (response) => {
+            console.log("update sucess", response)
+          }).catch((error) => {
+            console.log("error ", error)
+          })
+        } catch (error) {
+          console.log("error while updating visitor status")
+        }
+        await notifee.cancelNotification(detail.notification?.id!);
+      }
+    })
+  }
+}
+
+const gateEntryNotification = async (message:any) =>{
+  let img2: any | null = null
+  console.log("message ", message.data['data_fcm_2'])
+  const messStringTwo: any = JSON.parse(message.data['data_fcm_2'])
+  const channelId = await notifee.createChannel({
+    id: 'default',
+    name: 'EzEntry Notifications',
+    importance: AndroidImportance.HIGH,
+    sound: 'old_ring_bell',
+  })
+  if(messStringTwo!=''){
+    let dataString = ""
+    dataString = `${messStringTwo.ProdMovDriverName} ${" is waiting at  Main Gate"}`;
+    if (messStringTwo.ProdMovMobileNo != "") {
+      let payload = {
+        ProdMovVehicleNo: messStringTwo.ProdMovVehicleNo
+      }
+      await GetVehicleDetailByNumber(payload).then((response: any) => {
+        // console.log("image ", response)
+        const data = response.data.Data
+        console.log("data item ",data)
+        img2 = data[0]
+      }).catch((error) => {
+        console.log("error ", error)
+      })
+    }
+    if (img2.ProdMovImage != "") {
+      await notifee.displayNotification({
+        title: 'EzEntry Notification',
+        body: dataString,
+        android: {
+          ongoing: true,
+          autoCancel:false,
+          loopSound:true,
+          smallIcon: 'cus_icon_color',
+          channelId,
+          color: Color.blueRecColor,
+          largeIcon: require('./assets/cus_icon_color.png'),
+          sound: 'old_ring_bell',
+          style: {
+            type: AndroidStyle.BIGPICTURE,
+            picture: `data:image/png;base64,${img2.ProdMovImage}`
+          },
+          actions: [
+            {
+              title: 'Accept',
+              icon: 'https://my-cdn.com/icons/reply.png',
+              pressAction: {
+                id: 'Accept',
+                launchActivity:'default',
+                mainComponent: 'App'
+              },
+            },
+            {
+              title: 'Deny',
+              icon: 'https://my-cdn.com/icons/reply.png',
+              pressAction: {
+                id: 'Deny',
+                launchActivity:'default',
+                mainComponent: 'App'
+              },
+            },
+            {
+              title: 'Replay',
+              pressAction: {
+                id: 'Replay',
+              },
+              input: true
+            }
+          ],
+          fullScreenAction: {
+            id: 'default'
+          }
+        }
+      })
+    }
+    notifee.onForegroundEvent(async ({ type, detail }) => {
+      const { notification, pressAction }: any = detail;
+      if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
+        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+        AsyncStorage.setItem('FCM_STATUS', 'ACCEPTED')
+        let payload = {
+          VisitorMasterCode: dataKey,
+          VisitTranId: dataKey2,
+          VisitTranVisitStatus: 'A',
+          VisitTranReason: ''
+        }
+        try {
+          // await UpdateVisitStatus(payload).then((response) => {
+          //   console.log("update sucess", response)
+          // }).catch((error) => {
+          //   console.log("error ", error)
+          // })
+        } catch (error) {
+          console.log("error while updating visitor status")
+        }
+      } else if (type === EventType.ACTION_PRESS && pressAction.id === 'Deny') {
+        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+        let payload = {
+          VisitorMasterCode: dataKey,
+          VisitTranId: dataKey2,
+          VisitTranVisitStatus: 'R',
+          VisitTranReason: ''
+        }
+        try {
+          // await UpdateVisitStatus(payload).then((response) => {
+          //   console.log("update sucess", response)
+          // }).catch((error) => {
+          //   console.log("error ", error)
+          // })
+        } catch (error) {
+          console.log("error while updating visitor status")
+        }
+        await notifee.cancelNotification(notification.id);
+      } else if (type === EventType.ACTION_PRESS && detail.pressAction?.id === 'Replay') {
+        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
+        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+        let payload = {
+          VisitorMasterCode: dataKey,
+          VisitTranId: dataKey2,
+          VisitTranVisitStatus: 'R',
+          VisitTranReason: detail.input
+        }
+        try {
+          // await UpdateVisitStatus(payload).then(async (response) => {
+          //   console.log("update sucess", response)
+          // }).catch((error) => {
+          //   console.log("error ", error)
+          // })
+        } catch (error) {
+          console.log("error while updating visitor status")
+        }
+        await notifee.cancelNotification(detail.notification?.id!);
+      }
+    })
+  }
+}
 
 const onRegisterMessaging = async () => {
   const authorizationStatus = await messaging().requestPermission();
@@ -52,146 +338,11 @@ const onRegisterMessaging = async () => {
 }
 
 const onMessageGetter = async (message: any) => {
-  let img: ViewNotification | null = null
-  AsyncStorage.setItem('FCM_Data_key', message.data['mastercode'])
-  AsyncStorage.setItem('FCM_TRAN_key', message.data['trancode'])
-  console.log("message ", message.data['data_fcm'])
-  const messString: any = JSON.parse(message.data['data_fcm'])
-  const channelId = await notifee.createChannel({
-    id: 'default',
-    name: 'EzEntry Notifications',
-    importance: AndroidImportance.HIGH,
-    sound: 'old_ring_bell',
-  })
-  let dataString = ""
-  if (messString.VisitTranNoOfVisitors != undefined) {
-    dataString = `${messString.VisitorName} ${" and "} ${messString.VisitTranNoOfVisitors} ${" is waiting at "} ${messString.VisiPersonLocation} ${' From '} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
-  } else {
-    dataString = `${messString.VisitorName} ${" and "} ${" is waiting at "} ${messString.VisiPersonLocation} ${' From '} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
+  if(message.data['key']=='RECE'){
+    receptionNotification(message)
+  }else if(message.data['key']=='GATE'){
+    gateEntryNotification(message)
   }
-  if (messString.VisitorMobileNo != "") {
-    let payload = {
-      VisitorMobileNo: messString.VisitorMobileNo
-    }
-    await GetPhoneNumberDetails(payload).then((response: any) => {
-      const data = JSON.parse(response.data.Data)
-      img = data[0][0]
-      console.log("image ", response)
-    }).catch((error) => {
-      console.log("error ", error)
-    })
-  }
-  if (img!.VisitorImage != "") {
-    await notifee.displayNotification({
-      title: 'EzEntry Notification',
-      body: dataString,
-      android: {
-        ongoing: true,
-        autoCancel:false,
-        loopSound:true,
-        smallIcon: 'cus_icon_color',
-        channelId,
-        color: Color.blueRecColor,
-        largeIcon: require('./assets/cus_icon_color.png'),
-        sound: 'old_ring_bell',
-        style: {
-          type: AndroidStyle.BIGPICTURE,
-          picture: `data:image/png;base64,${img!.VisitorImage}`
-        },
-        actions: [
-          {
-            title: 'Accept',
-            icon: 'https://my-cdn.com/icons/reply.png',
-            pressAction: {
-              id: 'Accept',
-              launchActivity:'default',
-              mainComponent: 'App'
-            },
-          },
-          {
-            title: 'Deny',
-            icon: 'https://my-cdn.com/icons/reply.png',
-            pressAction: {
-              id: 'Deny',
-              launchActivity:'default',
-              mainComponent: 'App'
-            },
-          },
-          {
-            title: 'Replay',
-            pressAction: {
-              id: 'Replay',
-            },
-            input: true
-          }
-        ],
-        fullScreenAction: {
-          id: 'default'
-        }
-      }
-    })
-  }
-  notifee.onForegroundEvent(async ({ type, detail }) => {
-    const { notification, pressAction }: any = detail;
-    if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
-      const dataKey = await AsyncStorage.getItem('FCM_Data_key')
-      const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
-      AsyncStorage.setItem('FCM_STATUS', 'ACCEPTED')
-      let payload = {
-        VisitorMasterCode: dataKey,
-        VisitTranId: dataKey2,
-        VisitTranVisitStatus: 'A',
-        VisitTranReason: ''
-      }
-      try {
-        await UpdateVisitStatus(payload).then((response) => {
-          console.log("update sucess", response)
-        }).catch((error) => {
-          console.log("error ", error)
-        })
-      } catch (error) {
-        console.log("error while updating visitor status")
-      }
-    } else if (type === EventType.ACTION_PRESS && pressAction.id === 'Deny') {
-      const dataKey = await AsyncStorage.getItem('FCM_Data_key')
-      const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
-      let payload = {
-        VisitorMasterCode: dataKey,
-        VisitTranId: dataKey2,
-        VisitTranVisitStatus: 'R',
-        VisitTranReason: ''
-      }
-      try {
-        await UpdateVisitStatus(payload).then((response) => {
-          console.log("update sucess", response)
-        }).catch((error) => {
-          console.log("error ", error)
-        })
-      } catch (error) {
-        console.log("error while updating visitor status")
-      }
-      await notifee.cancelNotification(notification.id);
-    } else if (type === EventType.ACTION_PRESS && detail.pressAction?.id === 'Replay') {
-      const dataKey = await AsyncStorage.getItem('FCM_Data_key')
-      const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
-      let payload = {
-        VisitorMasterCode: dataKey,
-        VisitTranId: dataKey2,
-        VisitTranVisitStatus: 'R',
-        VisitTranReason: detail.input
-      }
-      try {
-        await UpdateVisitStatus(payload).then(async (response) => {
-          console.log("update sucess", response)
-        }).catch((error) => {
-          console.log("error ", error)
-        })
-      } catch (error) {
-        console.log("error while updating visitor status")
-      }
-      await notifee.cancelNotification(detail.notification?.id!);
-    }
-  })
 }
 
 const App = () => {
