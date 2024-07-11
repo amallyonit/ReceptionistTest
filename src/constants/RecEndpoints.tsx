@@ -13,5 +13,6 @@ export const ServerEndpoints = {
     POST_PRODUCT_DATA:'api/v1/recProd/productEntry',
     GET_TRANSPORT_NAMES:'api/v1/recProd/getTransportNames',
     UPDATE_PRODUCT_STATUS:'api/v1/recProd/updateTransStatus',
-    UPDATE_PRODUCT_OUTTIME:'api/v1/recProd/updateItemProduct'
+    UPDATE_PRODUCT_OUTTIME:'api/v1/recProd/updateItemProduct',
+    GET_PRODUCT_DP_STATUS:'api/v1/recProd/getproductStatus'
 }

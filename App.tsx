@@ -22,7 +22,7 @@ import AdminScreen from './src/screens/AdminScreen';
 import SettingScreen from './src/screens/SettingsScreen';
 import { GetPhoneNumberDetails, UpdateVisitStatus } from './src/requests/recHomeRequest';
 import CourierScreen from './src/screens/CourierScreen';
-import { GetVehicleDetailByNumber } from './src/requests/recProdRequest';
+import { GetVehicleDetailByNumber, UpdateEntryStatus } from './src/requests/recProdRequest';
 
 
 const Stack = createNativeStackNavigator()
@@ -177,6 +177,7 @@ const gateEntryNotification = async (message:any) =>{
   let img2: any | null = null
   console.log("message ", message.data['data_fcm_2'])
   const messStringTwo: any = JSON.parse(message.data['data_fcm_2'])
+  AsyncStorage.setItem('FCM_GATE_MASTERCODE', message.data['mastercode_2'])
   const channelId = await notifee.createChannel({
     id: 'default',
     name: 'EzEntry Notifications',
@@ -234,13 +235,6 @@ const gateEntryNotification = async (message:any) =>{
                 launchActivity:'default',
                 mainComponent: 'App'
               },
-            },
-            {
-              title: 'Replay',
-              pressAction: {
-                id: 'Replay',
-              },
-              input: true
             }
           ],
           fullScreenAction: {
@@ -252,62 +246,38 @@ const gateEntryNotification = async (message:any) =>{
     notifee.onForegroundEvent(async ({ type, detail }) => {
       const { notification, pressAction }: any = detail;
       if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
-        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
-        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
-        AsyncStorage.setItem('FCM_STATUS', 'ACCEPTED')
+        const dataKey = await AsyncStorage.getItem('FCM_GATE_MASTERCODE')
         let payload = {
-          VisitorMasterCode: dataKey,
-          VisitTranId: dataKey2,
-          VisitTranVisitStatus: 'A',
-          VisitTranReason: ''
-        }
-        try {
-          // await UpdateVisitStatus(payload).then((response) => {
-          //   console.log("update sucess", response)
-          // }).catch((error) => {
-          //   console.log("error ", error)
-          // })
-        } catch (error) {
-          console.log("error while updating visitor status")
-        }
+          ProdMovCode:dataKey,
+          EntryStatus:'A'
+      }
+          try {
+              await UpdateEntryStatus(payload).then((response)=>{
+                  console.log("response data ",response?.data.Data);
+                  AsyncStorage.setItem('ProvMoveCode',JSON.stringify("PM_EMPTY"))
+              }).catch((error)=>{
+                  console.log("error ",error)
+              })
+          } catch (error) {
+              console.log("error ",error)
+          }
       } else if (type === EventType.ACTION_PRESS && pressAction.id === 'Deny') {
-        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
-        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
+        const dataKey = await AsyncStorage.getItem('FCM_GATE_MASTERCODE')
         let payload = {
-          VisitorMasterCode: dataKey,
-          VisitTranId: dataKey2,
-          VisitTranVisitStatus: 'R',
-          VisitTranReason: ''
-        }
-        try {
-          // await UpdateVisitStatus(payload).then((response) => {
-          //   console.log("update sucess", response)
-          // }).catch((error) => {
-          //   console.log("error ", error)
-          // })
-        } catch (error) {
-          console.log("error while updating visitor status")
-        }
+          ProdMovCode:dataKey,
+          EntryStatus:'R'
+      }
+          try {
+              await UpdateEntryStatus(payload).then((response)=>{
+                  console.log("response data ",response?.data.Data);
+                  AsyncStorage.setItem('ProvMoveCode',JSON.stringify("PM_EMPTY"))
+              }).catch((error)=>{
+                  console.log("error ",error)
+              })
+          } catch (error) {
+              console.log("error ",error)
+          }
         await notifee.cancelNotification(notification.id);
-      } else if (type === EventType.ACTION_PRESS && detail.pressAction?.id === 'Replay') {
-        const dataKey = await AsyncStorage.getItem('FCM_Data_key')
-        const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
-        let payload = {
-          VisitorMasterCode: dataKey,
-          VisitTranId: dataKey2,
-          VisitTranVisitStatus: 'R',
-          VisitTranReason: detail.input
-        }
-        try {
-          // await UpdateVisitStatus(payload).then(async (response) => {
-          //   console.log("update sucess", response)
-          // }).catch((error) => {
-          //   console.log("error ", error)
-          // })
-        } catch (error) {
-          console.log("error while updating visitor status")
-        }
-        await notifee.cancelNotification(detail.notification?.id!);
       }
     })
   }
@@ -347,6 +317,7 @@ const onMessageGetter = async (message: any) => {
 
 const App = () => {
   useEffect(() => {
+    AsyncStorage.setItem('FCM_GATE_MASTERCODE',JSON.stringify('MASTERCODE_EMPTY'))
     notifee.requestPermission({
       criticalAlert: true
     })

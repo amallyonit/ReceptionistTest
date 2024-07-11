@@ -13,7 +13,7 @@ import { color } from "react-native-elements/dist/helpers"
 import { colorsDark } from "react-native-elements/dist/config"
 
 
-const receLogo = require('../../assets/recimages/Frame.png')
+const receLogo = require('../../assets/recimages/Newlogo.png')
 const receMeetLog = require('../../assets/recscreen/MEETING.png')
 const receVisitLog = require('../../assets/recscreen/VISIT.png')
 const receServeLog = require('../../assets/recscreen/SERVICE.png')
@@ -266,7 +266,7 @@ const styles = StyleSheet.create({
     },
     image: {
         height: 160,
-        width: 300, 
+        width: 270, 
         resizeMode: 'contain',
     },
     ImageBoxView:{

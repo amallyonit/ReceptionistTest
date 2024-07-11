@@ -13,7 +13,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import { Dropdown } from "react-native-element-dropdown"
 import { GetUsersByLocation } from "../requests/recHomeRequest"
-import { GenerateGateEntry, GetTransportNames, GetVehicleDetailByNumber, GetVehicleNumbers, UpdateEntryStatus, UpdateOutTime } from "../requests/recProdRequest"
+import { GenerateGateEntry, GetDeliveryStatus, GetTransportNames, GetVehicleDetailByNumber, GetVehicleNumbers, UpdateEntryStatus, UpdateOutTime } from "../requests/recProdRequest"
 const camLogo = require("../../assets/recscreen/CAMERA.png")
 
 const FormDeliveryScreen = ({ route, navigation }: any) => {
@@ -44,7 +44,7 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
     const [isLoaderTrue,setisLoaderTrue] = useState(false)
     const [vehiclLis, setVehicleList] = useState([])
     const [tranNames,setTranNames] = useState([])
-    const [status,setStatus] = useState(false)
+    const [status,setStatus] = useState('B_STATUS')
     const [outStatus,setOutStatus]=useState(false)
     useEffect(() => {
         getUserData()
@@ -166,6 +166,8 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
         setTranPortName('')
         setDriveName('')
         setInOut('D')
+        setBase64("")
+        setStatus('B_STATUS')
     }
 
     const getVechicleno = async (vehno:any) => {
@@ -176,7 +178,7 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                 ProdMovVehicleNo:query==""?vehno:query
             }
             await GetVehicleDetailByNumber(data).then((response)=>{
-                console.log("code ",response?.data.Data[0].ProdMovImage)
+                console.log("code ",response?.data.Data[0].ProdMovCode)
                 AsyncStorage.setItem('ProvMoveCode',JSON.stringify(response?.data.Data[0].ProdMovCode))
                 setDrivMob(response?.data.Data[0].ProdMovMobileNo)
                 setTranPortName(response?.data.Data[0].ProdMovTransporter)
@@ -215,8 +217,8 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                         resetData()
                         setInterval(()=>{
                             setOutStatus(false)
-                        },3000)
-                        getVehicleNumber()
+                            getVehicleNumber()
+                        },4000)
                     }
                 }).catch((error)=>{
                     console.log("error ",error)
@@ -242,6 +244,7 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                 await UpdateEntryStatus(payload).then((response)=>{
                     console.log("response data ",response?.data.Data);
                     AsyncStorage.setItem('ProvMoveCode',JSON.stringify("PM_EMPTY"))
+                    setStatus('S_STATUS')
                     setisLoaderTrue(false)
                 }).catch((error)=>{
                     console.log("error ",error)
@@ -251,6 +254,23 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                 console.log("error ",error)
                 setisLoaderTrue(false)
             }
+        }
+    }
+
+    const productStatus = async () =>{
+        const CodeProv = await AsyncStorage.getItem('ProvMoveCode')
+        let CodeParse = JSON.parse(CodeProv!)
+        let payload ={
+            ProdMovCode:CodeParse
+        }
+        try {
+            await GetDeliveryStatus(payload).then((response)=>{
+                setStatus(response?.data.Data)
+            }).catch((error)=>{
+                console.log("error ",error)
+            })
+        } catch (error) {
+            
         }
     }
 
@@ -287,10 +307,12 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
             }
             await GenerateGateEntry(data).then((response)=>{
                 console.log("response ",response?.data)
-                    setisLoaderTrue(false)
                 if(response?.data.Status){
-                    setStatus(true)
                     AsyncStorage.setItem('ProvMoveCode',JSON.stringify(response.data.Data))
+                    setInterval(()=>{
+                        productStatus()
+                        setisLoaderTrue(false)
+                    },10000)
                 }
             }).catch((error)=>{
                 console.log("error ",error)
@@ -490,8 +512,18 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                             <Text style={styles.buttonText} onPress={sentRequest}>Send Request <Icon name="send" size={15} color={Color.blackRecColor}></Icon> </Text>
                         </View>
                         <View style={styles.statusView}>
-                            <Text style={[styles.statusText,{color:status?Color.redRecColor:Color.blackRecColor}]}>Status <Icon name="check-circle" size={25} color={ status?Color.redRecColor:Color.blackRecColor}></Icon></Text>
-                        </View>
+                        {(status == 'R_STATUS') ? (
+                                        <Pressable  style={{borderWidth:1,borderColor:Color.redRecColor,borderRadius:25,paddingTop:2,paddingBottom:2,paddingLeft:3,paddingRight:3}}>
+                                            <Text style={styles.statusRText}>Status <Icon name="check-circle" size={20} color={Color.redRecColor}></Icon>
+                                        </Text>
+                                        </Pressable>
+                                    ) : (status == 'S_STATUS') ? (
+                                        <Text style={styles.statusSText}>Status <Icon name="check-circle" size={18} color={Color.greenRecColor}></Icon>
+                                        </Text>
+                                    ) : (
+                                        <Text style={styles.statusText}>Status <Icon name="check-circle" size={18} color={Color.blackRecColor}></Icon></Text>
+                                    )}
+                                </View>
                     </View>
                 </View>
                 <View style={[styles.boxRow2,{marginBottom:100}]}>
@@ -541,6 +573,14 @@ const styles = StyleSheet.create({
         flexWrap: 'wrap',
         width: "100%",
         paddingHorizontal: 20
+    },
+    statusRText: {
+        color: Color.redRecColor,
+        fontSize: 20,
+    },
+    statusSText: {
+        color: Color.greenRecColor,
+        fontSize: 20,
     },
         boxRow2: {
         marginTop: Dimensions.get('window').height * 0.06,

@@ -9,9 +9,84 @@ import messaging from "@react-native-firebase/messaging"
 import { GetPhoneNumberDetails,UpdateVisitStatus } from './src/requests/recHomeRequest';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Color from './src/theme/Color';  
+import { UpdateEntryStatus } from './src/requests/recProdRequest';
 
 
 messaging().getInitialNotification(async (message)=>{
+  if(message.data['key']=='RECE'){
+    receptionEntry(message)
+  }else if(message.data['key']=='GATE'){
+    gateEntry(message)
+  }
+})
+
+const gateEntry =  async () =>{
+  AsyncStorage.setItem('FCM_GATE_MASTERCODE', message.data['mastercode_2'])
+  let img;
+  const channelId = await notifee.createChannel({
+    id:'default',
+    name:'EzEntry Notifications',
+    importance:AndroidImportance.HIGH,
+    sound:'old_ring_bell',
+    lightColor:Color.blueRecColor,
+    lights:true,
+  })
+  let messageString = JSON.parse(message.data['data_fcm_2'])
+  let dataString=`${messageString.ProdMovDriverName} ${" is waiting at  Main Gate"}`
+  if(messageString.ProdMovMobileNo!=""){
+    let payload = {
+      ProdMovMobileNo:messageString.ProdMovMobileNo
+  }
+    await GetPhoneNumberDetails(payload).then((response)=>{
+      const data = JSON.parse(response.data.Data)
+      img = data[0]
+    }).catch((error)=>{
+      console.log("error ",error)
+    })
+  }
+  if(img.ProdMovImage!=''){
+    await notifee.displayNotification({
+      title:'<p style="color:#99c2ff"><b>Persons are Watiting...</span></p></b></p>',
+      body:dataString,
+      android:{ 
+        ongoing:true,
+        loopSound:true,
+        autoCancel:false,
+        badgeIconType:AndroidBadgeIconType.LARGE,
+        smallIcon:'cus_icon_color',
+        channelId,
+        largeIcon:require('./assets/cus_icon_color.png'),
+        sound:'old_ring_bell',
+        style:{
+          type:AndroidStyle.BIGPICTURE,
+          picture:`data:image/png;base64,${img}`
+        },
+        actions: [
+          {
+            title: 'Accept',
+            icon: 'https://my-cdn.com/icons/reply.png',
+            pressAction: {
+              id: 'Accept',
+              launchActivity:'default',
+              mainComponent:'App'
+            },
+          },
+          {
+            title: 'Deny',
+            icon: 'https://my-cdn.com/icons/reply.png',
+            pressAction: {
+              id: 'Deny',
+              launchActivity:'default',
+              mainComponent:'App'
+            },
+          }
+        ],
+      }
+    })
+  }
+}
+
+const receptionEntry = async ()=>{
   AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
   let img;
   const channelId = await notifee.createChannel({
@@ -86,92 +161,57 @@ messaging().getInitialNotification(async (message)=>{
       }
     })
   }
-})
+}
 
 messaging().setBackgroundMessageHandler(async(message)=>{
-  AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
-  let img;
-  const channelId = await notifee.createChannel({
-    id:'default',
-    name:'EzEntry Notifications',
-    importance:AndroidImportance.HIGH,
-    sound:'old_ring_bell',
-    lightColor:Color.blueRecColor,
-    lights:true,
-  })
-  let messageString = JSON.parse(message.data['data_fcm'])
-  let dataString=""
-  if(messageString.VisitTranNoOfVisitors!=undefined){
-    dataString = `${messageString.VisitorName} ${" and "} ${messageString.VisitTranNoOfVisitors} ${" is waiting at "} ${messageString.VisiPersonLocation} ${' From '} ${messageString.VisitTranVisitorFrom} ${" "}${messageString.VisitTranPurpose}`;
-  }else{
-    dataString = `${messageString.VisitorName} ${" and "}  ${" is waiting at "} ${messageString.VisiPersonLocation} ${' From '} ${messageString.VisitTranVisitorFrom} ${" "}${messageString.VisitTranPurpose}`;
-  }
-  if(messageString.VisitorMobileNo!=""){
-    let payload = {
-      VisitorMobileNo:messageString.VisitorMobileNo
-  }
-    await GetPhoneNumberDetails(payload).then((response)=>{
-      img = JSON.parse(response.data.Data)
-    }).catch((error)=>{
-      console.log("error ",error)
-    })
-  }
-  if(img[0][0].VisitorImage!=''){
-    await notifee.displayNotification({
-      title:'<p style="color:#99c2ff"><b>Persons are Watiting...</span></p></b></p>',
-      body:dataString,
-      ios:{
-        criticalVolume:1.0,
-        critical:true,
-        sound:'old_ring_bell',
-      },
-      android:{ 
-        ongoing:true,
-        loopSound:true,
-        badgeIconType:AndroidBadgeIconType.LARGE,
-        smallIcon:'cus_icon_color',
-        channelId,
-        largeIcon:require('./assets/cus_icon_color.png'),
-        sound:'old_ring_bell',
-        style:{
-          type:AndroidStyle.BIGPICTURE,
-          picture:`data:image/png;base64,${img[0][0].VisitorImage}`
-        },
-        actions: [
-          {
-            title: 'Accept',
-            icon: 'https://my-cdn.com/icons/reply.png',
-            pressAction: {
-              id: 'Accept',
-              mainComponent:'App'
-            },
-          },
-          {
-            title: 'Deny',
-            icon: 'https://my-cdn.com/icons/reply.png',
-            pressAction: {
-              id: 'Deny',
-              mainComponent:'App'
-            },
-          },
-          {
-            title: 'Replay',
-            pressAction: {
-              id: 'Replay',
-            },
-            input: true
-          }
-        ],
-        fullScreenAction:{
-          id:'default'
-        }
-      }
-    })
+  if(message.data['key']=='RECE'){
+    receptionEntry(message)
+  }else if(message.data['key']=='GATE'){
+    gateEntry(message)
   }
 })
 
 notifee.onBackgroundEvent(async ({ type, detail }) => {
   const { notification, pressAction } = detail;
+  const checkData = await AsyncStorage.getItem('FCM_GATE_MASTERCODE')
+  let CodeParse = JSON.parse(checkData)
+  if(CodeParse!="MASTERCODE_EMPTY"){
+    if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
+      const dataKey = await AsyncStorage.getItem('FCM_GATE_MASTERCODE')
+      let payload = {
+        ProdMovCode:dataKey,
+        EntryStatus:'A'
+    }
+        try {
+            await UpdateEntryStatus(payload).then((response)=>{
+                console.log("response data ",response?.data.Data);
+                AsyncStorage.setItem('ProvMoveCode',JSON.stringify("PM_EMPTY"))
+            }).catch((error)=>{
+                console.log("error ",error)
+            }) 
+        } catch (error) {
+            console.log("error ",error)
+        }
+        console.log("event pressed ",pressAction.id);
+    }else if(type === EventType.ACTION_PRESS && pressAction.id === 'Deny'){
+        await notifee.cancelNotification(notification.id);
+        const dataKey = await AsyncStorage.getItem('FCM_GATE_MASTERCODE')
+        let payload = {
+          ProdMovCode:dataKey,
+          EntryStatus:'R'
+      }
+          try {
+              await UpdateEntryStatus(payload).then((response)=>{
+                  console.log("response data ",response?.data.Data);
+                  AsyncStorage.setItem('ProvMoveCode',JSON.stringify("PM_EMPTY"))
+              }).catch((error)=>{
+                  console.log("error ",error)
+              })
+          } catch (error) {
+              console.log("error ",error)
+          }
+    }
+  }else{
   // Check if the user pressed the "Mark as read" action
   if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
     const dataKey = await AsyncStorage.getItem('FCM_Data_key')
@@ -234,6 +274,8 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
     }
     await notifee.cancelNotification(detail.notification.id);
   }
+  }
+
 });
 
 AppRegistry.registerComponent(appName, () => App);

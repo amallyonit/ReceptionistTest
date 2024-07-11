@@ -79,3 +79,18 @@ export async function UpdateEntryStatus(data:any){
         console.log("error ",error)
     }
 }
+
+export async function GetDeliveryStatus(data:any){
+    try {
+        return axios({
+            method:'post',
+            headers:ApiConfig,
+            url:ServerConfig.urlString+ServerEndpoints.GET_PRODUCT_DP_STATUS,
+            data:JSON.stringify(data)
+        })
+    } catch (error) {
+        console.log("error ",error)
+    }
+}
+
+
