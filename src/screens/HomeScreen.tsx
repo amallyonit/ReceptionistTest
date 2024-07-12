@@ -150,7 +150,7 @@ const HomeScreen = ({ route, navigation }: any) => {
                     <Image source={receLogo} style={styles.image} />
                 </View>
                 <Text style={styles.title}>EzEntry</Text>
-                <View style={{marginTop:3, width: '98%', height: 20, alignItems: 'center', position: 'relative', borderRadius: 5, backgroundColor: Color.blueRecColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
+                <View style={{marginTop:3, width: '98%', height: 25, alignItems: 'center', position: 'relative', borderRadius: 5, backgroundColor:Color.newBlueColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
                     <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500',textAlignVertical:'center'}}>{viewUser?.UserName} - {viewUser?.LocationPremise}</Text>
                 </View>
                 <View style={styles.cardGroupContainer}>
@@ -220,8 +220,8 @@ const HomeScreen = ({ route, navigation }: any) => {
                 </View>
                 <View style={styles.boxRow}>
                     <Pressable style={styles.viewSec}>
-                        <Icon style={{ marginRight: 'auto', fontSize: 16, borderBottomWidth: 1, borderBottomColor: Color.blueRecColor }} name="logout" onPress={logoutApp} color={Color.blueRecColor}>Logout</Icon>
-                        <Icon onPress={() => { navigation.navigate('History') }} style={{ marginLeft: 'auto', fontSize: 16, borderBottomWidth: 1, borderBottomColor: Color.blueRecColor }} name="history" color={Color.blueRecColor}>View History</Icon>
+                        <Icon style={{ marginRight: 'auto', fontSize: 16, borderBottomWidth: 1, borderBottomColor: Color.blueRecColor }} name="logout" onPress={logoutApp} color={Color.newBlueColor}>Logout</Icon>
+                        <Icon onPress={() => { navigation.navigate('History') }} style={{ marginLeft: 'auto', fontSize: 16, borderBottomWidth: 1, borderBottomColor: Color.blueRecColor }} name="history" color={Color.newBlueColor}>View History</Icon>
                     </Pressable>
                 </View>
                 <Image source={receBottomLogo} style={styles.bottomLogo} />
@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
         fontFamily: Fonts.recFontFamily.titleRecFont,
         textAlign: "center",
         fontWeight: 'normal',
-        color: Color.blueRecColor
+        color: Color.newBlueColor
     },
     button: {
         backgroundColor: 'green',

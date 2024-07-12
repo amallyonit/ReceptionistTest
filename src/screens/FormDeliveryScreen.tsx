@@ -76,7 +76,7 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
         }
         try {
             await GetVehicleNumbers(data).then((response)=>{
-                console.log("response",response?.data.Data)
+                console.log("response repe",response?.data.Data)
                 setVehicleList(response?.data.Data)
                 setQuery("")
             }).catch((error)=>{
@@ -215,10 +215,10 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                     console.log("response data.Data ",response?.data)
                     if(response?.data.Status){
                         resetData()
-                        setInterval(()=>{
+                        getVehicleNumber()
+                        setTimeout(() => {
                             setOutStatus(false)
-                            getVehicleNumber()
-                        },4000)
+                        }, 4000);
                     }
                 }).catch((error)=>{
                     console.log("error ",error)
@@ -227,7 +227,7 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                 console.log("error ",error)
             }
         }
-    }
+    } 
 
     const selfApproveStatus = async () =>{
         const CodeProv = await AsyncStorage.getItem('ProvMoveCode')
@@ -265,6 +265,7 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
         }
         try {
             await GetDeliveryStatus(payload).then((response)=>{
+                console.log("product status ",response?.data)
                 setStatus(response?.data.Data)
             }).catch((error)=>{
                 console.log("error ",error)
@@ -306,13 +307,14 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                 TotalItem:itemList
             }
             await GenerateGateEntry(data).then((response)=>{
-                console.log("response ",response?.data)
+                console.log("response 1",response?.data)
                 if(response?.data.Status){
                     AsyncStorage.setItem('ProvMoveCode',JSON.stringify(response.data.Data))
-                    setInterval(()=>{
+                     setTimeout(() => {
                         productStatus()
                         setisLoaderTrue(false)
                     },10000)
+
                 }
             }).catch((error)=>{
                 console.log("error ",error)

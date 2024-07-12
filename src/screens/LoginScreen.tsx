@@ -13,7 +13,7 @@ import { CommonModal } from "../components/RecCommonModal";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 
-const receLogo = require('../../assets/recimages/Frame.png')
+const receLogo = require('../../assets/recimages/Newlogo.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
 
 const LoginScreen = ({ navigation }: any) => {
@@ -137,8 +137,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   image: {
+    marginBottom:20,
     height: 160,
-    width: 300,
+    width: 270,
     resizeMode: 'contain'
   },
   cusButton: {
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontFamily: Fonts.recFontFamily.titleRecFont,
     textAlign: "center",
-    color: '#99c2ff',
+    color: Color.newBlueColor,
     marginBottom: 10
   },
   inputView: {
