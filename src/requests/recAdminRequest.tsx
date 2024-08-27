@@ -15,3 +15,16 @@ export function GetNotificationByUserCode(data:any){
         console.log("error ",error)
     }
 }
+
+export function GetGatePassByUserCode(data:any){
+    try {
+        return axios({
+            method:'post',
+            headers:ApiConfig,
+            url:ServerConfig.urlString+ServerEndpoints.POST_GATEPASS_DATA,
+            data:data
+        })
+    } catch (error) {
+        console.log("error ",error)
+    }
+}

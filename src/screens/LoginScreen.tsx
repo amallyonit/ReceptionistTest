@@ -13,7 +13,7 @@ import { CommonModal } from "../components/RecCommonModal";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 
-const receLogo = require('../../assets/recimages/Newlogo.png')
+const receLogo = require('../../assets/recimages/AmrLogo.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
 
 const LoginScreen = ({ navigation }: any) => {

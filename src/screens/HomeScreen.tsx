@@ -13,7 +13,7 @@ import { color } from "react-native-elements/dist/helpers"
 import { colorsDark } from "react-native-elements/dist/config"
 
 
-const receLogo = require('../../assets/recimages/Newlogo.png')
+const receLogo = require('../../assets/recimages/AmrLogo.png')
 const receMeetLog = require('../../assets/recscreen/MEETING.png')
 const receVisitLog = require('../../assets/recscreen/VISIT.png')
 const receServeLog = require('../../assets/recscreen/SERVICE.png')

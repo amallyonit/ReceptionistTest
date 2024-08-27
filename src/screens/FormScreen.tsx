@@ -67,7 +67,6 @@ const FormScreen = ({ route, navigation }: any) => {
         console.log("data ",data)
         setLocations(vals.Data[1])
         setUsrLcton(location[0]?.LocationCode)
-        getUsersByLocationName(usrLcton==undefined || usrLcton==''?'BPJ001':usrLcton)
         console.log(" dat ",location,usrLcton)
       }
     const getUsersByLocationName = async (code: any) => {
@@ -349,12 +348,12 @@ const FormScreen = ({ route, navigation }: any) => {
                                 valueField="LocationCode"
                                 placeholder="Company name"
                                 searchPlaceholder="Search...locations"
-                                value={usrLcton==undefined || usrLcton==''?'BPJ001':usrLcton}
+                                value={usrLcton}
                                 onChange={(item) => {
                                     setUsrLcton(item.LocationCode)
                                     console.log("user item ",item)
                                     setUserLocFl(item.LocationName)
-                                    getUsersByLocationName(usrLcton==undefined || usrLcton==''?'BPJ001':usrLcton)
+                                    getUsersByLocationName(item.LocationCode)
                                 }}
                             />
                             <Dropdown

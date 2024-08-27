@@ -309,6 +309,7 @@ const onRegisterMessaging = async () => {
 
 const onMessageGetter = async (message: any) => {
   if(message.data['key']=='RECE'){
+    console.log("message key ",message.data['key'])
     receptionNotification(message)
   }else if(message.data['key']=='GATE'){
     gateEntryNotification(message)

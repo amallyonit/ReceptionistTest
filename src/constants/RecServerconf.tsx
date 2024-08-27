@@ -1,3 +1,3 @@
 export const ServerConfig = {
-    urlString:'http://65.2.22.83:1085/'
+    urlString:'http://4.240.16.147:2010/'
 }

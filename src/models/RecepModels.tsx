@@ -11,36 +11,36 @@ export const RecpImgArray: PathStore[] = [
 export const DelpickData: DeliveryData[] = [
     { billnumber: 5566, date: new Date(), partyname: 'LyonIT' }
 ]
-export interface ItemDescription{ 
-	ProdMovDetBillNumber:string
-	ProdMovDetPartyName:string
-	ProdMovDetItems:string
-	ProdMovDetItemQty:number
+export interface ItemDescription {
+    ProdMovDetBillNumber: string
+    ProdMovDetPartyName: string
+    ProdMovDetItems: string
+    ProdMovDetItemQty: number
 }
 export interface PathStore {
     name: any
     path: any
-} 
+}
 
-export interface UserPayload{
-    userid:any
-    token:any
+export interface UserPayload {
+    userid: any
+    token: any
 }
 
 export interface InfoFormProps {
     appBarTitle: any,
     type: any,
-    category:number
+    category: number
 }
 
 export interface ViewHistory {
-    VisitorName: any 
+    VisitorName: any
     VisitorMobileNo: any
     VisitorImage: any
     VisitTranVisitorFrom: any
 }
 
-export interface ViewNotification{
+export interface ViewNotification {
     VisitorName: any
     VisitorImage: any
     VisitorMobileNo: any
@@ -72,17 +72,17 @@ export interface UserLoginData {
     UserPassword: any
     UserType: any
 }
-export interface UserLDData{
+export interface UserLDData {
     UserCode: any
     UserDeviceToken: any
     UserMobileNo: any
     UserName: any
-    UserPassword:any
+    UserPassword: any
     LocationPremise: any
     UserType: any
 }
 export interface UserLoginLocation {
-    LocationAddress:any
+    LocationAddress: any
     LocationCode: any
     LocationCompanyCode: any
     LocationId: any
@@ -91,8 +91,26 @@ export interface UserLoginLocation {
     CompanyName: any
 }
 
-export interface NotificationData{
-	NotificationDeviceToken:any
-	NotificationsData:any
-	NotificationCreatedAt:any
+export interface NotificationData {
+    NotificationDeviceToken: any
+    NotificationsData: any
+    NotificationCreatedAt: any
+}
+
+export interface ProductMovementData {
+    ProdMovCode: string
+    ProdMovImage: string
+    ProdMovDriverName: string
+    ProdMovMobileNo: string
+    ProdMovTransporter: string
+    ProdMovAuthorizedPerson: string
+    ProdMovVehicleNo: string
+    ProdMovInTime: string
+    ProdMovOutTime: string
+    ProdMovDetId: 2
+    ProdMovDetBillNumber: string
+    ProdMovDetDate: string
+    ProdMovDetPartyName: string
+    ProdMovDetItems: string
+    ProdMovDetItemQty: number
 }

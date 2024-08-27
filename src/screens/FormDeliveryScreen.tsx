@@ -93,7 +93,6 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
         const vals = JSON.parse(data)
         setLocations(vals.Data[1])
         setUsrLcton(location[0]?.LocationCode)
-        getUsersByLocationName(usrLcton)
     }
     const getUsersByLocationName = async (code: any) => {
         let payload = {
@@ -428,7 +427,7 @@ const FormDeliveryScreen = ({ route, navigation }: any) => {
                         onChange={(item) => {
                             setUsrLcton(item.LocationCode)
                             console.log("user item ", item)
-                            getUsersByLocationName(usrLcton)
+                            getUsersByLocationName(item.LocationCode)
                         }}  
                     />
                     <Dropdown
