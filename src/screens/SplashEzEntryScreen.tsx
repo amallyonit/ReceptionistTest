@@ -6,7 +6,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 
 
-const logoImage = require('../../assets/print_prev_ez.png')
+const logoImage = require('../../assets/recimages/Group.png')
 const SplashEzEntryScreen = ({navigation}:any)=>{
   useEffect(() => {
     setTimeout(async () => {
@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 22,
+        backgroundColor:Color.lightRecBlue
     },
     entryText:{
         color:Color.blueRecColor,

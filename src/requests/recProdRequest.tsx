@@ -93,4 +93,17 @@ export async function GetDeliveryStatus(data:any){
     }
 }
 
+export async function GETReports(data:any){
+    try {
+        return axios({
+            method:'post',
+            headers:ApiConfig,
+            url:ServerConfig.urlString+ServerEndpoints.GET_REPORTS_DATA_BY_FILTER,
+            data:JSON.stringify(data)
+        })
+    } catch (error) {
+        console.log("error ",error)
+    }
+}
+
 

@@ -4,6 +4,7 @@ import { Button, View } from "react-native"
 import { MiscStoreKeys } from "../constants/RecStorageKeys";
 import { ListItem } from "react-native-elements";
 import { UserLDData } from "../models/RecepModels";
+import { LogoutByUserCode } from "../requests/recAdminRequest";
 
 
 const SettingScreen = ({ navigation }: any) => {
@@ -18,6 +19,14 @@ const SettingScreen = ({ navigation }: any) => {
     console.log("data ", vals.Data[0][0])
     setViewUser(vals.Data[0][0])
   }
+
+  const getUserLogut = async () =>{
+      try {
+        let data = await LogoutByUserCode(JSON.stringify({userid:viewUser?.UserCode}))
+      } catch (error) {
+        
+      }
+  }
   return (
     <View>
       <ListItem bottomDivider>
@@ -31,6 +40,7 @@ const SettingScreen = ({ navigation }: any) => {
         <ListItem.Content>
           <ListItem.Subtitle style={{ paddingTop: 5 }}>
             <Button title="Logout" onPress={() => {
+              getUserLogut();
               navigation.replace('Login');
               AsyncStorage.removeItem(MiscStoreKeys.EZ_LOGIN)
             }}></Button>

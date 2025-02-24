@@ -1,7 +1,7 @@
 /**
  * @format
  */
-import {Alert, AppRegistry} from 'react-native';
+import { AppRegistry, Platform} from 'react-native';
 import App from './App';
 import {name as appName} from './app.json';
 import notifee, { AndroidBadgeIconType, AndroidImportance,AndroidStyle, EventType} from '@notifee/react-native';
@@ -13,6 +13,7 @@ import { UpdateEntryStatus } from './src/requests/recProdRequest';
 
 
 messaging().getInitialNotification(async (message)=>{
+  console.log("message ",message)
   if(message.data['key']=='RECE'){
     receptionEntry(message)
   }else if(message.data['key']=='GATE'){
@@ -20,7 +21,7 @@ messaging().getInitialNotification(async (message)=>{
   }
 })
 
-const gateEntry =  async () =>{
+const gateEntry =  async (message) =>{
   AsyncStorage.setItem('FCM_GATE_MASTERCODE', message.data['mastercode_2'])
   let img;
   const channelId = await notifee.createChannel({
@@ -39,6 +40,7 @@ const gateEntry =  async () =>{
   }
     await GetPhoneNumberDetails(payload).then((response)=>{
       const data = JSON.parse(response.data.Data)
+      console.log("image block")
       img = data[0]
     }).catch((error)=>{
       console.log("error ",error)
@@ -86,7 +88,7 @@ const gateEntry =  async () =>{
   }
 }
 
-const receptionEntry = async ()=>{
+const receptionEntry = async (message)=>{
   AsyncStorage.setItem('FCM_TRAN_key',message.data['trancode'])
   let img;
   const channelId = await notifee.createChannel({
@@ -110,6 +112,7 @@ const receptionEntry = async ()=>{
   }
     await GetPhoneNumberDetails(payload).then((response)=>{
       img = JSON.parse(response.data.Data)
+      console.log("image entry ",img)
     }).catch((error)=>{
       console.log("error ",error)
     })
@@ -129,7 +132,7 @@ const receptionEntry = async ()=>{
         sound:'old_ring_bell',
         style:{
           type:AndroidStyle.BIGPICTURE,
-          picture:`data:image/png;base64,${img}`
+          picture:`data:image/png;base64,${img[0][0].VisitorImage}`
         },
         actions: [
           {
@@ -164,6 +167,7 @@ const receptionEntry = async ()=>{
 }
 
 messaging().setBackgroundMessageHandler(async(message)=>{
+  console.log("message ",message)
   if(message.data['key']=='RECE'){
     receptionEntry(message)
   }else if(message.data['key']=='GATE'){
@@ -278,4 +282,14 @@ notifee.onBackgroundEvent(async ({ type, detail }) => {
 
 });
 
-AppRegistry.registerComponent(appName, () => App);
+
+if (Platform.OS === 'web') {
+  // You might need to add additional web-related configuration here.
+  AppRegistry.registerComponent(appName, () => App);
+  AppRegistry.runApplication(appName, {
+    initialProps: {},
+    rootTag: document.getElementById('app-root'),
+  });
+} else {
+  AppRegistry.registerComponent(appName, () => App);
+}

@@ -7,20 +7,18 @@ import LinearGradient from "react-native-linear-gradient"
 import { InfoFormProps, RecpImgArray, UserLDData, UserPayload } from "../models/RecepModels"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { MiscStoreKeys } from "../constants/RecStorageKeys"
-import { Avatar, ListItem, Overlay } from "react-native-elements"
-import { color } from "react-native-elements/dist/helpers"
-import { colorsDark } from "react-native-elements/dist/config"
+import { MiscStoreKeys } from "../constants/RecStorageKeys";
+import { Avatar, ListItem, Overlay } from "react-native-elements";
 
 
 const receLogo = require('../../assets/recimages/AmrLogo.png')
+const ezentryLogo = require('../../assets/print_prev_ez.png')
 const receMeetLog = require('../../assets/recscreen/MEETING.png')
 const receVisitLog = require('../../assets/recscreen/VISIT.png')
 const receServeLog = require('../../assets/recscreen/SERVICE.png')
 const receContrLog = require('../../assets/recscreen/CONTRACTOR.png')
 const receInterLog = require('../../assets/recscreen/INTERVIEW.png')
 const receDelLog = require('../../assets/recscreen/DELIVERY.png')
-const receBottomLogo = require('../../assets/recimages/Group.png')
 
 const HomeScreen = ({ route, navigation }: any) => {
     let propData: InfoFormProps = {
@@ -29,8 +27,8 @@ const HomeScreen = ({ route, navigation }: any) => {
         category: 0
     }
     const [viewUser, setViewUser] = useState<UserLDData>()
-    const [preApp,setPreApp] = useState(false)
-    const [checkot,setCheckout] = useState(false)
+    const [preApp, setPreApp] = useState(false)
+    const [checkot, setCheckout] = useState(false)
     useEffect(() => {
         getUserData()
         let propData: InfoFormProps = {
@@ -67,7 +65,6 @@ const HomeScreen = ({ route, navigation }: any) => {
     }
 
     const checkFormScreen = (type: any) => {
-
         switch (type) {
             case 'MEETING':
                 propData = {
@@ -114,7 +111,7 @@ const HomeScreen = ({ route, navigation }: any) => {
                 navigation.navigate('Form', { propData })
                 navigation.setOptions({ headerTitle: propData.appBarTitle })
                 break;
-            case 'Courier':
+            case 'COURIER':
                 propData = {
                     appBarTitle: 'Courier',
                     type: type,
@@ -144,14 +141,16 @@ const HomeScreen = ({ route, navigation }: any) => {
     }
 
     return (
-        <SafeAreaView style={{backgroundColor:Color.whiteRecColor}}>
+        <SafeAreaView style={{ backgroundColor: Color.whiteRecColor }}>
             <View style={styles.container}>
                 <View style={styles.ImageBoxView}>
                     <Image source={receLogo} style={styles.image} />
                 </View>
-                <Text style={styles.title}>EzEntry</Text>
-                <View style={{marginTop:3, width: '98%', height: 25, alignItems: 'center', position: 'relative', borderRadius: 5, backgroundColor:Color.newBlueColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
-                    <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500',textAlignVertical:'center'}}>{viewUser?.UserName} - {viewUser?.LocationPremise}</Text>
+                <View style={styles.ImageBoxView}>
+                    <Image source={ezentryLogo} style={[styles.image, { height: 50 }]} />
+                </View>
+                <View style={{ marginTop: 3, width: '98%', height: 25, alignItems: 'center', position: 'relative', borderRadius: 5, backgroundColor: Color.newBlueColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
+                    <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500', textAlignVertical: 'center' }}>{viewUser?.UserName} - {viewUser?.LocationPremise}</Text>
                 </View>
                 <View style={styles.cardGroupContainer}>
                     <LinearGradient colors={[Color.whiteRecColor, Color.whiteRecColor, Color.lightRecBlue]} style={styles.cardGroup}>
@@ -206,49 +205,87 @@ const HomeScreen = ({ route, navigation }: any) => {
                     </LinearGradient>
                 </View>
                 <View style={styles.boxRow}>
-                    <Pressable style={styles.uploadBox}>
-                        <Pressable style={styles.cusButton} onPress={()=>{setPreApp(true)}}>
+                    <Pressable style={[styles.uploadBox, { width: '50%' }]}>
+                        <Pressable style={styles.cusButton} onPress={() => { setPreApp(true) }}>
                             <Text style={styles.cusText}>Pre Approved <Icon name="check-circle-outline" size={Dimensions.get('window').fontScale * 16}></Icon></Text>
                         </Pressable>
                     </Pressable>
-                    <Pressable style={styles.uploadBox}>
-                        <Pressable style={styles.cusButton} onPress={()=>{setCheckout(true)}}>
+                    <Pressable style={[styles.uploadBox, { width: '50%' }]}>
+                        <Pressable style={styles.cusButton} onPress={() => { setCheckout(true) }}>
                             <Text style={styles.cusText}>Check Out <Icon name="location-exit" size={Dimensions.get('window').fontScale * 16}></Icon>
                             </Text>
                         </Pressable>
                     </Pressable>
                 </View>
-                <View style={styles.boxRow}>
+                <View style={styles.fixedBottomMenu}>
                     <Pressable style={styles.viewSec}>
-                        <Icon style={{ marginRight: 'auto', fontSize: 16, borderBottomWidth: 1, borderBottomColor: Color.blueRecColor }} name="logout" onPress={logoutApp} color={Color.newBlueColor}>Logout</Icon>
-                        <Icon onPress={() => { navigation.navigate('History') }} style={{ marginLeft: 'auto', fontSize: 16, borderBottomWidth: 1, borderBottomColor: Color.blueRecColor }} name="history" color={Color.newBlueColor}>View History</Icon>
+                        <View style={styles.viewSecIcons}>
+                            <Icon
+                                style={{
+                                    marginRight: 'auto',
+                                    fontSize: 16,
+                                }}
+                                name="logout"
+                                onPress={logoutApp}
+                                color={Color.newBlueColor}
+                            >
+                                Logout
+                            </Icon>
+                        </View>
+                        <View style={styles.viewSecIcons}>
+                            <Icon
+                                style={{
+                                    marginRight: 'auto',
+                                    fontSize: 16,
+                                }}
+                                name="file-chart-outline"
+                                onPress={() => { navigation.navigate('Reports',{screenName:'USER'}) }}
+                                color={Color.newBlueColor}
+                            >
+                                Reports
+                            </Icon>
+                        </View>
+                        <View style={styles.viewSecIcons}>
+                            <Icon
+                                onPress={() => {
+                                    navigation.navigate('History');
+                                }}
+                                style={{
+                                    marginLeft: 'auto',
+                                    fontSize: 16,
+                                }}
+                                name="history"
+                                color={Color.newBlueColor}
+                            >
+                                View History
+                            </Icon>
+                        </View>
                     </Pressable>
                 </View>
-                <Image source={receBottomLogo} style={styles.bottomLogo} />
-                <Overlay isVisible={preApp}  overlayStyle={{width:'80%',borderRadius:20,backgroundColor:Color.lightRecBlue,}}  onBackdropPress={()=>{setPreApp(false)}}>
-                <Icon name="close" onPress={()=>{setPreApp(false)}} color={Color.darkRecGray} style={{textAlign:'right'}} size={40}></Icon>
-                <ListItem bottomDivider>
-                    <ListItem.Content>
-                    <ListItem.Title>Name: Amal</ListItem.Title>
-                    <ListItem.Subtitle>Reason: For service</ListItem.Subtitle>
-                    </ListItem.Content>
-                </ListItem>
-                <ListItem bottomDivider>
-                    <ListItem.Content>
-                    <ListItem.Title>Name: Amal</ListItem.Title>
-                    <ListItem.Subtitle>Reason: For service</ListItem.Subtitle>
-                    </ListItem.Content>
-                </ListItem>
-                <ListItem bottomDivider>
-                    <ListItem.Content>
-                    <ListItem.Title>Name: Amal</ListItem.Title>
-                    <ListItem.Subtitle>Reason: For service</ListItem.Subtitle>
-                    </ListItem.Content>
-                </ListItem>
-            </Overlay>
-            <Overlay isVisible={checkot} overlayStyle={{width:'80%',borderRadius:20,backgroundColor:Color.lightRecBlue,}}  onBackdropPress={()=>{setCheckout(false)}}>
-                <Icon name="close" onPress={()=>{setCheckout(false)}} color={Color.darkRecGray} style={{textAlign:'right'}} size={40}></Icon>
-            </Overlay>
+                <Overlay isVisible={preApp} overlayStyle={{ width: '80%', borderRadius: 20, backgroundColor: Color.lightRecBlue, }} onBackdropPress={() => { setPreApp(false) }}>
+                    <Icon name="close" onPress={() => { setPreApp(false) }} color={Color.darkRecGray} style={{ textAlign: 'right' }} size={40}></Icon>
+                    <ListItem bottomDivider>
+                        <ListItem.Content>
+                            <ListItem.Title>Name: Amal</ListItem.Title>
+                            <ListItem.Subtitle>Reason: For service</ListItem.Subtitle>
+                        </ListItem.Content>
+                    </ListItem>
+                    <ListItem bottomDivider>
+                        <ListItem.Content>
+                            <ListItem.Title>Name: Amal</ListItem.Title>
+                            <ListItem.Subtitle>Reason: For service</ListItem.Subtitle>
+                        </ListItem.Content>
+                    </ListItem>
+                    <ListItem bottomDivider>
+                        <ListItem.Content>
+                            <ListItem.Title>Name: Amal</ListItem.Title>
+                            <ListItem.Subtitle>Reason: For service</ListItem.Subtitle>
+                        </ListItem.Content>
+                    </ListItem>
+                </Overlay>
+                <Overlay isVisible={checkot} overlayStyle={{ width: '80%', borderRadius: 20, backgroundColor: Color.lightRecBlue, }} onBackdropPress={() => { setCheckout(false) }}>
+                    <Icon name="close" onPress={() => { setCheckout(false) }} color={Color.darkRecGray} style={{ textAlign: 'right' }} size={40}></Icon>
+                </Overlay>
             </View>
         </SafeAreaView>
     )
@@ -259,19 +296,43 @@ const cardWidth = (Dimensions.get('window').width - cardGap * 3) / 3;
 
 const styles = StyleSheet.create({
     container: {
-        paddingTop: Dimensions.get('window').height * 0.06,
+        paddingTop: Dimensions.get('window').height * 0.1,
         alignItems: "center",
         paddingHorizontal: 28,
-        backgroundColor:Color.whiteRecColor
+        backgroundColor: Color.whiteRecColor,
+        paddingBottom: Dimensions.get('window').height * 0.21,
+    },
+    fixedBottomMenu: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        backgroundColor: Color.lightRecBlue,
+        paddingVertical: 20,
+        paddingHorizontal: 20,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderTopWidth: 1,
+        borderTopColor: Color.lightNewGrey,
+    },
+    viewSec: {
+        flexDirection: 'row',
+        justifyContent: 'space-evenly',
+        alignItems: 'center',
+        width: '100%',
+    },
+    viewSecIcons:{
+        flex:1
     },
     image: {
-        height: 160,
-        width: 270, 
+        height: 100,
+        width: 180,
         resizeMode: 'contain',
     },
-    ImageBoxView:{
-        justifyContent:'center',
-        alignItems:'center',
+    ImageBoxView: {
+        justifyContent: 'center',
+        alignItems: 'center',
         shadowColor: Color.darkRecGray,
         shadowOffset: {
             width: 0,
@@ -285,11 +346,6 @@ const styles = StyleSheet.create({
         width: Dimensions.get('window').width * 0.2,
         height: (Dimensions.get('window').height * 1) / 10,
         resizeMode: 'contain'
-    },
-    viewSec: {
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'flex-end'
     },
     ViewText: {
         textAlign: 'right',
@@ -340,7 +396,7 @@ const styles = StyleSheet.create({
         height: 40
     },
     cardGroupContainer: {
-        marginTop:-8,
+        marginTop: -8,
         flexDirection: 'row',
         justifyContent: 'space-evenly',
         gap: 5

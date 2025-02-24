@@ -14,6 +14,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 
 
 const receLogo = require('../../assets/recimages/AmrLogo.png')
+const recSubLog = require('../../assets/print_prev_ez.png')
 const receBottomLogo = require('../../assets/recimages/Group.png')
 
 const LoginScreen = ({ navigation }: any) => {
@@ -72,7 +73,7 @@ const LoginScreen = ({ navigation }: any) => {
       <ScrollView>
         <View style={styles.container}>
           <Image source={receLogo} style={styles.image} />
-          <Text style={styles.title}>EzEntry</Text>
+          <Image source={recSubLog} style={styles.image} />
           <View>
           </View>
           <View style={styles.inputView}>
@@ -98,8 +99,6 @@ const LoginScreen = ({ navigation }: any) => {
               <Text style={styles.cusText}>Login</Text>
             </Pressable>
           </View>
-
-          <Image source={receBottomLogo} style={styles.bottomLogo} />
           <CommonModal confirm={isLoader}></CommonModal>
         </View>
       </ScrollView>
@@ -111,7 +110,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     flex: 1,
-    paddingTop: Dimensions.get('window').height * 0.2,
+    paddingTop: Dimensions.get('window').height * 0.28,
   },
   containerSet: {
     flex: 1
@@ -137,9 +136,9 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   image: {
-    marginBottom:20,
-    height: 160,
-    width: 270,
+    marginVertical:10,
+    height: 60,
+    width: 200,
     resizeMode: 'contain'
   },
   cusButton: {

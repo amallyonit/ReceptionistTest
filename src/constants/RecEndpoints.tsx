@@ -16,4 +16,6 @@ export const ServerEndpoints = {
     UPDATE_PRODUCT_STATUS:'api/v1/recProd/updateTransStatus',
     UPDATE_PRODUCT_OUTTIME:'api/v1/recProd/updateItemProduct',
     GET_PRODUCT_DP_STATUS:'api/v1/recProd/getproductStatus',
+    GET_LOGOUT_BY_USERCODE:'api/v1/recAuth/userLogout',
+    GET_REPORTS_DATA_BY_FILTER:'api/v1/recProd/getReportsByFilter',
 }

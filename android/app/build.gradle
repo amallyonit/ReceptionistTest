@@ -78,7 +78,7 @@ android {
     namespace "com.receptionisttest"
     defaultConfig {
         applicationId "com.receptionisttest"
-        minSdkVersion rootProject.ext.minSdkVersion
+        minSdkVersion 23
         missingDimensionStrategy 'react-native-camera','general'
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

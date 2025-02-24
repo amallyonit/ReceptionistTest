@@ -28,3 +28,15 @@ export function GetGatePassByUserCode(data:any){
         console.log("error ",error)
     }
 }
+
+export function LogoutByUserCode(data:any){
+    try {
+        return axios({
+            method:'post',
+            headers:ApiConfig,
+            url:ServerConfig.urlString+ServerEndpoints
+        })
+    } catch (error) {
+        
+    }
+}

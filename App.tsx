@@ -12,22 +12,24 @@ import Color from './src/theme/Color';
 import Fonts from './src/theme/Fonts';
 import messaging from "@react-native-firebase/messaging"
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createRef, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { NotificationData, ViewNotification } from './src/models/RecepModels';
 import { RegisterMessageToken } from './src/requests/recNotifiRequest';
 import notifee, { AndroidImportance, AndroidStyle, EventType } from '@notifee/react-native';
-import NotificationPop from './src/components/RecNotification';
+import NotificationPop from './src/components/RecNotification'
 import SplashEzEntryScreen from './src/screens/SplashEzEntryScreen';
 import AdminScreen from './src/screens/AdminScreen';
 import SettingScreen from './src/screens/SettingsScreen';
 import { GetPhoneNumberDetails, UpdateVisitStatus } from './src/requests/recHomeRequest';
 import CourierScreen from './src/screens/CourierScreen';
 import { GetVehicleDetailByNumber, UpdateEntryStatus } from './src/requests/recProdRequest';
-
+import ReportScreen from './src/screens/ReportScreen';
+import { Platform, PermissionsAndroid, Alert, Linking } from 'react-native';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 
 const Stack = createNativeStackNavigator()
 
-const receptionNotification = async (message:any) =>{
+const receptionNotification = async (message: any) => {
   let img: ViewNotification | null = null
   AsyncStorage.setItem('FCM_Data_key', message.data['mastercode'])
   AsyncStorage.setItem('FCM_TRAN_key', message.data['trancode'])
@@ -40,7 +42,7 @@ const receptionNotification = async (message:any) =>{
     sound: 'old_ring_bell',
   })
 
-  if(messString!=''){
+  if (messString != '') {
     let dataString = ""
     if (messString.VisitTranNoOfVisitors != undefined) {
       dataString = `${messString.VisitorName} ${" and "} ${messString.VisitTranNoOfVisitors} ${" is waiting at "} ${messString.VisiPersonLocation} ${' From '} ${messString.VisitTranVisitorFrom} ${" "}${messString.VisitTranPurpose}`;
@@ -65,8 +67,8 @@ const receptionNotification = async (message:any) =>{
         body: dataString,
         android: {
           ongoing: true,
-          autoCancel:false,
-          loopSound:true,
+          autoCancel: false,
+          loopSound: true,
           smallIcon: 'cus_icon_color',
           channelId,
           color: Color.blueRecColor,
@@ -82,7 +84,7 @@ const receptionNotification = async (message:any) =>{
               icon: 'https://my-cdn.com/icons/reply.png',
               pressAction: {
                 id: 'Accept',
-                launchActivity:'default',
+                launchActivity: 'default',
                 mainComponent: 'App'
               },
             },
@@ -91,7 +93,7 @@ const receptionNotification = async (message:any) =>{
               icon: 'https://my-cdn.com/icons/reply.png',
               pressAction: {
                 id: 'Deny',
-                launchActivity:'default',
+                launchActivity: 'default',
                 mainComponent: 'App'
               },
             },
@@ -130,6 +132,7 @@ const receptionNotification = async (message:any) =>{
         } catch (error) {
           console.log("error while updating visitor status")
         }
+        await notifee.cancelNotification(notification.id);
       } else if (type === EventType.ACTION_PRESS && pressAction.id === 'Deny') {
         const dataKey = await AsyncStorage.getItem('FCM_Data_key')
         const dataKey2 = await AsyncStorage.getItem('FCM_TRAN_key')
@@ -173,7 +176,7 @@ const receptionNotification = async (message:any) =>{
   }
 }
 
-const gateEntryNotification = async (message:any) =>{
+const gateEntryNotification = async (message: any) => {
   let img2: any | null = null
   console.log("message ", message.data['data_fcm_2'])
   const messStringTwo: any = JSON.parse(message.data['data_fcm_2'])
@@ -184,7 +187,7 @@ const gateEntryNotification = async (message:any) =>{
     importance: AndroidImportance.HIGH,
     sound: 'old_ring_bell',
   })
-  if(messStringTwo!=''){
+  if (messStringTwo != '') {
     let dataString = ""
     dataString = `${messStringTwo.ProdMovDriverName} ${" is waiting at  Main Gate"}`;
     if (messStringTwo.ProdMovMobileNo != "") {
@@ -192,9 +195,8 @@ const gateEntryNotification = async (message:any) =>{
         ProdMovVehicleNo: messStringTwo.ProdMovVehicleNo
       }
       await GetVehicleDetailByNumber(payload).then((response: any) => {
-        // console.log("image ", response)
         const data = response.data.Data
-        console.log("data item ",data)
+        console.log("data item ", data)
         img2 = data[0]
       }).catch((error) => {
         console.log("error ", error)
@@ -206,8 +208,8 @@ const gateEntryNotification = async (message:any) =>{
         body: dataString,
         android: {
           ongoing: true,
-          autoCancel:false,
-          loopSound:true,
+          autoCancel: false,
+          loopSound: true,
           smallIcon: 'cus_icon_color',
           channelId,
           color: Color.blueRecColor,
@@ -223,7 +225,7 @@ const gateEntryNotification = async (message:any) =>{
               icon: 'https://my-cdn.com/icons/reply.png',
               pressAction: {
                 id: 'Accept',
-                launchActivity:'default',
+                launchActivity: 'default',
                 mainComponent: 'App'
               },
             },
@@ -232,7 +234,7 @@ const gateEntryNotification = async (message:any) =>{
               icon: 'https://my-cdn.com/icons/reply.png',
               pressAction: {
                 id: 'Deny',
-                launchActivity:'default',
+                launchActivity: 'default',
                 mainComponent: 'App'
               },
             }
@@ -248,35 +250,36 @@ const gateEntryNotification = async (message:any) =>{
       if (type === EventType.ACTION_PRESS && pressAction.id === 'Accept') {
         const dataKey = await AsyncStorage.getItem('FCM_GATE_MASTERCODE')
         let payload = {
-          ProdMovCode:dataKey,
-          EntryStatus:'A'
-      }
-          try {
-              await UpdateEntryStatus(payload).then((response)=>{
-                  console.log("response data ",response?.data.Data);
-                  AsyncStorage.setItem('ProvMoveCode',JSON.stringify("PM_EMPTY"))
-              }).catch((error)=>{
-                  console.log("error ",error)
-              })
-          } catch (error) {
-              console.log("error ",error)
-          }
+          ProdMovCode: dataKey,
+          EntryStatus: 'A'
+        }
+        try {
+          await UpdateEntryStatus(payload).then((response) => {
+            console.log("response data ", response?.data.Data);
+            AsyncStorage.setItem('ProvMoveCode', JSON.stringify("PM_EMPTY"))
+          }).catch((error) => {
+            console.log("error ", error)
+          })
+        } catch (error) {
+          console.log("error ", error)
+        }
+        await notifee.cancelNotification(notification.id);
       } else if (type === EventType.ACTION_PRESS && pressAction.id === 'Deny') {
         const dataKey = await AsyncStorage.getItem('FCM_GATE_MASTERCODE')
         let payload = {
-          ProdMovCode:dataKey,
-          EntryStatus:'R'
-      }
-          try {
-              await UpdateEntryStatus(payload).then((response)=>{
-                  console.log("response data ",response?.data.Data);
-                  AsyncStorage.setItem('ProvMoveCode',JSON.stringify("PM_EMPTY"))
-              }).catch((error)=>{
-                  console.log("error ",error)
-              })
-          } catch (error) {
-              console.log("error ",error)
-          }
+          ProdMovCode: dataKey,
+          EntryStatus: 'R'
+        }
+        try {
+          await UpdateEntryStatus(payload).then((response) => {
+            console.log("response data ", response?.data.Data);
+            AsyncStorage.setItem('ProvMoveCode', JSON.stringify("PM_EMPTY"))
+          }).catch((error) => {
+            console.log("error ", error)
+          })
+        } catch (error) {
+          console.log("error ", error)
+        }
         await notifee.cancelNotification(notification.id);
       }
     })
@@ -308,20 +311,122 @@ const onRegisterMessaging = async () => {
 }
 
 const onMessageGetter = async (message: any) => {
-  if(message.data['key']=='RECE'){
-    console.log("message key ",message.data['key'])
+  if (message.data['key'] == 'RECE') {
+    console.log("message key ", message.data['key'])
     receptionNotification(message)
-  }else if(message.data['key']=='GATE'){
+  } else if (message.data['key'] == 'GATE') {
     gateEntryNotification(message)
   }
 }
 
+
+
+const requestStoragePermission = async () => {
+  if (Platform.OS === 'android') {
+    const granted = await check(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
+
+    if (granted === RESULTS.GRANTED) {
+      console.log('Permission already granted');
+      return;
+    }
+
+    const permissionResponse = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
+
+    if (permissionResponse === RESULTS.GRANTED) {
+      console.log('Permission granted');
+    } else if (permissionResponse === RESULTS.DENIED) {
+      console.log('Permission denied');
+      Alert.alert(
+        'Permission Required',
+        'You need to grant storage permission to use this feature.',
+        [{ text: 'OK' }],
+      );
+    } else if (permissionResponse === RESULTS.BLOCKED) {
+      console.log('Permission blocked');
+      Alert.alert(
+        'Permission Blocked',
+        'You have permanently denied the storage permission. Please enable it in app settings.',
+        [{ text: 'Open Settings', onPress: () => Linking.openSettings() }],
+      );
+    }
+  }
+};
+
+
+const requestPermissions = async () => {
+  if (Platform.OS === 'android' && Platform.Version >= 30) {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.MANAGE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission Required',
+          message: 'This app needs access to your storage to perform operations.',
+          buttonPositive: 'OK',
+          buttonNegative: 'Cancel',
+        }
+      );
+
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Storage management permission granted');
+      } else {
+        console.log('Storage management permission denied');
+        Alert.alert(
+          'Permission Denied',
+          'You need to enable storage permission in settings to continue.',
+          [{ text: 'Go to Settings', onPress: () => Linking.openSettings() }],
+        );
+      }
+    } catch (err) {
+      console.warn('Error requesting storage permission: ', err);
+    }
+  }
+}
+
+
+const requsetFilePermisson = async () => {
+  if (Platform.OS === 'android' && Platform.Version >= 30) {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.MANAGE_EXTERNAL_STORAGE,
+        {
+          title: 'Storage Permission Required',
+          message: 'This app needs access to your storage to perform operations.',
+          buttonPositive: 'OK',
+          buttonNegative: 'Cancel',
+        }
+      );
+
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('Storage management permission granted');
+      } else {
+        console.log('Storage management permission denied');
+        Alert.alert(
+          'Permission Denied',
+          'You need to enable storage permission in settings to continue.',
+          [{ text: 'Go to Settings', onPress: () => Linking.openSettings() }],
+        );
+      }
+    } catch (err) {
+      console.warn('Error requesting storage permission: ', err);
+    }
+  }
+}
+
+const openAppSettings = () => {
+  try {
+    Linking.openSettings();
+  } catch (err) {
+    console.warn('Error opening app settings: ', err);
+  }
+};
+
 const App = () => {
   useEffect(() => {
-    AsyncStorage.setItem('FCM_GATE_MASTERCODE',JSON.stringify('MASTERCODE_EMPTY'))
+    AsyncStorage.setItem('FCM_GATE_MASTERCODE', JSON.stringify('MASTERCODE_EMPTY'))
     notifee.requestPermission({
       criticalAlert: true
     })
+    requestStoragePermission()
     onRegisterMessaging();
     messaging().onNotificationOpenedApp(onMessageGetter)
     const messageSetile = messaging().onMessage(onMessageGetter)
@@ -347,6 +452,7 @@ const App = () => {
         <Stack.Screen name='PickDel' options={{ headerTitle: 'Inward / Outward' }} component={FormDeliveryScreen}></Stack.Screen>
         <Stack.Screen name='Courier' component={CourierScreen}></Stack.Screen>
         <Stack.Screen name='History' options={{ headerTitle: 'View History' }} component={ViewHistoryScreen}></Stack.Screen>
+        <Stack.Screen name='Reports' component={ReportScreen}></Stack.Screen>
         <Stack.Screen name='Admin' options={{ headerShown: false }} component={AdminScreen}></Stack.Screen>
         <Stack.Screen name='Activity' component={ActivityScreen}></Stack.Screen>
         <Stack.Screen name='Settings' component={SettingScreen}></Stack.Screen>
@@ -355,6 +461,8 @@ const App = () => {
     </NavigationContainer>
   );
 }
+
+
 
 
 
