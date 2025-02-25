@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Button, Dimensions, Linking, PermissionsAndroid, Platform, SafeAreaView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, Button, Dimensions, FlatList, Linking, PermissionsAndroid, Platform, SafeAreaView, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { CheckBox } from "react-native-elements";
 import Color from "../theme/Color";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -13,15 +13,17 @@ import * as XLSX from 'xlsx';
 import { Buffer } from 'buffer';
 import { GETReports } from "../requests/recProdRequest";
 import Snackbar from "react-native-snackbar";
-import RNHTMLtoPDF from 'react-native-html-to-pdf';
-import Pdf from 'react-native-pdf';
+// import RNHTMLtoPDF from 'react-native-html-to-pdf';
+// import Pdf from 'react-native-pdf';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions'; // Import from react-native-permissions
+
 
 const ReportScreen = ({ route }: any) => {
     const { screenName } = route.params;
     console.log("propnames", screenName)
     const [inout, setInOut] = useState(0)
     const [viewUser, setViewUser] = useState<UserLDData>()
-    const [pdfPath, setPdfPath] = useState('');
+    const [datset, setDataSet] = useState<any[]>([]);
     const [usrType, setUsrType] = useState("")
     const [typelocs, setTypeLocs] = useState<{ cattype: string; catvalue: number }[]>([
         {
@@ -111,100 +113,83 @@ const ReportScreen = ({ route }: any) => {
                 RptType: viewUser?.UserType,
                 userCode: viewUser?.UserCode
             });
-            setUseExcelItems(res?.data?.Data);
             return res?.data?.Data;
         } catch (error) {
             console.log("error ", error);
             return [];
         }
     };
-    const requestManageStoragePermission = async () => {
-        if (Platform.OS === 'android' && Platform.Version >= 30) {
-            try {
-                const granted = await PermissionsAndroid.request(
-                    PermissionsAndroid.PERMISSIONS.MANAGE_EXTERNAL_STORAGE
-                );
 
-                if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                    console.log('Manage storage permission granted');
-                } else if (granted === PermissionsAndroid.RESULTS.DENIED) {
-                    Alert.alert(
-                        'Permission Denied',
-                        'You need to enable Manage Storage permission in settings to proceed.',
-                        [
-                            {
-                                text: 'Go to Settings',
-                                onPress: () => Linking.openSettings(),
-                            },
-                            { text: 'Cancel' },
-                        ]
-                    );
-                } else if (granted === null) {
-                    console.warn('Permission result is null, user might have dismissed the permission dialog');
-                    Alert.alert(
-                        'Permission Unknown',
-                        'Permission result is unknown, please ensure the app has necessary permissions.',
-                        [
-                            {
-                                text: 'Go to Settings',
-                                onPress: () => Linking.openSettings(),
-                            },
-                            { text: 'Cancel' },
-                        ]
-                    );
-                }
-            } catch (err) {
-                console.warn('Error requesting MANAGE_EXTERNAL_STORAGE permission', err);
-            }
-        }
-    };
-
-    const requestPermissions = async () => {
-        if (Platform.OS === 'android') {
-            if (Platform.Version >= 30) {
-                Alert.alert("Permission Required", "Please allow the storage permission to download the reports");
-                await requestManageStoragePermission();
-            } else {
-                const granted = await PermissionsAndroid.requestMultiple([
-                    PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-                    PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-                ]);
-
-                if (
-                    granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
-                    granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
-                ) {
-                    console.log('Storage permissions granted');
-                } else {
-                    console.log('Storage permissions denied');
-                }
-            }
-        }
-    };
-    const requestStoragePermission = async () => {
-        try {
-            const granted = await PermissionsAndroid.request(
-                PermissionsAndroid.PERMISSIONS.MANAGE_EXTERNAL_STORAGE,
-                {
-                    title: 'Storage Permission',
-                    message: 'This app needs access to your storage to open Excel files.',
-                    buttonNeutral: 'Ask Me Later',
-                    buttonNegative: 'Cancel',
-                    buttonPositive: 'OK',
-                }
-            );
-            if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-                console.log('Storage permission granted');
-            } else {
-                console.log('Storage permission denied');
-            }
-        } catch (err) {
-            console.warn(err);
-        }
-    };
     const [urlTOOpen, setUrlTOOpen] = useState('')
+    // State to keep track of the current page
+    const [currentPage, setCurrentPage] = useState(0);
+    const rowsPerPage = 12;
+
+    // Calculate the data to be shown on the current page
+    const currentRows = useExcelItems.slice(
+        currentPage * rowsPerPage,
+        (currentPage + 1) * rowsPerPage
+    );
+
+    // Calculate the total number of pages
+    const totalPages = Math.ceil(useExcelItems.length / rowsPerPage);
+
+    // Handle the "Next" button click
+    const goToNextPage = () => {
+        if (currentPage < totalPages - 1) {
+            setCurrentPage(currentPage + 1);
+        }
+    };
+
+    // Handle the "Previous" button click
+    const goToPreviousPage = () => {
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);
+        }
+    };
+
+    const requestStoragePermission = async () => {
+        if (Platform.OS === 'android') {
+          const permission = PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE;
+      
+          try {
+            const status = await check(permission);
+            if (status === RESULTS.GRANTED) {
+              return true;
+            } else if (status === RESULTS.DENIED) {
+              const requestStatus = await request(permission);
+              if (requestStatus === RESULTS.GRANTED) {
+                return true;
+              } else {
+                Alert.alert('Storage permission denied');
+                return false;
+              }
+            } else if (status === RESULTS.BLOCKED) {
+              Alert.alert('Permission blocked. Please enable it from settings.');
+              return false;
+            }
+          } catch (error) {
+            console.error('Error checking or requesting permission:', error);
+            return false;
+          }
+        }
+        return true;  // For iOS or other platforms
+      };
+      
+
     const exportTOExcel = async () => {
         try {
+            const hasPermission = await requestStoragePermission();
+            console.log(Platform.Version,Platform.OS)
+            if (!hasPermission) {
+                console.error('Storage permission denied');
+                Snackbar.show({
+                  text: 'Storage permission denied!',
+                  duration: Snackbar.LENGTH_LONG,
+                  backgroundColor: Color.whiteRecColor,
+                  textColor: Color.redRecColor,
+                });
+              }
             let result: any[] = await getReportsItems()
             console.log(result)
             if (result.length !== 0) {
@@ -223,6 +208,7 @@ const ReportScreen = ({ route }: any) => {
                     "OutTime": item.ProdMovOutTime
                 }));
             }
+            setUseExcelItems(result)
             // Step 2: Convert the JSON data to a worksheet
             const ws = XLSX.utils.json_to_sheet(result);
 
@@ -251,103 +237,38 @@ const ReportScreen = ({ route }: any) => {
                 console.log('File exists at path: ', downloadPath);
                 setUrlTOOpen(downloadPath)
             }
-            Snackbar.show({
-                text: 'Reports Downloaded Successfully !',
-                duration: Snackbar.LENGTH_LONG,
-                backgroundColor: Color.whiteRecColor,
-                textColor: Color.greenRecColor,
-            })
-
+              try {
+                await Share.share({
+                  title:'EzEntry Report',
+                  message: 'Here is the report you requested',
+                  url: `file://${downloadPath}`, // The local file path to be share
+                });
+                Snackbar.show({
+                  text: 'Report Shared Successfully!',
+                  duration: Snackbar.LENGTH_LONG,
+                  backgroundColor: Color.whiteRecColor,
+                  textColor: Color.greenRecColor,
+                });
+              } catch (error) {
+                console.error('Error while sharing the file: ', error);
+                Snackbar.show({
+                  text: 'Failed to share report!',
+                  duration: Snackbar.LENGTH_LONG,
+                  backgroundColor: Color.whiteRecColor,
+                  textColor: Color.redRecColor,
+                });
+              }
         } catch (error: any) {
             console.error('Error downloading or opening Excel file:', error.message || error);
         } finally {
             console.log('downloaded the excel file');
         }
     }
-    const exportTOPdf = async () => {
-        let result: any[] = await getReportsItems()
-        if (result.length !== 0) {
-            result = result.map((item) => ({
-                "VehicleNo": item.ProdMovVehicleNo,
-                "Drivername": item.ProdMovDriverName,
-                "InTime": item.ProdMovInTime,
-                "Moventtype": item.ProdMovType,
-                "Partyname": item.ProdMovDetPartyName,
-                "Itemname": item.ProdMovDetItems,
-                "Itemqty": item.ProdMovDetItemQty,
-                "Billnumber": item.ProdMovDetBillNumber,
-                "MobileNo": item.ProdMovMobileNo,
-                "AuthorizedPerson": item.ProdMovAuthorizedPerson,
-                "Transporter": item.ProdMovTransporter,
-                "OutTime": item.ProdMovOutTime
-            }));
-        }
 
-        const headers = Object.keys(result[0]);
-
-        // Generate table rows dynamically based on content
-        const tableRows = result.map(item => {
-            return `
-            <tr>
-              ${headers.map(header => `<td>${item[header]}</td>`).join('')}
-            </tr>
-          `;
-        }).join('');
-
-        // Generate HTML content with dynamic table headers and rows
-        const htmlContent = `
-          <h1>${'Ezentry reports'}</h1>
-          <table border="1" cellpadding="5" cellspacing="0" style="width: 100%; border-collapse: collapse;">
-            <thead>
-              <tr>
-                ${headers.map(header => `<th style="text-align: left;">${header}</th>`).join('')}
-              </tr>
-            </thead>
-            <tbody>
-              ${tableRows}
-            </tbody>
-          </table>
-        `;
-
-        try {
-            const timestamp = new Date().toISOString().replace(/[-:.]/g, ''); // Remove characters that are not allowed in filenames
-            const fileName = `ezentry-report-pdf-${timestamp}.pdf`;
-
-            const directory =
-                Platform.OS === 'android'
-                    ? `${RNFS.ExternalStorageDirectoryPath}/Download/`
-                    : RNFS.DocumentDirectoryPath;
-
-            const filePath = directory + fileName;
-            console.log('Saving PDF to:', filePath);
-
-            const options = {
-                html: htmlContent,
-                fileName: fileName,
-                directory: directory,
-            };
-
-            const file = await RNHTMLtoPDF.convert(options);
-            // Check if the file has been successfully created
-            if (file && file.filePath) {
-                setPdfPath(filePath)
-            } else {
-                Alert.alert('Error', 'Failed to create PDF');
-            }
-            Alert.alert('PDF created successfully!', `Path: ${file.filePath}`);
-        } catch (err) {
-            console.error(err);
-            Alert.alert('Error', 'Failed to create PDF');
-        }
-
-    }
     const handleExport = async () => {
         if (usrType !== "") {
-            if (inout === 0) {
-                let pdfExport = await exportTOPdf()
-            } else {
-                let excelExport = await exportTOExcel()
-            }
+            let excelExport = await exportTOExcel()
+            console.log("excelExport", excelExport)
         } else {
             Snackbar.show({
                 text: 'Select the report type and date range !',
@@ -362,104 +283,154 @@ const ReportScreen = ({ route }: any) => {
 
     return (
         <SafeAreaView>
-            <View>
-                <View style={styles.container}>
-                    {screenName !== "ADMIN" && <View style={{ marginTop: Dimensions.get('window').width > 756 ? 10 : 3.6, width: Dimensions.get('window').width > 756 ? '92%' : '85%', height: 20, alignItems: 'center', position: 'absolute', borderRadius: 5, backgroundColor: Color.blueRecColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
-                        <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500', textAlign: 'center' }}>{viewUser?.UserName} - {viewUser?.LocationPremise}</Text>
-                    </View>}
-                    <View style={{ marginTop: Dimensions.get('window').width > 756 ? 25 : 20, width: '100%', overflow: 'scroll' }}>
-                        <View style={styles.inputView1}>
-                            <View style={{ flex: 1, flexDirection: 'row', marginHorizontal: 12 }}>
-                                <CheckBox
-                                    title={'PDF'}
-                                    checkedIcon="dot-circle-o"
-                                    checked={inout === 0}
-                                    onPress={() => setInOut(0)}
-                                    uncheckedIcon="circle-o"
-                                    containerStyle={{ backgroundColor: 'transparent' }}
-                                />
-                                <CheckBox
-                                    title={'EXCEL'}
-                                    checkedIcon="dot-circle-o"
-                                    checked={inout === 1}
-                                    onPress={() => setInOut(1)}
-                                    uncheckedIcon="circle-o"
-                                    containerStyle={{ backgroundColor: 'transparent' }}
-                                />
-                            </View>
-                            <Dropdown
-                                style={[styles.dropdown, { borderBottomColor: Color.blackRecColor }]}
-                                placeholderStyle={styles.placeholderStyle}
-                                selectedTextStyle={styles.selectedTextStyle}
-                                inputSearchStyle={styles.inputSearchStyle}
-                                iconStyle={styles.iconStyle}
-                                data={typelocs}
-                                itemTextStyle={{ color: Color.blackRecColor }}
-                                search
-                                maxHeight={300}
-                                labelField="cattype"
-                                valueField="cattype"
-                                placeholder="select report type"
-                                searchPlaceholder="Search...types"
-                                value={usrType}
-                                onChange={(item) => {
-                                    setUsrType(item.cattype)
-                                }} />
-                            <View style={{ flex: 1, justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 12 }}>
-                                {/* From Date */}
-                                <View style={{ flexDirection: 'row' }}>
-                                    <TextInput placeholderTextColor={Color.blackRecColor}
-                                        value={fromDate.toDateString()}
-                                        onPressIn={showFromDatepicker} style={[styles.input, { width: '100%' }]} placeholder="From Date" />
-                                </View>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <TextInput placeholderTextColor={Color.blackRecColor}
-                                        value={toDate.toDateString()}
-                                        onPressIn={showToDatepicker} style={[styles.input, { width: '100%' }]}
-                                        placeholder="To Date" />
-                                </View>
-
-                                {showFromDatePicker && (
-                                    <DateTimePicker
-                                        value={fromDate}
-                                        mode="date"
-                                        is24Hour={true}
-                                        display="default"
-                                        onChange={onChangeFromDate}
+            <ScrollView>
+                <View>
+                    <View style={styles.container}>
+                        {screenName !== "ADMIN" && <View style={{ marginTop: Dimensions.get('window').width > 756 ? 10 : 3.6, width: Dimensions.get('window').width > 756 ? '92%' : '85%', height: 20, alignItems: 'center', position: 'absolute', borderRadius: 5, backgroundColor: Color.blueRecColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
+                            <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500', textAlign: 'center' }}>{viewUser?.UserName} - {viewUser?.LocationPremise}</Text>
+                        </View>}
+                        <View style={{ marginTop: Dimensions.get('window').width > 756 ? 25 : 20, width: '100%', overflow: 'scroll' }}>
+                            <View style={styles.inputView1}>
+                                <View style={{ flex: 1, flexDirection: 'row', marginHorizontal: 12 }}>
+                                    <CheckBox
+                                        title={'PDF'}
+                                        checkedIcon="dot-circle-o"
+                                        checked={inout === 0}
+                                        onPress={() => setInOut(0)}
+                                        uncheckedIcon="circle-o"
+                                        containerStyle={{ backgroundColor: 'transparent' }}
                                     />
-                                )}
-
-                                {showToDatePicker && (
-                                    <DateTimePicker
-                                        value={toDate}
-                                        mode="date"
-                                        is24Hour={true}
-                                        display="default"
-                                        onChange={onChangeToDate}
+                                    <CheckBox
+                                        title={'EXCEL'}
+                                        checkedIcon="dot-circle-o"
+                                        checked={inout === 1}
+                                        onPress={() => setInOut(1)}
+                                        uncheckedIcon="circle-o"
+                                        containerStyle={{ backgroundColor: 'transparent' }}
                                     />
-                                )}
-                            </View>
-                            <View style={{ marginHorizontal: 10 }}>
-                                <Button title="Submit" onPress={handleExport} />
+                                </View>
+                                <Dropdown
+                                    style={[styles.dropdown, { borderBottomColor: Color.blackRecColor }]}
+                                    placeholderStyle={styles.placeholderStyle}
+                                    selectedTextStyle={styles.selectedTextStyle}
+                                    inputSearchStyle={styles.inputSearchStyle}
+                                    iconStyle={styles.iconStyle}
+                                    data={typelocs}
+                                    itemTextStyle={{ color: Color.blackRecColor }}
+                                    search
+                                    maxHeight={300}
+                                    labelField="cattype"
+                                    valueField="cattype"
+                                    placeholder="select report type"
+                                    searchPlaceholder="Search...types"
+                                    value={usrType}
+                                    onChange={(item) => {
+                                        setUsrType(item.cattype)
+                                    }} />
+                                <View style={{ flex: 1, justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 12 }}>
+                                    {/* From Date */}
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <TextInput placeholderTextColor={Color.blackRecColor}
+                                            value={fromDate.toDateString()}
+                                            onPressIn={showFromDatepicker} style={[styles.input, { width: '100%' }]} placeholder="From Date" />
+                                    </View>
+                                    <View style={{ flexDirection: 'row' }}>
+                                        <TextInput placeholderTextColor={Color.blackRecColor}
+                                            value={toDate.toDateString()}
+                                            onPressIn={showToDatepicker} style={[styles.input, { width: '100%' }]}
+                                            placeholder="To Date" />
+                                    </View>
+
+                                    {showFromDatePicker && (
+                                        <DateTimePicker
+                                            value={fromDate}
+                                            mode="date"
+                                            is24Hour={true}
+                                            display="default"
+                                            onChange={onChangeFromDate}
+                                        />
+                                    )}
+                                    {showToDatePicker && (
+                                        <DateTimePicker
+                                            value={toDate}
+                                            mode="date"
+                                            is24Hour={true}
+                                            display="default"
+                                            onChange={onChangeToDate}
+                                        />
+                                    )}
+                                </View>
+                                <View style={{ marginHorizontal: 10 }}>
+                                    <Button title="Submit" onPress={handleExport} />
+                                </View>
+                                {useExcelItems.length !== 0 &&
+                                    <>
+                                        <View style={styles.flatcontainer}>
+                                            <Text style={styles.flatheader}>Reports</Text>
+                                            <ScrollView horizontal style={styles.tableContainer}>
+                                                <View style={styles.table}>
+                                                    <View style={styles.tableRow}>
+                                                        <Text style={[styles.tableHeader, { width: 120 }]}>Vehicle No</Text>
+                                                        <Text style={[styles.tableHeader, { width: 150 }]}>Driver Name</Text>
+                                                        <Text style={[styles.tableHeader, { width: 120 }]}>In Time</Text>
+                                                        <Text style={[styles.tableHeader, { width: 150 }]}>Movement Type</Text>
+                                                        <Text style={[styles.tableHeader, { width: 150 }]}>Party Name</Text>
+                                                        <Text style={[styles.tableHeader, { width: 150 }]}>Item Name</Text>
+                                                        <Text style={[styles.tableHeader, { width: 120 }]}>Item Quantity</Text>
+                                                        <Text style={[styles.tableHeader, { width: 130 }]}>Bill Number</Text>
+                                                        <Text style={[styles.tableHeader, { width: 120 }]}>Mobile No</Text>
+                                                        <Text style={[styles.tableHeader, { width: 180 }]}>Authorized Person</Text>
+                                                        <Text style={[styles.tableHeader, { width: 150 }]}>Transporter</Text>
+                                                        <Text style={[styles.tableHeader, { width: 120 }]}>Out Time</Text>
+                                                    </View>
+
+                                                    {/* Table Rows */}
+                                                    <FlatList
+                                                        data={currentRows}
+                                                        renderItem={({ item }) => (
+                                                            <View style={styles.tableRow}>
+                                                                <Text style={[styles.tableText, { width: 120 }]}>{item.VehicleNo}</Text>
+                                                                <Text style={[styles.tableText, { width: 150 }]}>{item.Drivername}</Text>
+                                                                <Text style={[styles.tableText, { width: 120 }]}>{item.InTime}</Text>
+                                                                <Text style={[styles.tableText, { width: 150 }]}>{item.Moventtype}</Text>
+                                                                <Text style={[styles.tableText, { width: 150 }]}>{item.Partyname}</Text>
+                                                                <Text style={[styles.tableText, { width: 150 }]}>{item.Itemname}</Text>
+                                                                <Text style={[styles.tableText, { width: 120 }]}>{item.Itemqty}</Text>
+                                                                <Text style={[styles.tableText, { width: 130 }]}>{item.Billnumber}</Text>
+                                                                <Text style={[styles.tableText, { width: 120 }]}>{item.MobileNo}</Text>
+                                                                <Text style={[styles.tableText, { width: 180 }]}>{item.AuthorizedPerson}</Text>
+                                                                <Text style={[styles.tableText, { width: 150 }]}>{item.Transporter}</Text>
+                                                                <Text style={[styles.tableText, { width: 120 }]}>{item.OutTime}</Text>
+
+                                                            </View>
+                                                        )}
+                                                        keyExtractor={(item, index) => index.toString()}
+                                                    />
+                                                </View>
+                                            </ScrollView>
+                                        </View>
+                                        <View style={styles.paginationContainer}>
+                                            <Button
+                                                title="Previous"
+                                                onPress={goToPreviousPage}
+                                                disabled={currentPage === 0}
+                                            />
+                                            <Text style={[styles.pageText, { color: Color.blackRecColor }]} >
+                                                Page {currentPage + 1} of {totalPages}
+                                            </Text>
+                                            <Button
+                                                title="Next"
+                                                onPress={goToNextPage}
+                                                disabled={currentPage === totalPages - 1}
+                                            />
+                                        </View>
+                                    </>
+                                }
                             </View>
                         </View>
                     </View>
                 </View>
-                {pdfPath && (
-                    <Pdf
-                        source={{ uri: pdfPath, cache: true }}  // Show the PDF using the file path
-                        onLoadComplete={(numberOfPages, filePath) => {
-                            console.log(`number of pages: ${numberOfPages}`);
-                        }}
-                        onPageChanged={(page, numberOfPages) => {
-                            console.log(`current page: ${page}`);
-                        }}
-                        onError={(error) => {
-                            console.log(error);
-                        }}
-                    />
-                )}
-            </View>
+            </ScrollView>
         </SafeAreaView>
     )
 
@@ -671,7 +642,60 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 0,
         zIndex: 1000
-    }
+    },
+    flatcontainer: {
+        flex: 1,
+        marginHorizontal: 10
+    },
+    flatheader: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color:Color.blackRecColor,
+        marginBottom: 16,
+    },
+    tableContainer: {
+        flex: 1,
+        marginBottom: 16,
+    },
+    table: {
+        borderWidth: 1,
+        borderColor: Color.blackRecColor,
+
+        overflow: 'hidden',
+    },
+    tableRow: {
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        borderBottomWidth: 1,
+        borderColor: '#ccc',
+    },
+    tableHeader: {
+        fontWeight: 'bold',
+        textAlign: 'center',
+        flex: 1,
+        padding: 8,
+        color: Color.blackRecColor,
+        backgroundColor: Color.whiteRecColor,
+        borderRightWidth: 1,
+        borderColor: Color.blackRecColor,
+    },
+    tableText: {
+        flex: 1,
+        color: Color.blackRecColor,
+        textAlign: 'center',
+        borderRightWidth: 1,
+        borderColor: Color.blackRecColor,
+    },
+    paginationContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginVertical: 16,
+    },
+    pageText: {
+        marginHorizontal: 16,
+        fontSize: 16,
+    },
 })
 
 export default ReportScreen

@@ -320,113 +320,12 @@ const onMessageGetter = async (message: any) => {
 }
 
 
-
-const requestStoragePermission = async () => {
-  if (Platform.OS === 'android') {
-    const granted = await check(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
-
-    if (granted === RESULTS.GRANTED) {
-      console.log('Permission already granted');
-      return;
-    }
-
-    const permissionResponse = await request(PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE);
-
-    if (permissionResponse === RESULTS.GRANTED) {
-      console.log('Permission granted');
-    } else if (permissionResponse === RESULTS.DENIED) {
-      console.log('Permission denied');
-      Alert.alert(
-        'Permission Required',
-        'You need to grant storage permission to use this feature.',
-        [{ text: 'OK' }],
-      );
-    } else if (permissionResponse === RESULTS.BLOCKED) {
-      console.log('Permission blocked');
-      Alert.alert(
-        'Permission Blocked',
-        'You have permanently denied the storage permission. Please enable it in app settings.',
-        [{ text: 'Open Settings', onPress: () => Linking.openSettings() }],
-      );
-    }
-  }
-};
-
-
-const requestPermissions = async () => {
-  if (Platform.OS === 'android' && Platform.Version >= 30) {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.MANAGE_EXTERNAL_STORAGE,
-        {
-          title: 'Storage Permission Required',
-          message: 'This app needs access to your storage to perform operations.',
-          buttonPositive: 'OK',
-          buttonNegative: 'Cancel',
-        }
-      );
-
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Storage management permission granted');
-      } else {
-        console.log('Storage management permission denied');
-        Alert.alert(
-          'Permission Denied',
-          'You need to enable storage permission in settings to continue.',
-          [{ text: 'Go to Settings', onPress: () => Linking.openSettings() }],
-        );
-      }
-    } catch (err) {
-      console.warn('Error requesting storage permission: ', err);
-    }
-  }
-}
-
-
-const requsetFilePermisson = async () => {
-  if (Platform.OS === 'android' && Platform.Version >= 30) {
-    try {
-      const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.MANAGE_EXTERNAL_STORAGE,
-        {
-          title: 'Storage Permission Required',
-          message: 'This app needs access to your storage to perform operations.',
-          buttonPositive: 'OK',
-          buttonNegative: 'Cancel',
-        }
-      );
-
-      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Storage management permission granted');
-      } else {
-        console.log('Storage management permission denied');
-        Alert.alert(
-          'Permission Denied',
-          'You need to enable storage permission in settings to continue.',
-          [{ text: 'Go to Settings', onPress: () => Linking.openSettings() }],
-        );
-      }
-    } catch (err) {
-      console.warn('Error requesting storage permission: ', err);
-    }
-  }
-}
-
-const openAppSettings = () => {
-  try {
-    Linking.openSettings();
-  } catch (err) {
-    console.warn('Error opening app settings: ', err);
-  }
-};
-
 const App = () => {
   useEffect(() => {
     AsyncStorage.setItem('FCM_GATE_MASTERCODE', JSON.stringify('MASTERCODE_EMPTY'))
     notifee.requestPermission({
       criticalAlert: true
     })
-    requestStoragePermission()
     onRegisterMessaging();
     messaging().onNotificationOpenedApp(onMessageGetter)
     const messageSetile = messaging().onMessage(onMessageGetter)
@@ -461,10 +360,6 @@ const App = () => {
     </NavigationContainer>
   );
 }
-
-
-
-
 
 export default App;
 
