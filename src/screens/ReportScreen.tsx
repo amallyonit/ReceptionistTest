@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Alert, Button, Dimensions, FlatList, Linking, PermissionsAndroid, Platform, SafeAreaView, ScrollView, Share, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { CheckBox } from "react-native-elements";
+import { ActivityIndicator, Alert, Button, Dimensions, FlatList, Linking, PermissionsAndroid, Platform, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { CheckBox, Icon, Overlay } from "react-native-elements";
+import IconSet from 'react-native-vector-icons/MaterialCommunityIcons';
 import Color from "../theme/Color";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { MiscStoreKeys } from "../constants/RecStorageKeys";
@@ -8,14 +9,13 @@ import { UserLDData } from "../models/RecepModels";
 import { Dropdown } from "react-native-element-dropdown";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import RNFS from 'react-native-fs';
-import FileViewer from 'react-native-file-viewer';
 import * as XLSX from 'xlsx';
+import Share from 'react-native-share';
+import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import { Buffer } from 'buffer';
 import { GETReports } from "../requests/recProdRequest";
 import Snackbar from "react-native-snackbar";
-// import RNHTMLtoPDF from 'react-native-html-to-pdf';
-// import Pdf from 'react-native-pdf';
-import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions'; // Import from react-native-permissions
+
 
 
 const ReportScreen = ({ route }: any) => {
@@ -25,6 +25,7 @@ const ReportScreen = ({ route }: any) => {
     const [viewUser, setViewUser] = useState<UserLDData>()
     const [datset, setDataSet] = useState<any[]>([]);
     const [usrType, setUsrType] = useState("")
+    const [pdfPath, setPdfPath] = useState('');
     const [typelocs, setTypeLocs] = useState<{ cattype: string; catvalue: number }[]>([
         {
             cattype: 'MEETING',
@@ -68,6 +69,7 @@ const ReportScreen = ({ route }: any) => {
     const [toDate, setToDate] = useState(new Date());
     const [showFromDatePicker, setShowFromDatePicker] = useState(false);
     const [showToDatePicker, setShowToDatePicker] = useState(false);
+    const [isLoaderTrue, setisLoaderTrue] = useState(false)
 
     const showFromDatepicker = () => {
         setShowFromDatePicker(true);
@@ -101,6 +103,7 @@ const ReportScreen = ({ route }: any) => {
     const [useExcelItems, setUseExcelItems] = useState<any[]>([])
     const getReportsItems = async (): Promise<any[]> => {
         try {
+            setisLoaderTrue(true)
             console.log({
                 FromDt: formatDate(fromDate),
                 ToDt: formatDate(toDate),
@@ -117,79 +120,41 @@ const ReportScreen = ({ route }: any) => {
         } catch (error) {
             console.log("error ", error);
             return [];
+        } finally {
+            setisLoaderTrue(false)
         }
     };
 
     const [urlTOOpen, setUrlTOOpen] = useState('')
-    // State to keep track of the current page
+
     const [currentPage, setCurrentPage] = useState(0);
     const rowsPerPage = 12;
 
-    // Calculate the data to be shown on the current page
     const currentRows = useExcelItems.slice(
         currentPage * rowsPerPage,
         (currentPage + 1) * rowsPerPage
     );
 
-    // Calculate the total number of pages
     const totalPages = Math.ceil(useExcelItems.length / rowsPerPage);
 
-    // Handle the "Next" button click
+
     const goToNextPage = () => {
         if (currentPage < totalPages - 1) {
             setCurrentPage(currentPage + 1);
         }
     };
 
-    // Handle the "Previous" button click
+
     const goToPreviousPage = () => {
         if (currentPage > 0) {
             setCurrentPage(currentPage - 1);
         }
     };
 
-    const requestStoragePermission = async () => {
-        if (Platform.OS === 'android') {
-          const permission = PERMISSIONS.ANDROID.WRITE_EXTERNAL_STORAGE;
-      
-          try {
-            const status = await check(permission);
-            if (status === RESULTS.GRANTED) {
-              return true;
-            } else if (status === RESULTS.DENIED) {
-              const requestStatus = await request(permission);
-              if (requestStatus === RESULTS.GRANTED) {
-                return true;
-              } else {
-                Alert.alert('Storage permission denied');
-                return false;
-              }
-            } else if (status === RESULTS.BLOCKED) {
-              Alert.alert('Permission blocked. Please enable it from settings.');
-              return false;
-            }
-          } catch (error) {
-            console.error('Error checking or requesting permission:', error);
-            return false;
-          }
-        }
-        return true;  // For iOS or other platforms
-      };
-      
 
     const exportTOExcel = async () => {
         try {
-            const hasPermission = await requestStoragePermission();
-            console.log(Platform.Version,Platform.OS)
-            if (!hasPermission) {
-                console.error('Storage permission denied');
-                Snackbar.show({
-                  text: 'Storage permission denied!',
-                  duration: Snackbar.LENGTH_LONG,
-                  backgroundColor: Color.whiteRecColor,
-                  textColor: Color.redRecColor,
-                });
-              }
+            console.log(Platform.Version, Platform.OS)
             let result: any[] = await getReportsItems()
             console.log(result)
             if (result.length !== 0) {
@@ -237,49 +202,187 @@ const ReportScreen = ({ route }: any) => {
                 console.log('File exists at path: ', downloadPath);
                 setUrlTOOpen(downloadPath)
             }
-              try {
-                await Share.share({
-                  title:'EzEntry Report',
-                  message: 'Here is the report you requested',
-                  url: `file://${downloadPath}`, // The local file path to be share
-                });
-                Snackbar.show({
-                  text: 'Report Shared Successfully!',
-                  duration: Snackbar.LENGTH_LONG,
-                  backgroundColor: Color.whiteRecColor,
-                  textColor: Color.greenRecColor,
-                });
-              } catch (error) {
-                console.error('Error while sharing the file: ', error);
-                Snackbar.show({
-                  text: 'Failed to share report!',
-                  duration: Snackbar.LENGTH_LONG,
-                  backgroundColor: Color.whiteRecColor,
-                  textColor: Color.redRecColor,
-                });
-              }
+            Snackbar.show({
+                text: 'Report Downloaded Successfully!',
+                duration: Snackbar.LENGTH_LONG,
+                backgroundColor: Color.greenRecColor,
+                textColor: Color.whiteRecColor,
+            });
         } catch (error: any) {
             console.error('Error downloading or opening Excel file:', error.message || error);
+            Snackbar.show({
+                text: 'Report Download Failed!',
+                duration: Snackbar.LENGTH_LONG,
+                backgroundColor: Color.redRecColor,
+                textColor: Color.whiteRecColor,
+            });
         } finally {
             console.log('downloaded the excel file');
         }
     }
 
+    const exportToPdf = async () => {
+        try {
+            let result: any[] = await getReportsItems()
+            console.log(result)
+            if (result.length !== 0) {
+                result = result.map((item) => ({
+                    "VehicleNo": item.ProdMovVehicleNo,
+                    "Drivername": item.ProdMovDriverName,
+                    "InTime": item.ProdMovInTime,
+                    "Moventtype": item.ProdMovType,
+                    "Partyname": item.ProdMovDetPartyName,
+                    "Itemname": item.ProdMovDetItems,
+                    "Itemqty": item.ProdMovDetItemQty,
+                    "Billnumber": item.ProdMovDetBillNumber,
+                    "MobileNo": item.ProdMovMobileNo,
+                    "AuthorizedPerson": item.ProdMovAuthorizedPerson,
+                    "Transporter": item.ProdMovTransporter,
+                    "OutTime": item.ProdMovOutTime
+                }));
+            }
+            setUseExcelItems(result)
+            const tableHeaders = Object.keys(result[0]);
+            let tableHeader = '<thead><tr>';
+            tableHeaders.forEach((header) => {
+                tableHeader += `<th style="border: 1px solid black; padding: 8px; text-align: center; background-color: #f2f2f2;">${header}</th>`;
+            });
+            tableHeader += '</tr></thead>';
+            let rows = '';
+            result.forEach((rowData) => {
+                rows += '<tr>';
+                tableHeaders.forEach((header) => {
+                    rows += `<td style="border: 1px solid black; padding: 8px; text-align: center;">${rowData[header]}</td>`;
+                });
+                rows += '</tr>';
+            });
+
+            const htmlContent = `
+            <h1 style="text-align: center;">Ezentry pdf report</h1>
+            <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                ${tableHeader}
+            <tbody>
+                ${rows}
+            </tbody>
+            </table>
+            `;
+            // Generate the timestamp to use in the file name
+            const timestamp = new Date().toISOString().replace(/[-:.]/g, ''); // Remove invalid characters from filename
+
+            // Determine file path for PDF storage
+            const downloadPath = Platform.OS === 'android' ?
+                RNFS.ExternalStorageDirectoryPath + `/Download/ezentrytest-report-${timestamp}.pdf` :
+                RNFS.DocumentDirectoryPath + `/ezentry-report-${timestamp}.pdf`;
+
+            console.log('Saving file at: ', downloadPath);  // Log where the file is being saved
+
+            // Generate PDF with the specified options
+            const options = {
+                html: htmlContent,
+                fileName: `ezentry-report-${timestamp}`,
+                directory: Platform.OS === 'android' ? 'Download' : 'Documents', // Specify the directory
+            };
+
+            const file = await RNHTMLtoPDF.convert(options);
+
+            // Move the file to the desired download path
+            if (file.filePath) {
+                await RNFS.moveFile(file.filePath, downloadPath);  // Move the file from temp location to the target download path
+            } else {
+                throw new Error('File path is undefined');
+            }
+            Snackbar.show({
+                text: 'Report Download Successfully!',
+                duration: Snackbar.LENGTH_LONG,
+                backgroundColor: Color.greenRecColor,
+                textColor: Color.whiteRecColor,
+            });
+            // Set the generated PDF file path
+            setPdfPath(downloadPath);
+
+        } catch (error: any) {
+            console.error('Error downloading or opening PDF file:', error.message || error);
+            Snackbar.show({
+                text: 'Report Download Failed!',
+                duration: Snackbar.LENGTH_LONG,
+                backgroundColor: Color.redRecColor,
+                textColor: Color.whiteRecColor,
+            });
+        } finally {
+            console.log("pdf downloaded");
+        }
+    }
+
     const handleExport = async () => {
         if (usrType !== "") {
-            let excelExport = await exportTOExcel()
-            console.log("excelExport", excelExport)
+            if (inout === 0) {
+                let pdfExport = await exportToPdf()
+            } else {
+                let excelExport = await exportTOExcel()
+            }
         } else {
             Snackbar.show({
                 text: 'Select the report type and date range !',
                 duration: Snackbar.LENGTH_SHORT,
-                backgroundColor: Color.whiteRecColor,
-                textColor: Color.orangRecLight,
+                backgroundColor: Color.orangRecLight,
+                textColor: Color.whiteRecColor,
             })
         }
-
-
     };
+
+    const handleShareItems = async () => {
+        if (inout === 0) {
+            try {
+                await Share.open({
+                    title: 'EzEntry Report',
+                    message: 'Here is the report you requested',
+                    url: `file://${pdfPath}`,
+                    type: 'application/pdf'
+                });
+                Snackbar.show({
+                    text: 'Report Shared Successfully!',
+                    duration: Snackbar.LENGTH_LONG,
+                    backgroundColor: Color.greenRecColor,
+                    textColor: Color.whiteRecColor,
+                });
+            } catch (error) {
+                console.error('Error while sharing the file: ', error);
+                Snackbar.show({
+                    text: 'Failed to share report!',
+                    duration: Snackbar.LENGTH_LONG,
+                    backgroundColor: Color.whiteRecColor,
+                    textColor: Color.redRecColor,
+                });
+            } finally{
+                console.log("pdf execution block executed !")
+            }
+        } else {
+            try {
+                await Share.open({
+                    title: 'EzEntry Report',
+                    message: 'Here is the report you requested',
+                    url: `file://${urlTOOpen}`,
+                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                });
+                Snackbar.show({
+                    text: 'Report Shared Successfully!',
+                    duration: Snackbar.LENGTH_LONG,
+                    backgroundColor: Color.greenRecColor,
+                    textColor: Color.whiteRecColor,
+                });
+            } catch (error) {
+                console.error('Error while sharing the file: ', error);
+                Snackbar.show({
+                    text: 'Failed to share report!',
+                    duration: Snackbar.LENGTH_LONG,
+                    backgroundColor: Color.whiteRecColor,
+                    textColor: Color.redRecColor,
+                });
+            } finally{
+                console.log("excel execution block executed !")
+            }
+        }
+    }
 
     return (
         <SafeAreaView>
@@ -296,7 +399,7 @@ const ReportScreen = ({ route }: any) => {
                                         title={'PDF'}
                                         checkedIcon="dot-circle-o"
                                         checked={inout === 0}
-                                        onPress={() => setInOut(0)}
+                                        onPress={() =>{ setInOut(0);setUseExcelItems([]);setUsrType("");}}
                                         uncheckedIcon="circle-o"
                                         containerStyle={{ backgroundColor: 'transparent' }}
                                     />
@@ -304,7 +407,7 @@ const ReportScreen = ({ route }: any) => {
                                         title={'EXCEL'}
                                         checkedIcon="dot-circle-o"
                                         checked={inout === 1}
-                                        onPress={() => setInOut(1)}
+                                        onPress={() =>{ setInOut(1);setUseExcelItems([]);setUsrType("");}}
                                         uncheckedIcon="circle-o"
                                         containerStyle={{ backgroundColor: 'transparent' }}
                                     />
@@ -328,7 +431,6 @@ const ReportScreen = ({ route }: any) => {
                                         setUsrType(item.cattype)
                                     }} />
                                 <View style={{ flex: 1, justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 12 }}>
-                                    {/* From Date */}
                                     <View style={{ flexDirection: 'row' }}>
                                         <TextInput placeholderTextColor={Color.blackRecColor}
                                             value={fromDate.toDateString()}
@@ -360,13 +462,36 @@ const ReportScreen = ({ route }: any) => {
                                         />
                                     )}
                                 </View>
-                                <View style={{ marginHorizontal: 10 }}>
-                                    <Button title="Submit" onPress={handleExport} />
+                                <View style={{ marginHorizontal: 10, flexDirection: 'row', alignItems: 'center' }}>
+                                    <TouchableOpacity onPress={handleExport} style={{
+                                        backgroundColor: Color.blueRecColor,
+                                        padding: 8, borderRadius: 5,
+                                        flexDirection: 'row', alignItems: 'center', marginHorizontal: 2
+                                    }}>
+                                        <Text style={{ marginRight: 5,color:Color.blackRecColor,fontWeight:'bold' }}>Download Report</Text>
+                                        <IconSet color={Color.blackRecColor} name="cloud-download-outline" size={20} />
+                                    </TouchableOpacity>
                                 </View>
                                 {useExcelItems.length !== 0 &&
                                     <>
                                         <View style={styles.flatcontainer}>
-                                            <Text style={styles.flatheader}>Reports</Text>
+                                            <View style={{
+                                                marginVertical: 5,
+                                                flexDirection: 'row',
+                                                justifyContent: 'flex-start',
+                                                alignItems: 'center'
+                                            }}>
+                                                <Text style={styles.flatheader}>
+                                                    Share Reports
+                                                </Text>
+                                                <IconSet
+                                                    onPress={handleShareItems}
+                                                    name="share-outline"
+                                                    size={30}
+                                                    color={Color.newBlueColor}
+                                                >
+                                                </IconSet>
+                                            </View>
                                             <ScrollView horizontal style={styles.tableContainer}>
                                                 <View style={styles.table}>
                                                     <View style={styles.tableRow}>
@@ -429,6 +554,9 @@ const ReportScreen = ({ route }: any) => {
                             </View>
                         </View>
                     </View>
+                    <Overlay isVisible={isLoaderTrue} statusBarTranslucent={true} overlayStyle={{ backgroundColor: 'white', borderRadius: 20 }}>
+                        <ActivityIndicator style={{ backfaceVisibility: 'hidden' }} size={60} color={Color.blueRecColor}></ActivityIndicator>
+                    </Overlay>
                 </View>
             </ScrollView>
         </SafeAreaView>
@@ -520,7 +648,7 @@ const styles = StyleSheet.create({
         height: Dimensions.get('window').width > 756 ? 50 : 40,
         paddingHorizontal: 10,
         borderBottomWidth: 1.5,
-        borderBottomColor: Color.darkRecGray,
+        borderBottomColor: Color.blackRecColor,
         borderTopRightRadius: 11,
         borderTopLeftRadius: 11,
         color: Color.blackRecColor,
@@ -549,9 +677,9 @@ const styles = StyleSheet.create({
     },
     dropdown: {
         height: Dimensions.get('window').width > 756 ? 50 : 40,
-        borderBottomColor: Color.darkRecGray,
+        borderBottomColor: Color.blackRecColor,
         borderBottomWidth: 1.5,
-        marginHorizontal: 20,
+        marginHorizontal: 12,
         backgroundColor: Color.lightNewGrey,
         borderTopRightRadius: 11,
         borderTopLeftRadius: 11,
@@ -561,6 +689,7 @@ const styles = StyleSheet.create({
         marginRight: 5,
     },
     placeholderStyle: {
+        paddingHorizontal: 10,
         fontSize: 16,
         color: Color.blackRecColor
     },
@@ -648,10 +777,10 @@ const styles = StyleSheet.create({
         marginHorizontal: 10
     },
     flatheader: {
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: 'bold',
-        color:Color.blackRecColor,
-        marginBottom: 16,
+        color: Color.newBlueColor,
+        paddingRight: 10
     },
     tableContainer: {
         flex: 1,

@@ -9,8 +9,7 @@ import { launchCamera, CameraOptions } from 'react-native-image-picker';
 import { GetAllRevisitorsData, GetPhoneNumberDetails, GetUsersByLocation, PostVisitorData } from "../requests/recHomeRequest"
 import { MiscStoreKeys } from "../constants/RecStorageKeys"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons"
-import { LinearProgress, ListItem, Overlay } from "react-native-elements"
+import { ListItem, Overlay } from "react-native-elements"
 import { KeyboardAvoidingView } from "react-native"
 
 const camLogo = require("../../assets/recscreen/CAMERA.png")

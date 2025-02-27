@@ -12,10 +12,7 @@ import Snackbar from 'react-native-snackbar';
 import { CommonModal } from "../components/RecCommonModal";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
-
-const receLogo = require('../../assets/recimages/AmrLogo.png')
-const recSubLog = require('../../assets/print_prev_ez.png')
-const receBottomLogo = require('../../assets/recimages/Group.png')
+const recSubLog = require('../../assets/nlogo2.png')
 
 const LoginScreen = ({ navigation }: any) => {
   useEffect(() => {
@@ -57,10 +54,10 @@ const LoginScreen = ({ navigation }: any) => {
       }).catch((error) => {
         console.log("error ", error)
         Snackbar.show({
-          text: 'Invalid Credentials !',
+          text: 'Invalid Credentials,Please enter your credentials',
           duration: Snackbar.LENGTH_SHORT,
-          backgroundColor: Color.blueRecColor,
-          textColor: Color.blackRecColor,
+          backgroundColor: Color.redRecColor,
+          textColor: Color.whiteRecColor,
         })
         setIsLoader(false)
       })
@@ -72,7 +69,6 @@ const LoginScreen = ({ navigation }: any) => {
     <SafeAreaView>
       <ScrollView>
         <View style={styles.container}>
-          <Image source={receLogo} style={styles.image} />
           <Image source={recSubLog} style={styles.image} />
           <View>
           </View>
@@ -110,7 +106,7 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     flex: 1,
-    paddingTop: Dimensions.get('window').height * 0.28,
+    paddingTop: Dimensions.get('window').height * 0.3,
   },
   containerSet: {
     flex: 1
@@ -136,8 +132,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   image: {
-    marginVertical:10,
-    height: 60,
+    marginVertical:20,
+    height: 80,
     width: 200,
     resizeMode: 'contain'
   },
@@ -146,6 +142,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingVertical: 10,
     paddingHorizontal: 30,
+    marginBottom:10,
     borderRadius: 4,
     elevation: 5,
     backgroundColor: "#99c2ff",

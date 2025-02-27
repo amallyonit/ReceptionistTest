@@ -40,3 +40,15 @@ export function LogoutByUserCode(data:any){
         
     }
 }
+
+export function GetUserSettings(){
+    try {
+        return axios({
+            method:'get',
+            headers:ApiConfig,
+            url:ServerConfig.urlString+ServerEndpoints.GET_USER_SETTINGS
+        })
+    } catch (error) {
+        console.log("error "+error)
+    }
+}

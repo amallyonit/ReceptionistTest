@@ -1,27 +1,29 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  
+  <!-- Permissions for external storage (required for Android 10 and below) -->
+  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+  <!-- For Android 10 (API level 29+) and above, request manage storage permission -->
+  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+
+
+  <!-- Permissions for system alerts, services, and other functionalities -->
   <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
   <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-
   <uses-permission android:name="android.permission.VIBRATE" />
   <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
-  <!-- WRITE_EXTERNAL_STORAGE is no longer necessary on Android 10 and above -->
-  <!-- Permissions for external storage (required for Android 10 and below) -->
-  <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-  <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
-  <!-- Permissions for other app functionality -->
+  <!-- Permissions for app functionalities (location, calendar, notifications) -->
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
   <uses-permission android:name="android.permission.READ_CALENDAR" />
   <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-
   <uses-permission android:name="android.permission.WRITE_CALENDAR" />
   <uses-permission android:name="android.permission.WRITE_SETTINGS" />
   <uses-permission android:name="android.permission.INTERNET" />
 
   <application
-    android:requestLegacyExternalStorage="false"
+    android:requestLegacyExternalStorage="false" 
     android:name=".MainApplication"
     android:label="@string/app_name"
     android:icon="@mipmap/cus_icon_color"
@@ -30,9 +32,12 @@
     android:usesCleartextTraffic="true"
     android:launchMode="singleTop"
     android:theme="@style/AppTheme">
+
+    <!-- Firebase Notification icon metadata -->
     <meta-data
       android:name="com.google.firebase.messaging.default_notification_icon"
       android:resource="@drawable/not_bell_icon" />
+
     <activity
       android:name=".MainActivity"
       android:label="@string/app_name"
@@ -42,10 +47,13 @@
       android:exported="true"
       android:showWhenLocked="true"
       android:turnScreenOn="true">
+      
+      <!-- Main activity with intent filter -->
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />
         <category android:name="android.intent.category.LAUNCHER" />
       </intent-filter>
     </activity>
   </application>
+
 </manifest>

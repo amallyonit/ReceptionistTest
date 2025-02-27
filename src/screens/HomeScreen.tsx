@@ -12,7 +12,7 @@ import { Avatar, ListItem, Overlay } from "react-native-elements";
 
 
 const receLogo = require('../../assets/recimages/AmrLogo.png')
-const ezentryLogo = require('../../assets/print_prev_ez.png')
+const ezentryLogo = require('../../assets/nlogo2.png')
 const receMeetLog = require('../../assets/recscreen/MEETING.png')
 const receVisitLog = require('../../assets/recscreen/VISIT.png')
 const receServeLog = require('../../assets/recscreen/SERVICE.png')
@@ -144,10 +144,7 @@ const HomeScreen = ({ route, navigation }: any) => {
         <SafeAreaView style={{ backgroundColor: Color.whiteRecColor }}>
             <View style={styles.container}>
                 <View style={styles.ImageBoxView}>
-                    <Image source={receLogo} style={styles.image} />
-                </View>
-                <View style={styles.ImageBoxView}>
-                    <Image source={ezentryLogo} style={[styles.image, { height: 50 }]} />
+                    <Image source={ezentryLogo} style={[styles.image, { height: 70,marginBottom:30 }]} />
                 </View>
                 <View style={{ marginTop: 3, width: '98%', height: 25, alignItems: 'center', position: 'relative', borderRadius: 5, backgroundColor: Color.newBlueColor, borderColor: Color.blueRecColor, borderWidth: 1 }}>
                     <Text style={{ color: Color.whiteRecColor, fontSize: 16, fontWeight: '500', textAlignVertical: 'center' }}>{viewUser?.UserName} - {viewUser?.LocationPremise}</Text>
@@ -300,7 +297,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 28,
         backgroundColor: Color.whiteRecColor,
-        paddingBottom: Dimensions.get('window').height * 0.21,
+        paddingBottom: Dimensions.get('window').height * 0.27,
     },
     fixedBottomMenu: {
         position: 'absolute',
@@ -308,14 +305,15 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         backgroundColor: Color.lightRecBlue,
-        paddingVertical: 20,
-        paddingHorizontal: 20,
+        paddingVertical: Dimensions.get('window').height * 0.02, // Vertical padding as percentage of screen height
+        paddingHorizontal: Dimensions.get('window').width * 0.05, // Horizontal padding based on screen width
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         borderTopWidth: 1,
         borderTopColor: Color.lightNewGrey,
-    },
+        width: Dimensions.get('window').width, // Ensure the bottom menu spans the full width of the screen
+      },
     viewSec: {
         flexDirection: 'row',
         justifyContent: 'space-evenly',

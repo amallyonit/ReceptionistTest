@@ -319,7 +319,6 @@ const onMessageGetter = async (message: any) => {
   }
 }
 
-
 const App = () => {
   useEffect(() => {
     AsyncStorage.setItem('FCM_GATE_MASTERCODE', JSON.stringify('MASTERCODE_EMPTY'))

@@ -1,6 +1,7 @@
 export default{
     recFontFamily:{
-        titleRecFont:'Poppins-SemiBold'
+        titleRecFont:'Poppins-SemiBold',
+        commonRecFont:'Poppins-Bold'
     },
     recFontSize:{
         fontSize:'32'
